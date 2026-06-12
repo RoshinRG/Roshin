@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Allow: /models/
+
+Sitemap: https://roshinrg.com/sitemap.xml

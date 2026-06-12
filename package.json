@@ -1,0 +1,18 @@
+{
+  "name": "rgr-portfolio",
+  "version": "1.0.0",
+  "description": "Roshin RG — 3D Model Portfolio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
