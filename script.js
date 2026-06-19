@@ -392,6 +392,17 @@ function initHeroScene() {
   const canvas = $('heroCanvas');
   if (!canvas || typeof THREE === 'undefined') return;
 
+  /* ── Device capability gates ──
+     PERF: the per-particle mouse-repulsion loop below only does anything
+     useful on a device with a real mouse to hover with. It was running
+     unconditionally, which means on phones/tablets — which is exactly what
+     Lighthouse's mobile audit (Moto G Power) emulates — it was burning the
+     bulk of every frame's CPU budget on physics nobody could ever trigger.
+     Skipping it on coarse/touch pointers removes that cost entirely on the
+     device class that was failing the audit. */
+  const ENABLE_REPULSION = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const REDUCED_MOTION   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   /* ── Use window dimensions — canvas.clientWidth can be 0 at DOMContentLoaded ── */
   const W = () => window.innerWidth;
   const H = () => window.innerHeight;
@@ -431,8 +442,11 @@ function initHeroScene() {
   );
   scene.add(icoWire);
 
-  /* ── Particle Field (2000 particles on sphere shell r=3–5) ── */
-  const PARTICLE_COUNT = 2000;
+  /* ── Particle Field (sphere shell r=3–5) ──
+     PERF: was 2000 — each particle does a full 3D→screen projection every
+     frame (see animate() below). 900 keeps the visual density while cutting
+     that per-frame cost by more than half. Raise it back if you have headroom. */
+  const PARTICLE_COUNT = 900;
   const positions  = new Float32Array(PARTICLE_COUNT * 3);
   const basePos    = new Float32Array(PARTICLE_COUNT * 3); // original positions
 
@@ -481,9 +495,8 @@ function initHeroScene() {
   window.addEventListener('resize', onResize);
 
   /* ── Pre-allocated objects — never new inside the render loop ── */
-  const raycaster  = new THREE.Raycaster();
-  const mouseVec   = new THREE.Vector2();
-  const _pv        = new THREE.Vector3();   // reused per-particle projection
+  const _pv         = new THREE.Vector3();   // reused per-particle projection
+  const viewProjMat = new THREE.Matrix4();   // combined view+projection, rebuilt once per frame (not per particle)
 
   /* ── Animate ── */
   function animate() {
@@ -510,38 +523,56 @@ function initHeroScene() {
     icoFill.rotation.x = lerp(icoFill.rotation.x, targetRotX, 0.05);
     icoWire.rotation.x = icoFill.rotation.x;
 
-    // Particle mouse repulsion — _pv reused, no allocations inside loop
-    mouseVec.set(state.mouse.nx, state.mouse.ny);
+    /* ── Particle mouse repulsion (skipped entirely on touch/coarse-pointer
+       devices — see ENABLE_REPULSION above) ──
+       PERF: this used to call Vector3.project(camera) for every particle,
+       which internally rebuilds and applies camera.matrixWorldInverse AND
+       camera.projectionMatrix (two 4x4 multiplies) on every single call —
+       i.e. up to 2000 redundant matrix multiplications per frame, forever.
+       Combine them ONCE per frame instead, and skip sqrt()/writes for
+       particles that are outside the repulsion radius and already at rest. */
+    if (ENABLE_REPULSION) {
+      viewProjMat.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
 
-    const posArr = particleGeo.attributes.position.array;
-    const REPULSE_R        = 1.2;
-    const REPULSE_STRENGTH = 0.6;
-    const mnx = state.mouse.nx, mny = state.mouse.ny;
+      const posArr           = particleGeo.attributes.position.array;
+      const REPULSE_R        = 1.2;
+      const REPULSE_R2       = REPULSE_R * REPULSE_R;   // squared-distance test avoids sqrt for most particles
+      const REPULSE_STRENGTH = 0.6;
+      const SETTLE_EPS       = 0.0004;                  // below this, a particle is treated as "at rest"
+      const mnx = state.mouse.nx, mny = state.mouse.ny;
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const idx = i * 3;
+      let anyMoved = false;
 
-      // Reuse pre-allocated vector — zero GC
-      _pv.set(posArr[idx], posArr[idx + 1], posArr[idx + 2]);
-      _pv.project(camera);
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const idx = i * 3;
+        const bx = basePos[idx], by = basePos[idx + 1], bz = basePos[idx + 2];
+        const px = posArr[idx],  py = posArr[idx + 1],  pz = posArr[idx + 2];
 
-      const dx   = _pv.x - mnx;
-      const dy   = _pv.y - mny;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+        // Reuse pre-allocated vector + the single combined matrix — zero GC
+        _pv.set(px, py, pz).applyMatrix4(viewProjMat);
 
-      if (dist < REPULSE_R && dist > 0.0001) {
-        const force = (REPULSE_R - dist) / REPULSE_R;
-        const bx = basePos[idx], by = basePos[idx + 1];
-        posArr[idx]     = lerp(posArr[idx],     bx + (dx / dist) * force * REPULSE_STRENGTH, 0.05);
-        posArr[idx + 1] = lerp(posArr[idx + 1], by + (dy / dist) * force * REPULSE_STRENGTH, 0.05);
-      } else {
-        // Drift back to original position
-        posArr[idx]     = lerp(posArr[idx],     basePos[idx],     0.02);
-        posArr[idx + 1] = lerp(posArr[idx + 1], basePos[idx + 1], 0.02);
-        posArr[idx + 2] = lerp(posArr[idx + 2], basePos[idx + 2], 0.02);
+        const dx    = _pv.x - mnx;
+        const dy    = _pv.y - mny;
+        const dist2 = dx * dx + dy * dy;
+
+        if (dist2 < REPULSE_R2) {
+          const dist  = Math.sqrt(dist2);
+          const force = (REPULSE_R - dist) / REPULSE_R;
+          posArr[idx]     = lerp(px, bx + (dx / dist) * force * REPULSE_STRENGTH, 0.05);
+          posArr[idx + 1] = lerp(py, by + (dy / dist) * force * REPULSE_STRENGTH, 0.05);
+          anyMoved = true;
+        } else if (Math.abs(px - bx) > SETTLE_EPS || Math.abs(py - by) > SETTLE_EPS || Math.abs(pz - bz) > SETTLE_EPS) {
+          // Still drifting back toward its resting position
+          posArr[idx]     = lerp(px, bx, 0.02);
+          posArr[idx + 1] = lerp(py, by, 0.02);
+          posArr[idx + 2] = lerp(pz, bz, 0.02);
+          anyMoved = true;
+        }
+        // else: already at rest — skip entirely, nothing to recompute or write
       }
+
+      if (anyMoved) particleGeo.attributes.position.needsUpdate = true;
     }
-    particleGeo.attributes.position.needsUpdate = true;
 
     // Rotate particle field slowly
     particles.rotation.y += 0.0005;
@@ -550,7 +581,11 @@ function initHeroScene() {
     renderer.render(scene, camera);
   }
 
-  animate();
+  if (REDUCED_MOTION) {
+    renderer.render(scene, camera);   // single static frame, no rAF loop
+  } else {
+    animate();
+  }
   state.scenes.hero = { renderer, scene, camera };
 }
 
@@ -604,6 +639,8 @@ function initAvatarScene() {
 
   function animate() {
     requestAnimationFrame(animate);
+    if (state.currentSection !== 'about') return;   // PERF: was rendering every frame even off-screen
+
     mesh.rotation.x    += 0.006;
     mesh.rotation.y    += 0.009;
     wireMesh.rotation.x = mesh.rotation.x;
@@ -721,6 +758,7 @@ function initSkillsScene() {
   let t = 0;
   function animate() {
     requestAnimationFrame(animate);
+    if (state.currentSection !== 'skills') return;   // PERF: was rendering every frame even off-screen
     t += 0.012;
 
     sprites.forEach(spr => {
@@ -782,6 +820,7 @@ function initContactScene() {
 
   function animate() {
     requestAnimationFrame(animate);
+    if (state.currentSection !== 'contact') return;   // PERF: was rendering every frame even off-screen
     gridHelper.rotation.y += 0.003;
     scene.rotation.y = lerp(scene.rotation.y, state.mouse.nx * 0.1, 0.04);
     renderer.render(scene, camera);
