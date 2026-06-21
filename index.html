@@ -1501,8 +1501,14 @@ ul, ol { list-style: none; }
   <!-- ── Vercel Speed Insights ── -->
   <script>
     window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    fetch('/_vercel/speed-insights/script.js', { method: 'HEAD' }).then((r) => {
+      if (!r.ok) return;
+      const s = document.createElement('script');
+      s.defer = true;
+      s.src = '/_vercel/speed-insights/script.js';
+      document.head.appendChild(s);
+    }).catch(() => {});
   </script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
 
   <!-- ── Favicon placeholder ── -->
   <link rel="icon"
