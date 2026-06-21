@@ -51,6 +51,12 @@
   }
   </script>
 
+  <!-- ── Vercel Speed Insights ── -->
+  <script type="module">
+    import { injectSpeedInsights } from '/@vercel/speed-insights';
+    injectSpeedInsights();
+  </script>
+
   <!-- ── Fonts ──
        PERF: loaded as preload + async swap instead of a blocking
        <link rel="stylesheet"> so the Google Fonts CSS no longer sits in the
@@ -526,7 +532,7 @@ ul, ol { list-style: none; }
 
 /* ══════════════════════════════════════════════════════════════════
    SECTION LAYOUT — shared
-   ══════════════════════════════════════════════════════════════════ */
+   ═══════════════════���══════════════════════════════════════════════ */
 .section-header {
   display: flex;
   flex-direction: column;
@@ -938,7 +944,7 @@ ul, ol { list-style: none; }
 
 /* ══════════════════════════════════════════════════════════════════
    SKILLS SECTION
-   ══════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════���═════════ */
 .skills__canvas-wrap {
   position: relative;
   height: 400px;
