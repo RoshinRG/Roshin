@@ -1,5 +1,3 @@
-# RGR-Portfolio
-Portfolio
 <p align="center">
   <strong>⬡ RRG.</strong>
 </p>
