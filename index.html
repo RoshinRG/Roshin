@@ -1,246 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roshin R G | UI/UX Designer & Developer</title>
-  <meta name="description" content="Portfolio of Roshin R G, Front-End Developer and UI/UX Designer." />
-  
-  <link rel="stylesheet" href="style.css" />
-  
-  <!-- Phosphor Icons (for standard crisp icons) -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ── SEO ── -->
+  <title>Roshin R G — UI/UX Designer & Front-End Developer</title>
+  <meta name="description" content="Portfolio of Roshin R G. UI/UX Designer and Front-End Developer.">
+
+  <!-- ── Fonts ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <div class="app-wrapper">
 
-    <!-- ══ NAVBAR ══ -->
-    <nav class="nav">
-      <div class="nav__logo">LOGO<span>.</span></div>
+  <!-- ══ CUSTOM CURSOR ══ -->
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursorRingInner" aria-hidden="true"></div>
+
+  <!-- ══ NAVBAR ══ -->
+  <nav class="nav" id="mainNav">
+    <div class="nav__inner">
+      <a href="#home" class="nav__logo">LOGO<span class="nav__logo-dot">.</span></a>
       
-      <ul class="nav__links">
-        <li><a href="#hero" class="nav__link nav__link--active" data-section="hero">Home</a></li>
-        <li><a href="#services" class="nav__link" data-section="services">Services</a></li>
-        <li><a href="#about" class="nav__link" data-section="about">About me</a></li>
-        <li><a href="#portfolio" class="nav__link" data-section="portfolio">Portfolio</a></li>
-        <li><a href="#contact" class="nav__link" data-section="contact">Contact me</a></li>
-      </ul>
+      <button class="nav__hamburger" id="navHamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
 
-      <div class="nav__cta">
-        <a href="#contact" class="btn btn--primary" data-section="contact">Hire Me</a>
+      <div class="nav__menu" id="mobileNav">
+        <div class="nav__links">
+          <a href="#home" class="nav__link nav__link--active">Home</a>
+          <a href="#services" class="nav__link">Services</a>
+          <a href="#about" class="nav__link">About me</a>
+          <a href="#portfolio" class="nav__link">Portfolio</a>
+          <a href="#contact" class="nav__link">Contact me</a>
+        </div>
+        <a href="#contact" class="btn btn--primary nav__cta">Hire Me</a>
       </div>
+    </div>
+  </nav>
 
-      <div class="nav__hamburger">
-        <i class="ph ph-list"></i>
-      </div>
-    </nav>
-
-    <!-- ══ HERO SECTION ══ -->
-    <section id="hero" class="section section--active">
-      <div class="hero">
-        <div class="hero__content">
+  <main>
+    <!-- ══ HERO ══ -->
+    <section id="home" class="hero section">
+      <div class="hero__inner container">
+        <div class="hero__content reveal">
           <span class="hero__eyebrow">Hi I am</span>
-          <h1 class="hero__title">Roshin <span>R G</span></h1>
-          <h2 class="hero__role">UI/UX Designer & Developer</h2>
-          <p class="hero__desc">
-            I craft immersive digital experiences, bridging the gap between elegant design and robust engineering. 
-            Passionate about intuitive interfaces and modern web technologies.
-          </p>
+          <h1 class="hero__name">Roshin R G</h1>
+          <h2 class="hero__role">Front-End <span class="text-accent">Developer</span></h2>
           
           <div class="hero__socials">
-            <a href="#" class="social-icon" aria-label="Instagram"><i class="ph ph-instagram-logo"></i></a>
-            <a href="https://linkedin.com/in/roshinrg" class="social-icon" aria-label="LinkedIn"><i class="ph ph-linkedin-logo"></i></a>
-            <a href="#" class="social-icon" aria-label="Dribbble"><i class="ph ph-dribbble-logo"></i></a>
-            <a href="https://github.com/RoshinRG" class="social-icon" aria-label="GitHub"><i class="ph ph-github-logo"></i></a>
+            <a href="#" class="social-icon" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+            <a href="https://github.com/roshinrg" target="_blank" rel="noopener" class="social-icon" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a>
+            <a href="#" class="social-icon" aria-label="Dribbble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"></path></svg></a>
+            <a href="#" class="social-icon" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
           </div>
 
           <div class="hero__actions">
-            <a href="#contact" class="btn btn--primary" data-section="contact">Hire Me</a>
-            <a href="/CV.pdf" class="btn btn--outline" target="_blank">Download CV</a>
+            <a href="#contact" class="btn btn--primary">Hire Me</a>
+            <a href="#" class="btn btn--outline">Download CV</a>
+          </div>
+          
+          <div class="hero__stats">
+            <div class="stat"><span class="stat__num">4+</span> <span class="stat__label">Projects done</span></div>
+            <div class="stat__divider"></div>
+            <div class="stat"><span class="stat__num">15+</span> <span class="stat__label">Skills mastered</span></div>
+            <div class="stat__divider"></div>
+            <div class="stat"><span class="stat__num">100%</span> <span class="stat__label">Lighthouse Score</span></div>
           </div>
         </div>
-        
-        <div class="hero__visual">
+
+        <div class="hero__visual reveal reveal--delay-1">
           <div class="hero__glow"></div>
-          <div class="hero__image-wrap">
+          <div class="hero__portrait-wrap">
             <!-- Placeholder for B&W Portrait -->
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Roshin Portrait" class="hero__image" />
+            <img src="https://via.placeholder.com/500x600/333333/666666?text=B%26W+Portrait" alt="Roshin R G" class="hero__portrait">
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Stats Row -->
-      <div class="stats">
-        <div class="stat-item">
-          <span class="stat-num">5+</span>
-          <span class="stat-label">Years of<br>Experience</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num">20+</span>
-          <span class="stat-label">Projects<br>Completed</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num">80+</span>
-          <span class="stat-label">Happy<br>Clients</span>
+    <!-- ══ SERVICES ══ -->
+    <section id="services" class="services section bg-surface">
+      <div class="container">
+        <h2 class="section-title reveal">My Services</h2>
+        <div class="services__grid">
+          
+          <div class="card service-card reveal">
+            <div class="service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+            <h3 class="service-card__title">UI/UX Design</h3>
+            <p class="service-card__desc">Crafting intuitive and modern interfaces tailored to your audience.</p>
+          </div>
+
+          <div class="card service-card reveal reveal--delay-1">
+            <div class="service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></div>
+            <h3 class="service-card__title">Web Development</h3>
+            <p class="service-card__desc">Building fast, accessible, and responsive single-page applications.</p>
+          </div>
+
+          <div class="card service-card reveal reveal--delay-2">
+            <div class="service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></div>
+            <h3 class="service-card__title">SPA Architecture</h3>
+            <p class="service-card__desc">Expertise in vanilla JS scaling and zero-dependency performance.</p>
+          </div>
+
         </div>
       </div>
     </section>
 
-    <!-- ══ SERVICES SECTION ══ -->
-    <section id="services" class="section">
-      <div class="section-header">
-        <h2 class="section-title">My <span>Services</span></h2>
-        <p class="section-subtitle">What I do to help your business grow</p>
-      </div>
-
-      <div class="services-grid">
-        <div class="service-card">
-          <i class="ph ph-pen-nib service-icon"></i>
-          <h3 class="service-title">UI/UX Design</h3>
-          <p class="service-desc">Creating intuitive and visually stunning interfaces focused on user experience and conversion.</p>
+    <!-- ══ ABOUT ME ══ -->
+    <section id="about" class="about section">
+      <div class="container about__inner">
+        <div class="about__visual reveal">
+           <img src="https://via.placeholder.com/500x500/333333/666666?text=Illustration" alt="About Me" class="about__img card">
         </div>
-        <div class="service-card">
-          <i class="ph ph-code service-icon"></i>
-          <h3 class="service-title">Web Development</h3>
-          <p class="service-desc">Building fast, responsive, and accessible websites using modern frontend technologies.</p>
-        </div>
-        <div class="service-card">
-          <i class="ph ph-device-mobile service-icon"></i>
-          <h3 class="service-title">App Prototyping</h3>
-          <p class="service-desc">Interactive high-fidelity prototypes to visualize concepts before writing a single line of code.</p>
+        <div class="about__content reveal reveal--delay-1">
+          <h2 class="section-title">About Me</h2>
+          <p class="about__bio">I craft fast, focused interfaces that live and breathe in the browser — no build tools required, no framework overhead, just deliberate JavaScript, semantic HTML, and CSS that scales.</p>
+          <p class="about__bio">Currently in my second year of B.Tech AI & Data Science at Rajalakshmi Engineering College, I bridge the gap between data literacy and front-end precision.</p>
+          
+          <div class="about__skills">
+            <div class="skill-bar">
+              <div class="skill-bar__header"><span>Vanilla JS</span> <span>95%</span></div>
+              <div class="skill-bar__track"><div class="skill-bar__fill" style="width: 95%"></div></div>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-bar__header"><span>CSS & UI Architecture</span> <span>90%</span></div>
+              <div class="skill-bar__track"><div class="skill-bar__fill" style="width: 90%"></div></div>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-bar__header"><span>Python / ML</span> <span>75%</span></div>
+              <div class="skill-bar__track"><div class="skill-bar__fill" style="width: 75%"></div></div>
+            </div>
+          </div>
+          
+          <div class="about__actions">
+            <a href="#" class="btn btn--primary">Download CV</a>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ══ ABOUT SECTION ══ -->
-    <section id="about" class="section">
-      <div class="section-header">
-        <h2 class="section-title">About <span>Me</span></h2>
-      </div>
+    <!-- ══ PORTFOLIO ══ -->
+    <section id="portfolio" class="portfolio section bg-surface">
+      <div class="container">
+        <h2 class="section-title reveal">Recent Projects</h2>
+        
+        <div class="portfolio__grid">
+          <div class="card project-card reveal">
+            <div class="project-card__img-wrap">
+              <img src="https://via.placeholder.com/600x400/222222/FF7A1A?text=Project+1" alt="Project 1">
+              <div class="project-card__overlay"><a href="#" class="btn btn--primary">View Project</a></div>
+            </div>
+            <div class="project-card__info">
+              <span class="project-card__tag">Full Stack</span>
+              <h3 class="project-card__title">Restaurant Management System</h3>
+            </div>
+          </div>
 
-      <div class="about">
-        <div class="about__image-wrap">
-          <img src="https://images.unsplash.com/photo-1549692520-acc6669e2f0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Working" class="about__image" />
+          <div class="card project-card reveal reveal--delay-1">
+            <div class="project-card__img-wrap">
+              <img src="https://via.placeholder.com/600x400/222222/FF7A1A?text=Project+2" alt="Project 2">
+              <div class="project-card__overlay"><a href="#" class="btn btn--primary">View Project</a></div>
+            </div>
+            <div class="project-card__info">
+              <span class="project-card__tag">UI/UX</span>
+              <h3 class="project-card__title">Secure-Pay Payment Form</h3>
+            </div>
+          </div>
+
+          <div class="card project-card reveal reveal--delay-2">
+            <div class="project-card__img-wrap">
+              <img src="https://via.placeholder.com/600x400/222222/FF7A1A?text=Project+3" alt="Project 3">
+              <div class="project-card__overlay"><a href="#" class="btn btn--primary">View Project</a></div>
+            </div>
+            <div class="project-card__info">
+              <span class="project-card__tag">Web Design</span>
+              <h3 class="project-card__title">Masonry Art Gallery</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ CONTACT ══ -->
+    <section id="contact" class="contact section">
+      <div class="container contact__inner">
+        <div class="contact__content reveal">
+          <h2 class="section-title">Let's Work Together</h2>
+          <p class="contact__desc">Whether it's a freelance project, internship opportunity, or a collaboration — drop me a message and I'll get back to you within 24 hours.</p>
+          
+          <div class="contact__details">
+            <div class="contact__detail">
+              <span class="contact__detail-label">Email</span>
+              <a href="mailto:roshin.rg.2024.aids@rajalakshmi.edu.in">roshin.rg.2024.aids@rajalakshmi.edu.in</a>
+            </div>
+            <div class="contact__detail">
+              <span class="contact__detail-label">Phone</span>
+              <a href="tel:+916369460964">+91 6369 460 964</a>
+            </div>
+            <div class="contact__detail">
+              <span class="contact__detail-label">Location</span>
+              <span>Chennai, Tamil Nadu, India</span>
+            </div>
+          </div>
         </div>
         
-        <div class="about__content">
-          <p class="about__bio">
-            I'm a passionate designer and developer based in India. I specialize in crafting digital experiences that are both beautiful and highly functional. With a background in AI and Data Science, I bring an analytical approach to creative problem-solving.
-          </p>
-          
-          <div class="progress-bar">
-            <div class="progress-info">
-              <span>Figma & Design</span>
-              <span>90%</span>
+        <div class="contact__form-wrap card reveal reveal--delay-1">
+          <form class="contact__form" id="contactForm">
+            <div class="form__group">
+              <input type="text" class="form__input" placeholder="Your Name" required>
             </div>
-            <div class="progress-track">
-              <div class="progress-fill" style="width: 90%"></div>
+            <div class="form__group">
+              <input type="email" class="form__input" placeholder="Your Email" required>
             </div>
-          </div>
-          
-          <div class="progress-bar">
-            <div class="progress-info">
-              <span>Frontend (HTML/CSS/JS)</span>
-              <span>85%</span>
+            <div class="form__group">
+              <textarea class="form__input" rows="4" placeholder="Your Message" required></textarea>
             </div>
-            <div class="progress-track">
-              <div class="progress-fill" style="width: 85%"></div>
-            </div>
-          </div>
-
-          <div class="progress-bar">
-            <div class="progress-info">
-              <span>React & Frameworks</span>
-              <span>75%</span>
-            </div>
-            <div class="progress-track">
-              <div class="progress-fill" style="width: 75%"></div>
-            </div>
-          </div>
+            <button type="submit" class="btn btn--primary form__submit">Send Message</button>
+          </form>
         </div>
       </div>
     </section>
+  </main>
 
-    <!-- ══ PORTFOLIO SECTION ══ -->
-    <section id="portfolio" class="section">
-      <div class="section-header">
-        <h2 class="section-title">My <span>Work</span></h2>
-        <p class="section-subtitle">A selection of my recent projects</p>
+  <!-- ══ FOOTER ══ -->
+  <footer class="footer bg-surface">
+    <div class="container footer__inner">
+      <a href="#home" class="nav__logo">LOGO<span class="nav__logo-dot">.</span></a>
+      <div class="footer__links">
+        <a href="#home">Home</a>
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#portfolio">Portfolio</a>
       </div>
-
-      <div class="portfolio-grid">
-        <div class="portfolio-card">
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dashboard" class="portfolio-img">
-          <div class="portfolio-overlay">
-            <span class="portfolio-tag">Web App</span>
-            <h3 class="portfolio-title">Analytics Dashboard</h3>
-          </div>
-        </div>
-        <div class="portfolio-card">
-          <img src="https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="E-commerce" class="portfolio-img">
-          <div class="portfolio-overlay">
-            <span class="portfolio-tag">E-Commerce</span>
-            <h3 class="portfolio-title">Luna's World</h3>
-          </div>
-        </div>
-        <div class="portfolio-card">
-          <img src="https://images.unsplash.com/photo-1555421689-d68471e189f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="CanSat" class="portfolio-img">
-          <div class="portfolio-overlay">
-            <span class="portfolio-tag">Data Vis</span>
-            <h3 class="portfolio-title">CanSat Dashboard</h3>
-          </div>
-        </div>
+      <div class="footer__socials hero__socials">
+        <!-- Reusing hero socials structure for brevity -->
+        <a href="#" class="social-icon" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+        <a href="https://github.com/roshinrg" target="_blank" rel="noopener" class="social-icon" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a>
       </div>
-    </section>
+      <p class="footer__copy">© 2024 Roshin R G. Crafted with precision.</p>
+    </div>
+  </footer>
 
-    <!-- ══ CONTACT SECTION ══ -->
-    <section id="contact" class="section">
-      <div class="section-header">
-        <h2 class="section-title">Let's <span>Work Together</span></h2>
-      </div>
+  <div class="toast" id="toast"></div>
 
-      <div class="contact-wrap">
-        <div class="contact-info">
-          <div class="contact-item">
-            <div class="contact-icon"><i class="ph ph-envelope-simple"></i></div>
-            <div>
-              <p style="color: var(--color-text-muted); font-size: 0.9rem;">Email</p>
-              <p>hello@roshinrg.dev</p>
-            </div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-icon"><i class="ph ph-phone"></i></div>
-            <div>
-              <p style="color: var(--color-text-muted); font-size: 0.9rem;">Phone</p>
-              <p>+91 00000 00000</p>
-            </div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-icon"><i class="ph ph-map-pin"></i></div>
-            <div>
-              <p style="color: var(--color-text-muted); font-size: 0.9rem;">Location</p>
-              <p>India</p>
-            </div>
-          </div>
-        </div>
-
-        <form class="contact-form" onsubmit="event.preventDefault(); alert('Message sent!');">
-          <input type="text" class="form-input" placeholder="Your Name" required />
-          <input type="email" class="form-input" placeholder="Your Email" required />
-          <textarea class="form-input" placeholder="Your Message" required></textarea>
-          <button type="submit" class="btn btn--primary" style="align-self: flex-start;">Send Message</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- ══ FOOTER ══ -->
-    <footer class="footer">
-      <p>&copy; 2026 <span>Roshin R G</span>. All rights reserved.</p>
-    </footer>
-
-  </div>
-
+  <!-- Note: We are no longer using Three.js for the main visuals, so we just include our UI script -->
   <script src="script.js"></script>
 </body>
 </html>
