@@ -1,189 +1,96 @@
 /* ══════════════════════════════════════════════════════════════════
-   script.js — Roshin RG Portfolio
-   UI Interactions & Scroll Reveal (Vanilla JS)
+   script.js — RGR Nexus Root App
+   Handles standard DOM behavior and lazy-loads WebGL.
    ══════════════════════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initCustomCursor();
-  initMobileNav();
-  initScrollReveal();
-  initNavScrollSpy();
-  initContactForm();
+  initScrollSpy();
+  setupLazyInit();
 });
 
-/* ── Custom Cursor ── */
-function initCustomCursor() {
-  const dot = document.getElementById('cursorDot');
-  const ring = document.getElementById('cursorRingInner');
-  if (!dot || !ring) return;
-
-  // Only init on non-touch devices
-  if (window.matchMedia('(pointer: coarse)').matches) {
-    dot.style.display = 'none';
-    ring.style.display = 'none';
-    document.body.classList.remove('cursor--hidden');
-    return;
-  }
-
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
-  let ringX = mouseX;
-  let ringY = mouseY;
-  
-  // Use a slight lerp for the ring to trail the dot
-  const speed = 0.2;
-
-  document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    
-    // Instantly move the dot
-    dot.style.transform = `translate(calc(${mouseX}px - 50%), calc(${mouseY}px - 50%))`;
-  });
-
-  const animateRing = () => {
-    ringX += (mouseX - ringX) * speed;
-    ringY += (mouseY - ringY) * speed;
-    ring.style.transform = `translate(calc(${ringX}px - 50%), calc(${ringY}px - 50%))`;
-    requestAnimationFrame(animateRing);
-  };
-  animateRing();
-
-  // Hover states for interactive elements
-  const interactiveElements = document.querySelectorAll('a, button, input, textarea');
-  interactiveElements.forEach(el => {
-    el.addEventListener('mouseenter', () => ring.classList.add('cursor-ring--hover'));
-    el.addEventListener('mouseleave', () => ring.classList.remove('cursor-ring--hover'));
-  });
-
-  // Hide cursor when leaving window
-  document.addEventListener('mouseleave', () => {
-    dot.classList.add('cursor-dot--hidden');
-    ring.classList.add('cursor-ring--hidden');
-  });
-  document.addEventListener('mouseenter', () => {
-    dot.classList.remove('cursor-dot--hidden');
-    ring.classList.remove('cursor-ring--hidden');
-  });
-}
-
-/* ── Mobile Navigation ── */
-function initMobileNav() {
-  const hamburger = document.getElementById('navHamburger');
-  const mobileNav = document.getElementById('mobileNav');
+/* ── ScrollSpy & Section Events ── */
+function initScrollSpy() {
+  const sections = Array.from(document.querySelectorAll('section[id]'));
   const navLinks = document.querySelectorAll('.nav__link');
   
-  if (!hamburger || !mobileNav) return;
+  if (sections.length === 0) return;
 
-  const toggleNav = () => {
-    const isOpen = mobileNav.classList.contains('nav__menu--open');
-    mobileNav.classList.toggle('nav__menu--open');
-    hamburger.setAttribute('aria-expanded', !isOpen);
+  // Emit a custom event when a section becomes active
+  const dispatchSectionChange = (index, id) => {
+    window.dispatchEvent(new CustomEvent('sectionchange', {
+      detail: { index, id }
+    }));
   };
-
-  hamburger.addEventListener('click', toggleNav);
-
-  // Close nav when clicking a link
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (mobileNav.classList.contains('nav__menu--open')) {
-        toggleNav();
-      }
-    });
-  });
-}
-
-/* ── Scroll Reveal ── */
-function initScrollReveal() {
-  const revealElements = document.querySelectorAll('.reveal');
-  if (!revealElements.length) return;
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        // Optional: stop observing once revealed
-        // observer.unobserve(entry.target);
+        const id = entry.target.id;
+        const index = sections.findIndex(s => s.id === id);
+        
+        // Update Nav UI
+        navLinks.forEach(link => {
+          if (link.getAttribute('data-section') === id) {
+            link.classList.add('nav__link--active');
+          } else {
+            link.classList.remove('nav__link--active');
+          }
+        });
+
+        // Notify Three.js modules
+        dispatchSectionChange(index, id);
       }
     });
   }, {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
+    // Fire when section is 30% into the viewport
+    threshold: 0.3
   });
 
-  revealElements.forEach(el => observer.observe(el));
-}
-
-/* ── Navbar Scroll Spy & Background ── */
-function initNavScrollSpy() {
-  const nav = document.getElementById('mainNav');
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav__link');
-
-  window.addEventListener('scroll', () => {
-    // Nav background blur on scroll
-    if (window.scrollY > 50) {
-      nav.classList.add('nav--scrolled');
-    } else {
-      nav.classList.remove('nav--scrolled');
-    }
-
-    // Scroll Spy: highlight active link
-    let currentId = '';
-    const scrollPos = window.scrollY + window.innerHeight / 3;
-
-    sections.forEach(section => {
-      if (section.offsetTop <= scrollPos && (section.offsetTop + section.offsetHeight) > scrollPos) {
-        currentId = section.getAttribute('id');
-      }
-    });
-
-    if (currentId) {
-      navLinks.forEach(link => {
-        link.classList.remove('nav__link--active');
-        if (link.getAttribute('href') === `#${currentId}`) {
-          link.classList.add('nav__link--active');
-        }
-      });
-    }
-  }, { passive: true });
-}
-
-/* ── Contact Form Mockup ── */
-function initContactForm() {
-  const form = document.getElementById('contactForm');
-  const toast = document.getElementById('toast');
-  if (!form || !toast) return;
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    const originalText = btn.textContent;
-    
-    // Mock loading state
-    btn.textContent = 'Sending...';
-    btn.style.opacity = '0.7';
-    btn.style.pointerEvents = 'none';
-
-    setTimeout(() => {
-      // Mock success
-      btn.textContent = originalText;
-      btn.style.opacity = '1';
-      btn.style.pointerEvents = 'all';
-      form.reset();
-      
-      showToast('Message sent successfully! I will get back to you soon.');
-    }, 1500);
-  });
-}
-
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.classList.add('toast--show');
+  sections.forEach(sec => observer.observe(sec));
   
+  // Initial dispatch for whatever is on screen on load
   setTimeout(() => {
-    toast.classList.remove('toast--show');
-  }, 4000);
+    const activeLink = document.querySelector('.nav__link--active');
+    if (activeLink) {
+      const id = activeLink.getAttribute('data-section');
+      const index = sections.findIndex(s => s.id === id);
+      dispatchSectionChange(index, id);
+    }
+  }, 100);
+}
+
+/* ── Lazy Initialize Three.js ── */
+function setupLazyInit() {
+  let isInitTriggered = false;
+
+  const triggerInit = () => {
+    if (isInitTriggered) return;
+    isInitTriggered = true;
+    
+    // Clean up scroll listener
+    window.removeEventListener('scroll', scrollCheck);
+    
+    // Dynamically import the gatekeeper
+    import('./js/three/loader.js').then(module => {
+      module.initThreeJS();
+    }).catch(err => {
+      console.error("Failed to load loader.js", err);
+    });
+  };
+
+  // Condition 1: User scrolls > 10vh
+  const scrollCheck = () => {
+    if (window.scrollY > window.innerHeight * 0.1) {
+      triggerInit();
+    }
+  };
+  window.addEventListener('scroll', scrollCheck, { passive: true });
+
+  // Condition 2: requestIdleCallback
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => triggerInit());
+  } else {
+    // Fallback for Safari
+    setTimeout(triggerInit, 2000);
+  }
 }

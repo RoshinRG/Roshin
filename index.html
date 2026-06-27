@@ -1,256 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ── SEO ── -->
-  <title>Roshin R G — UI/UX Designer & Front-End Developer</title>
-  <meta name="description" content="Portfolio of Roshin R G. UI/UX Designer and Front-End Developer.">
-
-  <!-- ── Fonts ── -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
-
+  <title>Roshin R G — Engineering Digital Excellence</title>
+  
   <link rel="stylesheet" href="style.css">
-</head>
 
+  <!-- Fallback Circuit Pattern (loads instantly, no JS required) -->
+  <style>
+    .svg-fallback {
+      background-image: radial-gradient(var(--circuit-trace) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
 <body>
 
-  <!-- ══ CUSTOM CURSOR ══ -->
-  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
-  <div class="cursor-ring" id="cursorRingInner" aria-hidden="true"></div>
+  <!-- WebGL Canvas Layer -->
+  <canvas id="webgl-canvas"></canvas>
+  <div class="svg-fallback" id="fallback-bg"></div>
 
-  <!-- ══ NAVBAR ══ -->
-  <nav class="nav" id="mainNav">
+  <!-- Navbar -->
+  <nav class="nav" id="main-nav">
     <div class="nav__inner">
-      <a href="#home" class="nav__logo">LOGO<span class="nav__logo-dot">.</span></a>
-      
-      <button class="nav__hamburger" id="navHamburger" aria-label="Toggle navigation" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-
-      <div class="nav__menu" id="mobileNav">
-        <div class="nav__links">
-          <a href="#home" class="nav__link nav__link--active">Home</a>
-          <a href="#services" class="nav__link">Services</a>
-          <a href="#about" class="nav__link">About me</a>
-          <a href="#portfolio" class="nav__link">Portfolio</a>
-          <a href="#contact" class="nav__link">Contact me</a>
-        </div>
-        <a href="#contact" class="btn btn--primary nav__cta">Hire Me</a>
+      <a href="#home" class="nav__logo">RGR_NEXUS</a>
+      <div class="nav__links">
+        <a href="#home" class="nav__link nav__link--active" data-section="home">Home</a>
+        <a href="#about" class="nav__link" data-section="about">About</a>
+        <a href="#projects" class="nav__link" data-section="projects">Projects</a>
+        <a href="#skills" class="nav__link" data-section="skills">Skills</a>
+        <a href="#contact" class="nav__link" data-section="contact">Contact</a>
       </div>
     </div>
   </nav>
 
+  <!-- Content -->
   <main>
-    <!-- ══ HERO ══ -->
-    <section id="home" class="hero section">
-      <div class="hero__inner container">
-        <div class="hero__content reveal">
-          <span class="hero__eyebrow">Hi I am</span>
-          <h1 class="hero__name">Roshin R G</h1>
-          <h2 class="hero__role">Front-End <span class="text-accent">Developer</span></h2>
-          
-          <div class="hero__socials">
-            <a href="#" class="social-icon" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-            <a href="https://github.com/roshinrg" target="_blank" rel="noopener" class="social-icon" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a>
-            <a href="#" class="social-icon" aria-label="Dribbble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"></path></svg></a>
-            <a href="#" class="social-icon" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
-          </div>
-
-          <div class="hero__actions">
-            <a href="#contact" class="btn btn--primary">Hire Me</a>
-            <a href="#" class="btn btn--outline">Download CV</a>
-          </div>
-          
-          <div class="hero__stats">
-            <div class="stat"><span class="stat__num">4+</span> <span class="stat__label">Projects done</span></div>
-            <div class="stat__divider"></div>
-            <div class="stat"><span class="stat__num">15+</span> <span class="stat__label">Skills mastered</span></div>
-            <div class="stat__divider"></div>
-            <div class="stat"><span class="stat__num">100%</span> <span class="stat__label">Lighthouse Score</span></div>
-          </div>
-        </div>
-
-        <div class="hero__visual reveal reveal--delay-1">
-          <div class="hero__glow"></div>
-          <div class="hero__portrait-wrap">
-            <!-- Placeholder for B&W Portrait -->
-            <img src="https://via.placeholder.com/500x600/333333/666666?text=B%26W+Portrait" alt="Roshin R G" class="hero__portrait">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══ SERVICES ══ -->
-    <section id="services" class="services section bg-surface">
+    <section id="home" class="section hero">
       <div class="container">
-        <h2 class="section-title reveal">My Services</h2>
-        <div class="services__grid">
-          
-          <div class="card service-card reveal">
-            <div class="service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-            <h3 class="service-card__title">UI/UX Design</h3>
-            <p class="service-card__desc">Crafting intuitive and modern interfaces tailored to your audience.</p>
-          </div>
-
-          <div class="card service-card reveal reveal--delay-1">
-            <div class="service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></div>
-            <h3 class="service-card__title">Web Development</h3>
-            <p class="service-card__desc">Building fast, accessible, and responsive single-page applications.</p>
-          </div>
-
-          <div class="card service-card reveal reveal--delay-2">
-            <div class="service-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></div>
-            <h3 class="service-card__title">SPA Architecture</h3>
-            <p class="service-card__desc">Expertise in vanilla JS scaling and zero-dependency performance.</p>
-          </div>
-
+        <h1 class="hero__title"><span class="text-accent">ROSHIN R G</span></h1>
+        <p class="hero__tagline">Engineering Digital Excellence.</p>
+        <div class="hero__readout">
+          <span class="readout-line">B.Tech AI & Data Science [2024-2028]</span>
+          <span class="readout-line">Specialization: WebGL / V-JS Architecture</span>
+          <span class="readout-line">System Status: ONLINE</span>
         </div>
       </div>
     </section>
 
-    <!-- ══ ABOUT ME ══ -->
-    <section id="about" class="about section">
-      <div class="container about__inner">
-        <div class="about__visual reveal">
-           <img src="https://via.placeholder.com/500x500/333333/666666?text=Illustration" alt="About Me" class="about__img card">
-        </div>
-        <div class="about__content reveal reveal--delay-1">
-          <h2 class="section-title">About Me</h2>
-          <p class="about__bio">I craft fast, focused interfaces that live and breathe in the browser — no build tools required, no framework overhead, just deliberate JavaScript, semantic HTML, and CSS that scales.</p>
-          <p class="about__bio">Currently in my second year of B.Tech AI & Data Science at Rajalakshmi Engineering College, I bridge the gap between data literacy and front-end precision.</p>
-          
-          <div class="about__skills">
-            <div class="skill-bar">
-              <div class="skill-bar__header"><span>Vanilla JS</span> <span>95%</span></div>
-              <div class="skill-bar__track"><div class="skill-bar__fill" style="width: 95%"></div></div>
-            </div>
-            <div class="skill-bar">
-              <div class="skill-bar__header"><span>CSS & UI Architecture</span> <span>90%</span></div>
-              <div class="skill-bar__track"><div class="skill-bar__fill" style="width: 90%"></div></div>
-            </div>
-            <div class="skill-bar">
-              <div class="skill-bar__header"><span>Python / ML</span> <span>75%</span></div>
-              <div class="skill-bar__track"><div class="skill-bar__fill" style="width: 75%"></div></div>
-            </div>
-          </div>
-          
-          <div class="about__actions">
-            <a href="#" class="btn btn--primary">Download CV</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══ PORTFOLIO ══ -->
-    <section id="portfolio" class="portfolio section bg-surface">
+    <section id="about" class="section">
       <div class="container">
-        <h2 class="section-title reveal">Recent Projects</h2>
-        
-        <div class="portfolio__grid">
-          <div class="card project-card reveal">
-            <div class="project-card__img-wrap">
-              <img src="https://via.placeholder.com/600x400/222222/FF7A1A?text=Project+1" alt="Project 1">
-              <div class="project-card__overlay"><a href="#" class="btn btn--primary">View Project</a></div>
-            </div>
-            <div class="project-card__info">
-              <span class="project-card__tag">Full Stack</span>
-              <h3 class="project-card__title">Restaurant Management System</h3>
-            </div>
-          </div>
-
-          <div class="card project-card reveal reveal--delay-1">
-            <div class="project-card__img-wrap">
-              <img src="https://via.placeholder.com/600x400/222222/FF7A1A?text=Project+2" alt="Project 2">
-              <div class="project-card__overlay"><a href="#" class="btn btn--primary">View Project</a></div>
-            </div>
-            <div class="project-card__info">
-              <span class="project-card__tag">UI/UX</span>
-              <h3 class="project-card__title">Secure-Pay Payment Form</h3>
-            </div>
-          </div>
-
-          <div class="card project-card reveal reveal--delay-2">
-            <div class="project-card__img-wrap">
-              <img src="https://via.placeholder.com/600x400/222222/FF7A1A?text=Project+3" alt="Project 3">
-              <div class="project-card__overlay"><a href="#" class="btn btn--primary">View Project</a></div>
-            </div>
-            <div class="project-card__info">
-              <span class="project-card__tag">Web Design</span>
-              <h3 class="project-card__title">Masonry Art Gallery</h3>
-            </div>
-          </div>
+        <h2 class="section-title">01. About</h2>
+        <div class="panel">
+          <p>I build strict, highly-performant interfaces. My philosophy is simple: the best abstraction is the one you understand completely.</p>
+          <br>
+          <p>Currently studying algorithmic thinking and data literacy, bridging the gap between data models and front-end precision.</p>
         </div>
       </div>
     </section>
 
-    <!-- ══ CONTACT ══ -->
-    <section id="contact" class="contact section">
-      <div class="container contact__inner">
-        <div class="contact__content reveal">
-          <h2 class="section-title">Let's Work Together</h2>
-          <p class="contact__desc">Whether it's a freelance project, internship opportunity, or a collaboration — drop me a message and I'll get back to you within 24 hours.</p>
-          
-          <div class="contact__details">
-            <div class="contact__detail">
-              <span class="contact__detail-label">Email</span>
-              <a href="mailto:roshin.rg.2024.aids@rajalakshmi.edu.in">roshin.rg.2024.aids@rajalakshmi.edu.in</a>
-            </div>
-            <div class="contact__detail">
-              <span class="contact__detail-label">Phone</span>
-              <a href="tel:+916369460964">+91 6369 460 964</a>
-            </div>
-            <div class="contact__detail">
-              <span class="contact__detail-label">Location</span>
-              <span>Chennai, Tamil Nadu, India</span>
-            </div>
-          </div>
+    <section id="projects" class="section">
+      <div class="container">
+        <h2 class="section-title">02. Projects</h2>
+        <div class="panel">
+          <p class="font-mono text-muted">// Project index loading...</p>
         </div>
-        
-        <div class="contact__form-wrap card reveal reveal--delay-1">
-          <form class="contact__form" id="contactForm">
-            <div class="form__group">
-              <input type="text" class="form__input" placeholder="Your Name" required>
-            </div>
-            <div class="form__group">
-              <input type="email" class="form__input" placeholder="Your Email" required>
-            </div>
-            <div class="form__group">
-              <textarea class="form__input" rows="4" placeholder="Your Message" required></textarea>
-            </div>
-            <button type="submit" class="btn btn--primary form__submit">Send Message</button>
-          </form>
+      </div>
+    </section>
+
+    <section id="skills" class="section">
+      <div class="container">
+        <h2 class="section-title">03. Skills Array</h2>
+        <div class="panel" style="background: transparent; border: none;">
+          <!-- The 3D Skills Helix will render in the WebGL canvas behind this -->
+          <!-- We leave this area visually empty so the 3D stands out -->
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="container">
+        <h2 class="section-title">04. Contact Protocol</h2>
+        <div class="panel">
+          <div class="hero__readout">
+            <span class="readout-line">Email: roshin.rg.2024.aids@rajalakshmi.edu.in</span>
+            <span class="readout-line">GitHub: github.com/roshinrg</span>
+            <span class="readout-line">Location: Chennai, IN</span>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- ══ FOOTER ══ -->
-  <footer class="footer bg-surface">
-    <div class="container footer__inner">
-      <a href="#home" class="nav__logo">LOGO<span class="nav__logo-dot">.</span></a>
-      <div class="footer__links">
-        <a href="#home">Home</a>
-        <a href="#services">Services</a>
-        <a href="#about">About</a>
-        <a href="#portfolio">Portfolio</a>
-      </div>
-      <div class="footer__socials hero__socials">
-        <!-- Reusing hero socials structure for brevity -->
-        <a href="#" class="social-icon" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
-        <a href="https://github.com/roshinrg" target="_blank" rel="noopener" class="social-icon" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a>
-      </div>
-      <p class="footer__copy">© 2024 Roshin R G. Crafted with precision.</p>
-    </div>
-  </footer>
-
-  <div class="toast" id="toast"></div>
-
-  <!-- Note: We are no longer using Three.js for the main visuals, so we just include our UI script -->
-  <script src="script.js"></script>
+  <script src="script.js" type="module"></script>
 </body>
 </html>
