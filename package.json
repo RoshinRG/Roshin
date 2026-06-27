@@ -14,9 +14,5 @@
     "node": ">=18.0.0"
   },
   "license": "UNLICENSED",
-  "private": true,
-  "devDependencies": {
-    "esbuild": "^0.28.1",
-    "three": "^0.134.0"
-  }
+  "private": true
 }
