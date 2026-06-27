@@ -1,637 +1,914 @@
 /**
  * script.js — Roshin RG Portfolio
- * SPA router + interactions + Canvas 2D visual scenes
- * Pure Vanilla JS — zero external dependencies
+ * Three.js WebGL scenes + SPA router + all interactions
+ * Pure Vanilla JS — no framework dependencies
+ *
+ * PERF: Three.js is now imported as an ES module using named imports.
+ * Only the ~20 classes actually used are bundled — not the entire library.
+ * This eliminates ~70 KiB of unused JavaScript that was previously loaded
+ * from the monolithic Cloudflare CDN build (three.min.js r134, 120.7 KiB).
  */
 
 'use strict';
 
-/* ══════════════════════════════════════════════════════════════════
-   CONSTANTS & COLOURS
-   ══════════════════════════════════════════════════════════════════ */
-const GOLD_HEX  = '#d4af37';
-const GOLD      = (a) => `rgba(212,175,55,${a})`;
+import {
+  WebGLRenderer,
+  Scene,
+  PerspectiveCamera,
+  AmbientLight,
+  PointLight,
+  IcosahedronGeometry,
+  TorusKnotGeometry,
+  BufferGeometry,
+  BufferAttribute,
+  MeshStandardMaterial,
+  MeshBasicMaterial,
+  PointsMaterial,
+  SpriteMaterial,
+  Mesh,
+  Points,
+  Sprite,
+  GridHelper,
+  CanvasTexture,
+  Vector3,
+  Matrix4,
+} from 'three/src/Three.js';
 
 /* ══════════════════════════════════════════════════════════════════
-   GLOBAL STATE
+   CONSTANTS & STATE
    ══════════════════════════════════════════════════════════════════ */
+const GOLD   = 0xd4af37;
+const BLACK  = 0x000000;
+const WHITE  = 0xffffff;
+
 const state = {
-  section: 'hero',
-  mouse: { x: 0, y: 0, nx: 0, ny: 0 },
-  cursor: { x: 0, y: 0 },
-  mobileNavOpen: false,
-  scenes: {},
+  currentSection: 'hero',
+  mouse: { x: 0, y: 0, nx: 0, ny: 0 },        // raw px + normalised [-1,1]
+  mouseTarget: { x: 0, y: 0 },                  // lerped target for hero mesh
+  cursorPos:  { x: 0, y: 0 },
+  cursorRing: { x: 0, y: 0 },
+  isMobileNavOpen: false,
+  isHovering: false,
+  rafId: null,
+  scenes: {},                                     // three.js scene refs
 };
 
 /* ══════════════════════════════════════════════════════════════════
-   UTILS
+   UTILITY HELPERS
    ══════════════════════════════════════════════════════════════════ */
-const lerp    = (a, b, t) => a + (b - a) * t;
-const clamp   = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-const $       = (id) => document.getElementById(id);
-const $$      = (sel) => document.querySelectorAll(sel);
-
-const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const POINTER = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const lerp = (a, b, t) => a + (b - a) * t;
 
 function debounce(fn, ms) {
-  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+  let id;
+  return (...args) => { clearTimeout(id); id = setTimeout(() => fn(...args), ms); };
 }
 
-/** Safely run fn — handles the case where 'load' already fired (fast pages + defer) */
-function onLoad(fn) {
-  if (document.readyState === 'complete') { fn(); }
-  else { window.addEventListener('load', fn, { once: true }); }
-}
+function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
+
+function $(id) { return document.getElementById(id); }
 
 /* ══════════════════════════════════════════════════════════════════
    CUSTOM CURSOR
    ══════════════════════════════════════════════════════════════════ */
-(function () {
+(function initCursor() {
   const dot  = $('cursorDot');
   const ring = $('cursorRingInner');
   const body = document.body;
-  let rx = 0, ry = 0;
 
-  (function tick() {
-    rx = lerp(rx, state.cursor.x, 0.1);
-    ry = lerp(ry, state.cursor.y, 0.1);
-    ring.style.transform = `translate(calc(${rx}px - 50%),calc(${ry}px - 50%))`;
-    requestAnimationFrame(tick);
+  function moveDot(x, y) {
+    dot.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%))`;
+  }
+
+  function moveRing(x, y) {
+    ring.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%))`;
+  }
+
+  // Smooth ring following
+  let ringX = 0, ringY = 0;
+  (function animateRing() {
+    ringX = lerp(ringX, state.cursorPos.x, 0.1);
+    ringY = lerp(ringY, state.cursorPos.y, 0.1);
+    moveRing(ringX, ringY);
+    requestAnimationFrame(animateRing);
   })();
 
   document.addEventListener('mousemove', (e) => {
-    state.cursor.x = e.clientX; state.cursor.y = e.clientY;
-    state.mouse.x  = e.clientX; state.mouse.y  = e.clientY;
-    state.mouse.nx = e.clientX / window.innerWidth  * 2 - 1;
-    state.mouse.ny = -(e.clientY / window.innerHeight * 2 - 1);
-    dot.style.transform = `translate(calc(${e.clientX}px - 50%),calc(${e.clientY}px - 50%))`;
+    state.cursorPos.x = e.clientX;
+    state.cursorPos.y = e.clientY;
+    moveDot(e.clientX, e.clientY);
   }, { passive: true });
 
-  const sel = 'a,button,[tabindex],.project-card,.contact__link-item,.about__stat';
-  document.addEventListener('mouseover', e => { if (e.target.closest(sel)) body.classList.add('cursor--hover'); }, { passive: true });
-  document.addEventListener('mouseout',  e => { if (e.target.closest(sel)) body.classList.remove('cursor--hover'); }, { passive: true });
+  // Hover detection on interactive elements
+  const hoverTargets = 'a, button, [tabindex], .project-card, .contact__link-item, .about__stat';
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest(hoverTargets)) {
+      body.classList.add('cursor--hover');
+    }
+  }, { passive: true });
+
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest(hoverTargets)) {
+      body.classList.remove('cursor--hover');
+    }
+  }, { passive: true });
+})();
+
+/* ══════════════════════════════════════════════════════════════════
+   SPA ROUTER
+   ══════════════════════════════════════════════════════════════════ */
+(function initRouter() {
+  const sections = {
+    hero:     $('sectionHero'),
+    about:    $('sectionAbout'),
+    projects: $('sectionProjects'),
+    skills:   $('sectionSkills'),
+    contact:  $('sectionContact'),
+  };
+
+  const navLinks = document.querySelectorAll('[data-section]');
+  const transition = $('pageTransition');
+
+  function navigateTo(section) {
+    if (section === state.currentSection) return;
+    if (!sections[section]) return;
+
+    // Fade out
+    transition.classList.add('page-transition--in');
+
+    setTimeout(() => {
+      // Hide all
+      Object.values(sections).forEach(el => el.classList.remove('section--active'));
+
+      // Show target
+      sections[section].classList.add('section--active');
+      state.currentSection = section;
+
+      // Update nav active state
+      document.querySelectorAll('.nav__link').forEach(link => {
+        link.classList.toggle('nav__link--active', link.dataset.section === section);
+      });
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // Trigger reveals for new section
+      setTimeout(triggerReveal, 50);
+
+      // Init section-specific scenes (Three.js is available immediately via ESM)
+      if (section === 'skills' && !state.scenes.skills) {
+        initSkillsScene();
+      }
+      if (section === 'contact' && !state.scenes.contact) {
+        initContactScene();
+      }
+
+      // Fade in
+      transition.classList.remove('page-transition--in');
+
+      // Close mobile nav
+      closeMobileNav();
+    }, 200);
+  }
+
+  // Attach all [data-section] links
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo(link.dataset.section);
+    });
+  });
+
+  // Footer nav links
+  document.querySelectorAll('.footer__link[data-section]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo(link.dataset.section);
+    });
+  });
+
+  // Expose
+  window.navigateTo = navigateTo;
 })();
 
 /* ══════════════════════════════════════════════════════════════════
    MOBILE NAV
    ══════════════════════════════════════════════════════════════════ */
 function closeMobileNav() {
-  $('mobileNav').classList.remove('mobile-nav--open');
-  $('navHamburger').setAttribute('aria-expanded', 'false');
-  state.mobileNavOpen = false;
+  const mobileNav = $('mobileNav');
+  const hamburger = $('navHamburger');
+  mobileNav.classList.remove('mobile-nav--open');
+  hamburger.setAttribute('aria-expanded', 'false');
+  state.isMobileNavOpen = false;
 }
 
-(function () {
-  const btn   = $('navHamburger');
-  const nav   = $('mobileNav');
-  const close = $('mobileNavClose');
-  btn.addEventListener('click', () => {
-    state.mobileNavOpen = !state.mobileNavOpen;
-    nav.classList.toggle('mobile-nav--open', state.mobileNavOpen);
-    btn.setAttribute('aria-expanded', String(state.mobileNavOpen));
-  });
-  close.addEventListener('click', closeMobileNav);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.mobileNavOpen) closeMobileNav(); });
-})();
+(function initMobileNav() {
+  const hamburger = $('navHamburger');
+  const mobileNav = $('mobileNav');
+  const closeBtn  = $('mobileNavClose');
 
-/* ══════════════════════════════════════════════════════════════════
-   SCROLL REVEAL
-   ══════════════════════════════════════════════════════════════════ */
-function triggerReveal() {
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('reveal--visible'); io.unobserve(e.target); } });
-  }, { threshold: 0.12 });
-  $$('.reveal').forEach(el => { if (!el.classList.contains('reveal--visible')) io.observe(el); });
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   SPA ROUTER
-   ══════════════════════════════════════════════════════════════════ */
-(function () {
-  const secs = {
-    hero: $('sectionHero'), about: $('sectionAbout'),
-    projects: $('sectionProjects'), skills: $('sectionSkills'), contact: $('sectionContact'),
-  };
-  const overlay = $('pageTransition');
-
-  function navigateTo(id) {
-    if (id === state.section || !secs[id]) return;
-    overlay.classList.add('page-transition--in');
-    setTimeout(() => {
-      Object.values(secs).forEach(s => s.classList.remove('section--active'));
-      secs[id].classList.add('section--active');
-      state.section = id;
-      $$('.nav__link').forEach(l => l.classList.toggle('nav__link--active', l.dataset.section === id));
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      setTimeout(triggerReveal, 50);
-      if (id === 'about'   && !state.scenes.avatar)  initAvatarScene();
-      if (id === 'skills'  && !state.scenes.skills)  initSkillsScene();
-      if (id === 'contact' && !state.scenes.contact) initContactScene();
-      overlay.classList.remove('page-transition--in');
-      closeMobileNav();
-    }, 200);
-  }
-
-  $$('[data-section]').forEach(el => {
-    el.addEventListener('click', e => { e.preventDefault(); navigateTo(el.dataset.section); });
+  hamburger.addEventListener('click', () => {
+    const open = !state.isMobileNavOpen;
+    state.isMobileNavOpen = open;
+    mobileNav.classList.toggle('mobile-nav--open', open);
+    hamburger.setAttribute('aria-expanded', String(open));
   });
 
-  window.navigateTo = navigateTo;
+  closeBtn.addEventListener('click', closeMobileNav);
+
+  // Close on ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state.isMobileNavOpen) closeMobileNav();
+  });
 })();
 
 /* ══════════════════════════════════════════════════════════════════
    STICKY NAV
    ══════════════════════════════════════════════════════════════════ */
-(function () {
+(function initStickyNav() {
   const nav = $('mainNav');
-  window.addEventListener('scroll', debounce(() => nav.classList.toggle('nav--scrolled', window.scrollY > 10), 10), { passive: true });
+  const onScroll = debounce(() => {
+    nav.classList.toggle('nav--scrolled', window.scrollY > 10);
+  }, 10);
+  window.addEventListener('scroll', onScroll, { passive: true });
 })();
 
 /* ══════════════════════════════════════════════════════════════════
    TYPEWRITER
    ══════════════════════════════════════════════════════════════════ */
-(function () {
+(function initTypewriter() {
   const el = $('typewriter');
   if (!el) return;
-  const words = ['Front-End Developer', 'SPA Architect', 'AI & Data Science Student', 'Vanilla JS Specialist'];
-  let wi = 0, ci = 0, del = false;
+
+  const phrases = [
+    'Front-End Developer',
+    'SPA Architect',
+    'AI & Data Science Student',
+    'Vanilla JS Specialist',
+  ];
+
+  let pi = 0, ci = 0, deleting = false;
+
   function tick() {
-    const w = words[wi];
-    if (!del) {
-      el.textContent = w.slice(0, ++ci);
-      if (ci === w.length) { del = true; setTimeout(tick, 1800); return; }
+    const current = phrases[pi];
+    if (!deleting) {
+      el.textContent = current.slice(0, ci + 1);
+      ci++;
+      if (ci === current.length) {
+        deleting = true;
+        setTimeout(tick, 1800);
+        return;
+      }
       setTimeout(tick, 75 + Math.random() * 40);
     } else {
-      el.textContent = w.slice(0, --ci);
-      if (ci === 0) { del = false; wi = (wi + 1) % words.length; setTimeout(tick, 400); return; }
+      el.textContent = current.slice(0, ci - 1);
+      ci--;
+      if (ci === 0) {
+        deleting = false;
+        pi = (pi + 1) % phrases.length;
+        setTimeout(tick, 400);
+        return;
+      }
       setTimeout(tick, 40);
     }
   }
+
   setTimeout(tick, 1200);
 })();
 
 /* ══════════════════════════════════════════════════════════════════
-   PROJECT CARD TILT
+   SCROLL REVEAL (IntersectionObserver)
    ══════════════════════════════════════════════════════════════════ */
-$$('.project-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const r = card.getBoundingClientRect();
-    const dx = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);
-    const dy = (e.clientY - r.top   - r.height / 2) / (r.height / 2);
-    card.style.transform = `perspective(800px) rotateY(${dx*8}deg) rotateX(${-dy*6}deg) translateZ(6px)`;
-    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width  * 100).toFixed(1) + '%');
-    card.style.setProperty('--my', ((e.clientY - r.top ) / r.height * 100).toFixed(1) + '%');
+function triggerReveal() {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('reveal--visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => {
+    if (!el.classList.contains('reveal--visible')) {
+      io.observe(el);
+    }
   });
-  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
-});
+}
+
+// Initial trigger for hero section
+setTimeout(triggerReveal, 100);
 
 /* ══════════════════════════════════════════════════════════════════
-   CONTACT FORM
+   PROJECT CARD — 3D TILT
    ══════════════════════════════════════════════════════════════════ */
-(function () {
-  const form  = $('contactForm');
-  const btn   = $('formSubmitBtn');
-  const label = $('formSubmitText');
-  const toast = $('toast');
+(function initProjectTilt() {
+  document.querySelectorAll('.project-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const cx   = rect.left + rect.width  / 2;
+      const cy   = rect.top  + rect.height / 2;
+      const dx   = (e.clientX - cx) / (rect.width  / 2);
+      const dy   = (e.clientY - cy) / (rect.height / 2);
+
+      card.style.transform = `perspective(800px) rotateY(${dx * 8}deg) rotateX(${-dy * 6}deg) translateZ(6px)`;
+
+      // spotlight effect via CSS var
+      const mx = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%';
+      const my = ((e.clientY - rect.top ) / rect.height * 100).toFixed(1) + '%';
+      card.style.setProperty('--mx', mx);
+      card.style.setProperty('--my', my);
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════════
+   CONTACT FORM — Google Sheets integration
+   ══════════════════════════════════════════════════════════════════ */
+(function initContactForm() {
+  const form   = $('contactForm');
+  const btn    = $('formSubmitBtn');
+  const label  = $('formSubmitText');
+  const toast  = $('toast');
+
   if (!form) return;
 
-  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbw97MFfNON_HAKfOryamFU21x33bhZzeWXBRjfnxUD51pxMpw2L_T5rwe56kka_iAI/exec';
+  /* ── Google Apps Script Web App URL ──
+     Replace this with your deployed Apps Script URL.
+     See google-apps-script.js for setup instructions.  */
+  const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbw97MFfNON_HAKfOryamFU21x33bhZzeWXBRjfnxUD51pxMpw2L_T5rwe56kka_iAI/exec';
 
-  function showToast(msg, err = false) {
+  function showToast(msg, isError = false) {
     toast.textContent = msg;
-    toast.classList.toggle('toast--error', err);
+    toast.classList.toggle('toast--error', isError);
     toast.classList.add('toast--visible');
     setTimeout(() => toast.classList.remove('toast--visible'), 4000);
   }
 
-  form.addEventListener('submit', async e => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name    = $('contactName').value.trim();
     const email   = $('contactEmail').value.trim();
     const phone   = $('contactPhone').value.trim();
     const subject = $('contactSubject').value.trim();
     const message = $('contactMessage').value.trim();
-    if (!name || !email || !message) return showToast('Please fill in all required fields.', true);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Please enter a valid email address.', true);
-    btn.disabled = true; label.textContent = 'Sending…';
+
+    if (!name || !email || !message) {
+      showToast('Please fill in all required fields.', true);
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast('Please enter a valid email address.', true);
+      return;
+    }
+
+    btn.disabled = true;
+    label.textContent = 'Sending…';
+
+    const payload = { name, email, phone, subject, message };
+
     try {
-      await fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ name, email, phone, subject, message }) });
-      showToast("Message sent! I'll reply within 24 hours. ✓"); form.reset();
-    } catch { showToast('Network error. Please try again.', true); }
-    finally { btn.disabled = false; label.textContent = 'Send Message →'; }
+      /* ── Send to Google Sheets ── */
+      await fetch(GOOGLE_SHEET_URL, {
+        method: 'POST',
+        mode:   'no-cors',                       // Apps Script requires no-cors
+        headers: { 'Content-Type': 'text/plain' },
+        body:   JSON.stringify(payload),
+      });
+
+      /* no-cors means we can't read the response, so we assume success
+         if the fetch didn't throw. The sheet will have the row. */
+      showToast('Message sent! I\'ll reply within 24 hours. ✓');
+      form.reset();
+    } catch {
+      showToast('Network error. Please try again.', true);
+    } finally {
+      btn.disabled = false;
+      label.textContent = 'Send Message →';
+    }
   });
 })();
 
 /* ══════════════════════════════════════════════════════════════════
-   KEYBOARD NAV
+   MOUSE TRACKING (debounced, 16ms)
    ══════════════════════════════════════════════════════════════════ */
-document.addEventListener('keydown', e => {
-  const list = ['hero', 'about', 'projects', 'skills', 'contact'];
-  const i = list.indexOf(state.section);
-  if ((e.key === 'ArrowRight' || e.key === 'ArrowDown') && i < list.length - 1) window.navigateTo(list[i + 1]);
-  if ((e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   && i > 0)              window.navigateTo(list[i - 1]);
-});
+const onMouseMove = debounce((e) => {
+  state.mouse.x  = e.clientX;
+  state.mouse.y  = e.clientY;
+  state.mouse.nx = (e.clientX / window.innerWidth)  * 2 - 1;
+  state.mouse.ny = -(e.clientY / window.innerHeight) * 2 + 1;
+}, 16);
+
+document.addEventListener('mousemove', onMouseMove, { passive: true });
 
 /* ══════════════════════════════════════════════════════════════════
-   3D PROJECTION HELPER  (shared by hero + avatar)
-   Simple perspective projection with Y-axis rotation.
-   ══════════════════════════════════════════════════════════════════ */
-function project3(x, y, z, rotY, rotX, cx, cy, scale, fov) {
-  fov = fov || 4;
-  // Rotate Y
-  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-  let rx = x * cosY + z * sinY;
-  let ry = y;
-  let rz = z * cosY - x * sinY;
-  // Rotate X
-  const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
-  const ry2 =  ry * cosX - rz * sinX;
-  const rz2 =  ry * sinX + rz * cosX;
-  // Perspective divide
-  const d = fov / (fov + rz2 + fov * 0.5);  // keep d always > 0
-  return [cx + rx * d * scale, cy + ry2 * d * scale, rz2];
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   CANVAS — HERO SCENE
-   Gold particles on a sphere + rotating icosahedron wireframe
+   THREE.JS — HERO SCENE
    ══════════════════════════════════════════════════════════════════ */
 function initHeroScene() {
   const canvas = $('heroCanvas');
-  if (!canvas || state.scenes.hero) return;
-  state.scenes.hero = true;
+  if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
-  let W, H;
+  /* ── Device capability gates ──
+     PERF: the per-particle mouse-repulsion loop below only does anything
+     useful on a device with a real mouse to hover with. It was running
+     unconditionally, which means on phones/tablets — which is exactly what
+     Lighthouse's mobile audit (Moto G Power) emulates — it was burning the
+     bulk of every frame's CPU budget on physics nobody could ever trigger.
+     Skipping it on coarse/touch pointers removes that cost entirely on the
+     device class that was failing the audit. */
+  const ENABLE_REPULSION = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const REDUCED_MOTION   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', debounce(resize, 200));
+  /* ── Use window dimensions — canvas.clientWidth can be 0 at DOMContentLoaded ── */
+  const W = () => window.innerWidth;
+  const H = () => window.innerHeight;
 
-  /* ── Particles on sphere ── */
-  const COUNT = POINTER ? 300 : 160;
-  const pts = Array.from({ length: COUNT }, () => {
+  /* ── Renderer ── */
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W(), H());
+  renderer.setClearColor(0x000000, 0);
+
+  /* ── Scene + Camera ── */
+  const scene  = new Scene();
+  const camera = new PerspectiveCamera(75, W() / H(), 0.1, 100);
+  camera.position.z = 5;
+
+  /* ── Lights ── */
+  scene.add(new AmbientLight(WHITE, 0.3));
+
+  const pointLight = new PointLight(GOLD, 2.5, 20);
+  pointLight.position.set(4, 0, 0);
+  scene.add(pointLight);
+
+  /* ── Central Icosahedron ── */
+  const icoGeo = new IcosahedronGeometry(1.4, 1);
+
+  // Solid black fill
+  const icoFill = new Mesh(
+    icoGeo,
+    new MeshStandardMaterial({ color: BLACK, metalness: 0.2, roughness: 0.8 })
+  );
+  scene.add(icoFill);
+
+  // Gold wireframe overlay
+  const icoWire = new Mesh(
+    icoGeo,
+    new MeshBasicMaterial({ color: GOLD, wireframe: true, transparent: true, opacity: 0.7 })
+  );
+  scene.add(icoWire);
+
+  /* ── Particle Field (sphere shell r=3–5) ──
+     PERF: was 2000 — each particle does a full 3D→screen projection every
+     frame (see animate() below). 900 keeps the visual density while cutting
+     that per-frame cost by more than half. Raise it back if you have headroom. */
+  const PARTICLE_COUNT = 900;
+  const positions  = new Float32Array(PARTICLE_COUNT * 3);
+  const basePos    = new Float32Array(PARTICLE_COUNT * 3); // original positions
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const r     = 3 + Math.random() * 2;
     const theta = Math.random() * Math.PI * 2;
     const phi   = Math.acos(2 * Math.random() - 1);
-    const r     = 0.85 + Math.random() * 0.3;     // slight thickness
-    return {
-      x: r * Math.sin(phi) * Math.cos(theta),
-      y: r * Math.sin(phi) * Math.sin(theta) * 0.65,  // flatten vertically
-      z: r * Math.cos(phi),
-      size:  1.2 + Math.random() * 1.8,
-      alpha: 0.45 + Math.random() * 0.45,
-      phase: Math.random() * Math.PI * 2,
-      speed: 0.3 + Math.random() * 0.4,
-      ox: 0, oy: 0,  // repulsion offset
-    };
-  });
 
-  /* ── Icosahedron vertices ── */
-  const PHI = (1 + Math.sqrt(5)) / 2;
-  const N   = Math.sqrt(1 + PHI * PHI);
-  const V   = [
-    [0,   1/N, PHI/N], [0,  -1/N, PHI/N], [0,   1/N,-PHI/N], [0,  -1/N,-PHI/N],
-    [1/N, PHI/N, 0  ], [-1/N, PHI/N, 0  ], [1/N,-PHI/N, 0  ], [-1/N,-PHI/N, 0  ],
-    [PHI/N, 0, 1/N  ], [-PHI/N, 0, 1/N  ], [PHI/N, 0,-1/N  ], [-PHI/N, 0,-1/N  ],
-  ];
-  const E = [
-    [0,1],[0,4],[0,5],[0,8],[0,9],
-    [1,6],[1,7],[1,8],[1,9],
-    [2,3],[2,4],[2,5],[2,10],[2,11],
-    [3,6],[3,7],[3,10],[3,11],
-    [4,5],[4,8],[4,10],
-    [5,9],[5,11],
-    [6,7],[6,8],[6,10],
-    [7,9],[7,11],[8,10],[9,11],
-  ];
+    const x = r * Math.sin(phi) * Math.cos(theta);
+    const y = r * Math.sin(phi) * Math.sin(theta);
+    const z = r * Math.cos(phi);
 
-  let rotY = 0, rotX = 0, tiltY = 0, tiltX = 0, t = 0;
-
-  function draw() {
-    requestAnimationFrame(draw);
-    if (state.section !== 'hero') return;
-
-    ctx.clearRect(0, 0, W, H);
-
-    const cx = W * 0.5, cy = H * 0.5;
-    const R  = Math.min(W, H) * 0.28;   // particle sphere radius
-    const IR = Math.min(W, H) * 0.17;   // icosahedron radius
-
-    t     += 0.015;
-    rotY  += 0.005;
-
-    // Smooth tilt toward mouse
-    if (POINTER) {
-      tiltY = lerp(tiltY, state.mouse.nx * 0.25, 0.04);
-      tiltX = lerp(tiltX, -state.mouse.ny * 0.18, 0.04);
-    }
-    rotX = lerp(rotX, tiltX, 0.06);
-
-    /* ── Draw ambient glow ── */
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, IR * 2.2);
-    grd.addColorStop(0, GOLD(0.07));
-    grd.addColorStop(1, GOLD(0));
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, H);
-
-    /* ── Draw icosahedron edges ── */
-    ctx.lineWidth = 1;
-    for (const [ai, bi] of E) {
-      const [ax, ay, az] = project3(...V[ai], rotY, rotX, cx, cy, IR);
-      const [bx, by, bz] = project3(...V[bi], rotY, rotX, cx, cy, IR);
-      // Depth-based alpha: edges facing camera are brighter
-      const depth = clamp(1 - (az + 1.5) / 3, 0, 1);
-      ctx.strokeStyle = GOLD(0.15 + depth * 0.55);
-      ctx.beginPath();
-      ctx.moveTo(ax, ay);
-      ctx.lineTo(bx, by);
-      ctx.stroke();
-    }
-
-    /* ── Draw particles ── */
-    for (const p of pts) {
-      p.phase += p.speed * 0.01;
-      // Gentle floating
-      const px = p.x + Math.sin(p.phase) * 0.04;
-      const py = p.y + Math.cos(p.phase * 1.3) * 0.025;
-      const [sx, sy, sz] = project3(px, py, p.z, rotY + 0.2, rotX, cx, cy, R);
-
-      // Mouse repulsion
-      if (POINTER) {
-        const dx = sx - state.mouse.x, dy = sy - state.mouse.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 90) {
-          const f = (90 - dist) / 90;
-          p.ox = lerp(p.ox, dx / dist * f * 45, 0.08);
-          p.oy = lerp(p.oy, dy / dist * f * 45, 0.08);
-        } else {
-          p.ox = lerp(p.ox, 0, 0.05);
-          p.oy = lerp(p.oy, 0, 0.05);
-        }
-      }
-
-      // Depth shading
-      const depth = clamp((sz + 1.5) / 3, 0, 1);
-      const alpha = p.alpha * (0.4 + depth * 0.6);
-      const size  = p.size  * (0.5 + depth * 0.7);
-
-      ctx.beginPath();
-      ctx.arc(sx + p.ox, sy + p.oy, size, 0, Math.PI * 2);
-      ctx.fillStyle = GOLD(alpha);
-      ctx.fill();
-    }
+    positions[i * 3]     = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = z;
+    basePos[i * 3]       = x;
+    basePos[i * 3 + 1]   = y;
+    basePos[i * 3 + 2]   = z;
   }
 
-  if (!REDUCED) draw();
+  const particleGeo  = new BufferGeometry();
+  particleGeo.setAttribute('position', new BufferAttribute(positions, 3));
+
+  const particleMat = new PointsMaterial({
+    color: GOLD,
+    size: 0.018,
+    transparent: true,
+    opacity: 0.55,
+    sizeAttenuation: true,
+  });
+
+  const particles = new Points(particleGeo, particleMat);
+  scene.add(particles);
+
+  /* ── Smooth rotation targets ── */
+  let targetRotX = 0, targetRotY = 0;
+  let orbitAngle = 0;
+
+  /* ── Resize ── */
+  const onResize = debounce(() => {
+    camera.aspect = W() / H();
+    camera.updateProjectionMatrix();
+    renderer.setSize(W(), H());
+  }, 150);
+
+  window.addEventListener('resize', onResize);
+
+  /* ── Pre-allocated objects — never new inside the render loop ── */
+  const _pv         = new Vector3();   // reused per-particle projection
+  const viewProjMat = new Matrix4();   // combined view+projection, rebuilt once per frame (not per particle)
+
+  /* ── Animate ── */
+  function animate() {
+    if (state.currentSection !== 'hero') {
+      requestAnimationFrame(animate);
+      return;
+    }
+
+    requestAnimationFrame(animate);
+
+    // Orbit point light
+    orbitAngle += 0.008;
+    pointLight.position.x = Math.cos(orbitAngle) * 4;
+    pointLight.position.z = Math.sin(orbitAngle) * 4;
+    pointLight.position.y = Math.sin(orbitAngle * 0.5) * 2;
+
+    // Icosahedron: slow Y rotation + cursor tilt
+    targetRotY = state.mouse.nx * 0.35;
+    targetRotX = state.mouse.ny * -0.25;
+
+    icoFill.rotation.y += 0.003;
+    icoWire.rotation.y  = icoFill.rotation.y;
+
+    icoFill.rotation.x = lerp(icoFill.rotation.x, targetRotX, 0.05);
+    icoWire.rotation.x = icoFill.rotation.x;
+
+    /* ── Particle mouse repulsion (skipped entirely on touch/coarse-pointer
+       devices — see ENABLE_REPULSION above) ──
+       PERF: this used to call Vector3.project(camera) for every particle,
+       which internally rebuilds and applies camera.matrixWorldInverse AND
+       camera.projectionMatrix (two 4x4 multiplies) on every single call —
+       i.e. up to 2000 redundant matrix multiplications per frame, forever.
+       Combine them ONCE per frame instead, and skip sqrt()/writes for
+       particles that are outside the repulsion radius and already at rest. */
+    if (ENABLE_REPULSION) {
+      viewProjMat.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+
+      const posArr           = particleGeo.attributes.position.array;
+      const REPULSE_R        = 1.2;
+      const REPULSE_R2       = REPULSE_R * REPULSE_R;   // squared-distance test avoids sqrt for most particles
+      const REPULSE_STRENGTH = 0.6;
+      const SETTLE_EPS       = 0.0004;                  // below this, a particle is treated as "at rest"
+      const mnx = state.mouse.nx, mny = state.mouse.ny;
+
+      let anyMoved = false;
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const idx = i * 3;
+        const bx = basePos[idx], by = basePos[idx + 1], bz = basePos[idx + 2];
+        const px = posArr[idx],  py = posArr[idx + 1],  pz = posArr[idx + 2];
+
+        // Reuse pre-allocated vector + the single combined matrix — zero GC
+        _pv.set(px, py, pz).applyMatrix4(viewProjMat);
+
+        const dx    = _pv.x - mnx;
+        const dy    = _pv.y - mny;
+        const dist2 = dx * dx + dy * dy;
+
+        if (dist2 < REPULSE_R2) {
+          const dist  = Math.sqrt(dist2);
+          const force = (REPULSE_R - dist) / REPULSE_R;
+          posArr[idx]     = lerp(px, bx + (dx / dist) * force * REPULSE_STRENGTH, 0.05);
+          posArr[idx + 1] = lerp(py, by + (dy / dist) * force * REPULSE_STRENGTH, 0.05);
+          anyMoved = true;
+        } else if (Math.abs(px - bx) > SETTLE_EPS || Math.abs(py - by) > SETTLE_EPS || Math.abs(pz - bz) > SETTLE_EPS) {
+          // Still drifting back toward its resting position
+          posArr[idx]     = lerp(px, bx, 0.02);
+          posArr[idx + 1] = lerp(py, by, 0.02);
+          posArr[idx + 2] = lerp(pz, bz, 0.02);
+          anyMoved = true;
+        }
+        // else: already at rest — skip entirely, nothing to recompute or write
+      }
+
+      if (anyMoved) particleGeo.attributes.position.needsUpdate = true;
+    }
+
+    // Rotate particle field slowly
+    particles.rotation.y += 0.0005;
+    particles.rotation.x += 0.0002;
+
+    renderer.render(scene, camera);
+  }
+
+  if (REDUCED_MOTION) {
+    renderer.render(scene, camera);   // single static frame, no rAF loop
+  } else {
+    animate();
+  }
+  state.scenes.hero = { renderer, scene, camera };
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   CANVAS — AVATAR SCENE  (About section)
-   Animated torus-knot Lissajous silhouette
+   THREE.JS — AVATAR TORUS KNOT (About section)
    ══════════════════════════════════════════════════════════════════ */
 function initAvatarScene() {
   const canvas = $('avatarCanvas');
-  if (!canvas || state.scenes.avatar) return;
-  state.scenes.avatar = true;
+  if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width  = canvas.clientWidth  || 300;
-  const H = canvas.height = canvas.clientHeight || 300;
-  const cx = W / 2, cy = H / 2;
-  const R  = Math.min(W, H) * 0.4;
+  const w = canvas.clientWidth  || 300;
+  const h = canvas.clientHeight || 300;
 
-  // Torus-knot parametric (p=2, q=3)
-  const STEPS = 240;
-  function tkPt(u) {
-    const p = 2, q = 3;
-    const r = Math.cos(q * u) + 2.2;
-    return [r * Math.cos(p * u), r * Math.sin(p * u), -Math.sin(q * u)];
-  }
-  const raw = Array.from({ length: STEPS + 1 }, (_, i) => tkPt(i / STEPS * Math.PI * 2));
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  renderer.setClearColor(0x000000, 0);
 
-  let angle = 0;
+  const scene  = new Scene();
+  const camera = new PerspectiveCamera(60, w / h, 0.1, 100);
+  camera.position.z = 3.5;
 
-  function draw() {
-    requestAnimationFrame(draw);
-    if (state.section !== 'about') return;
+  scene.add(new AmbientLight(WHITE, 0.4));
 
-    ctx.clearRect(0, 0, W, H);
-    angle += 0.014;
+  const light1 = new PointLight(GOLD, 2, 15);
+  light1.position.set(3, 3, 3);
+  scene.add(light1);
 
-    // Project all points
-    const proj = raw.map(([x, y, z]) => project3(x, y, z, angle, angle * 0.5, cx, cy, R / 3.5));
+  const light2 = new PointLight(0x4488ff, 1, 15);
+  light2.position.set(-3, -3, -3);
+  scene.add(light2);
 
-    // Glow
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
-    grd.addColorStop(0, GOLD(0.08)); grd.addColorStop(1, GOLD(0));
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+  // Torus knot
+  const geo = new TorusKnotGeometry(0.9, 0.28, 128, 16, 2, 3);
+  const mat = new MeshStandardMaterial({
+    color: BLACK,
+    metalness: 0.9,
+    roughness: 0.15,
+    emissive: GOLD,
+    emissiveIntensity: 0.12,
+  });
+  const mesh = new Mesh(geo, mat);
+  scene.add(mesh);
 
-    // Sort segments by Z (painter's algorithm)
-    const segs = [];
-    for (let i = 0; i < STEPS; i++) {
-      const [x1, y1, z1] = proj[i], [x2, y2, z2] = proj[i + 1];
-      segs.push({ x1, y1, x2, y2, z: (z1 + z2) / 2 });
-    }
-    segs.sort((a, b) => a.z - b.z);
+  // Wire overlay
+  const wireMesh = new Mesh(
+    geo,
+    new MeshBasicMaterial({ color: GOLD, wireframe: true, transparent: true, opacity: 0.18 })
+  );
+  scene.add(wireMesh);
 
-    for (const s of segs) {
-      const depth = clamp((s.z + 2) / 4, 0, 1);
-      ctx.beginPath();
-      ctx.moveTo(s.x1, s.y1);
-      ctx.lineTo(s.x2, s.y2);
-      ctx.strokeStyle = GOLD(0.25 + depth * 0.7);
-      ctx.lineWidth   = 0.6 + depth * 2.2;
-      ctx.stroke();
-    }
+  function animate() {
+    requestAnimationFrame(animate);
+    if (state.currentSection !== 'about') return;   // PERF: was rendering every frame even off-screen
 
-    // Highlight dots on front-facing vertices
-    for (let i = 0; i < STEPS; i += 8) {
-      const [sx, sy, sz] = proj[i];
-      const d = clamp((sz + 2) / 4, 0, 1);
-      ctx.beginPath();
-      ctx.arc(sx, sy, 1 + d * 2, 0, Math.PI * 2);
-      ctx.fillStyle = GOLD(d * 0.7);
-      ctx.fill();
-    }
+    mesh.rotation.x    += 0.006;
+    mesh.rotation.y    += 0.009;
+    wireMesh.rotation.x = mesh.rotation.x;
+    wireMesh.rotation.y = mesh.rotation.y;
+    renderer.render(scene, camera);
   }
 
-  if (!REDUCED) draw();
+  animate();
+  state.scenes.avatar = { renderer, scene, camera };
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   CANVAS — SKILLS SCENE
-   Floating label pills with depth + parallax
+   THREE.JS — SKILLS FLOATING LABELS SCENE
    ══════════════════════════════════════════════════════════════════ */
 function initSkillsScene() {
   const canvas = $('skillsCanvas');
-  if (!canvas || state.scenes.skills) return;
-  state.scenes.skills = true;
+  if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
-  let W = canvas.clientWidth || 1000;
-  let H = canvas.clientHeight || 400;
-  canvas.width = W; canvas.height = H;
+  const w = canvas.clientWidth  || 1000;
+  const h = canvas.clientHeight || 400;
 
-  window.addEventListener('resize', debounce(() => {
-    W = canvas.clientWidth; H = canvas.clientHeight;
-    canvas.width = W; canvas.height = H;
-  }, 150));
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  renderer.setClearColor(0x000000, 0);
 
-  const SKILLS = [
-    { label: 'Vanilla JS',   star: true,  x:-0.70, y: 0.30, z: 0.0 },
-    { label: 'HTML5',        star: true,  x: 0.36, y: 0.40, z: 0.3 },
-    { label: 'CSS3',         star: true,  x:-0.24, y: 0.12, z: 0.8 },
-    { label: 'jQuery',       star: true,  x: 0.64, y: 0.20, z:-0.4 },
-    { label: 'SPA Patterns', star: true,  x:-0.56, y:-0.25, z: 0.5 },
-    { label: 'BEM CSS',      star: true,  x: 0.40, y:-0.35, z: 0.2 },
-    { label: 'Three.js',     star: false, x:-0.10, y: 0.45, z:-0.5 },
-    { label: 'Python',       star: false, x: 0.76, y:-0.12, z: 0.3 },
-    { label: 'Git',          star: false, x:-0.76, y: 0.00, z:-0.2 },
-    { label: 'CSS Grid',     star: false, x: 0.04, y:-0.45, z: 0.6 },
-    { label: 'Flexbox',      star: false, x:-0.36, y:-0.05, z:-0.8 },
-    { label: 'WebGL',        star: false, x:-0.44, y: 0.25, z: 0.9 },
-    { label: 'Service Worker',star:false, x: 0.52, y: 0.05, z:-0.7 },
-    { label: 'CSS Props',    star: false, x: 0.20, y:-0.15, z:-1.0 },
-    { label: 'Web APIs',     star: false, x:-0.04, y: 0.00, z: 1.2 },
-  ].map(s => ({ ...s, phase: Math.random() * Math.PI * 2, spd: 0.4 + Math.random() * 0.4 }));
+  const scene  = new Scene();
+  const camera = new PerspectiveCamera(70, w / h, 0.1, 100);
+  camera.position.z = 5;
 
-  let t = 0, pX = 0, pY = 0;
+  scene.add(new AmbientLight(WHITE, 0.5));
+  const light = new PointLight(GOLD, 1.5, 20);
+  light.position.set(0, 3, 5);
+  scene.add(light);
 
-  function draw() {
-    requestAnimationFrame(draw);
-    if (state.section !== 'skills') return;
+  /* Build sprite labels from canvas textures */
+  const skills = [
+    { label: 'Vanilla JS',   star: true,  x: -3.5, y:  1.2, z: 0.0 },
+    { label: 'HTML5',        star: true,  x:  1.8, y:  1.6, z: 0.3 },
+    { label: 'CSS3',         star: true,  x: -1.2, y:  0.5, z: 0.8 },
+    { label: 'jQuery',       star: true,  x:  3.2, y:  0.8, z: -0.4 },
+    { label: 'SPA Patterns', star: true,  x: -2.8, y: -1.0, z: 0.5 },
+    { label: 'BEM CSS',      star: true,  x:  2.0, y: -1.4, z: 0.2 },
+    { label: 'Three.js',     star: false, x: -0.5, y:  1.8, z: -0.5 },
+    { label: 'Python',       star: false, x:  3.8, y: -0.5, z: 0.3 },
+    { label: 'Git',          star: false, x: -3.8, y:  0.0, z: -0.2 },
+    { label: 'CSS Grid',     star: false, x:  0.2, y: -1.8, z: 0.6 },
+    { label: 'Flexbox',      star: false, x: -1.8, y: -0.2, z: -0.8 },
+    { label: 'Service Worker', star: false, x: 2.6, y:  0.2, z: -0.7 },
+    { label: 'IntersectionObserver', star: false, x: -0.2, y: 0.0, z: 1.2 },
+    { label: 'CSS Props',    star: false, x:  1.0, y: -0.6, z: -1.0 },
+    { label: 'WebGL',        star: false, x: -2.2, y:  1.0, z: 0.9 },
+  ];
 
-    t   += 0.012;
-    pX   = lerp(pX, state.mouse.nx * 0.05, 0.04);
-    pY   = lerp(pY, -state.mouse.ny * 0.025, 0.04);
+  function makeSprite(text, isStar) {
+    const c   = document.createElement('canvas');
+    c.width   = 256;
+    c.height  = 64;
+    const ctx = c.getContext('2d');
 
-    ctx.clearRect(0, 0, W, H);
+    // Background pill
+    ctx.fillStyle = isStar ? 'rgba(212,175,55,0.18)' : 'rgba(20,20,20,0.85)';
+    const r = 12;
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(c.width - r, 0);
+    ctx.quadraticCurveTo(c.width, 0, c.width, r);
+    ctx.lineTo(c.width, c.height - r);
+    ctx.quadraticCurveTo(c.width, c.height, c.width - r, c.height);
+    ctx.lineTo(r, c.height);
+    ctx.quadraticCurveTo(0, c.height, 0, c.height - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
+    ctx.fill();
 
-    const sorted = [...SKILLS].sort((a, b) => a.z - b.z);
+    // Border
+    ctx.strokeStyle = isStar ? 'rgba(212,175,55,0.8)' : 'rgba(212,175,55,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
-    for (const s of sorted) {
-      const depth = clamp((s.z + 1.2) / 2.4, 0, 1);
-      const fy    = Math.sin(t * s.spd + s.phase) * 0.04;
-      const sx    = W / 2 + (s.x + pX) * W * 0.46;
-      const sy    = H / 2 + (s.y + fy + pY) * H * 0.40;
-      const fSize = Math.round((12 + depth * 6) * (0.7 + depth * 0.5));
-      const label = s.label;
+    // Text
+    ctx.fillStyle = isStar ? '#d4af37' : '#c0c0b8';
+    ctx.font      = `${isStar ? '600' : '400'} 22px "Space Grotesk", sans-serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text.length > 18 ? text.slice(0,16) + '…' : text, c.width / 2, c.height / 2);
 
-      ctx.save();
-      ctx.globalAlpha = 0.5 + depth * 0.5;
-      ctx.font = `${s.star ? 600 : 400} ${fSize}px "Space Grotesk",sans-serif`;
-
-      const tw  = ctx.measureText(label).width;
-      const ph  = fSize * 1.7;
-      const pw  = tw + fSize * 1.6;
-      const bx  = sx - pw / 2;
-      const by  = sy - ph / 2;
-      const rad = ph * 0.42;
-
-      ctx.beginPath();
-      ctx.roundRect ? ctx.roundRect(bx, by, pw, ph, rad)
-        : (() => { ctx.moveTo(bx+rad,by); ctx.lineTo(bx+pw-rad,by); ctx.quadraticCurveTo(bx+pw,by,bx+pw,by+rad); ctx.lineTo(bx+pw,by+ph-rad); ctx.quadraticCurveTo(bx+pw,by+ph,bx+pw-rad,by+ph); ctx.lineTo(bx+rad,by+ph); ctx.quadraticCurveTo(bx,by+ph,bx,by+ph-rad); ctx.lineTo(bx,by+rad); ctx.quadraticCurveTo(bx,by,bx+rad,by); ctx.closePath(); })();
-
-      ctx.fillStyle   = s.star ? GOLD(0.12 + depth * 0.1) : `rgba(12,12,12,${0.75 + depth * 0.2})`;
-      ctx.fill();
-      ctx.strokeStyle = s.star ? GOLD(0.6 + depth * 0.35) : GOLD(0.15 + depth * 0.2);
-      ctx.lineWidth   = 1;
-      ctx.stroke();
-
-      ctx.fillStyle    = s.star ? GOLD_HEX : `rgba(192,192,184,${0.75 + depth * 0.25})`;
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, sx, sy);
-      ctx.restore();
-    }
+    const tex = new CanvasTexture(c);
+    const mat = new SpriteMaterial({ map: tex, transparent: true });
+    const spr = new Sprite(mat);
+    spr.scale.set(2.2, 0.55, 1);
+    return spr;
   }
 
-  if (!REDUCED) draw();
+  const sprites = [];
+  skills.forEach(s => {
+    const spr = makeSprite(s.label, s.star);
+    spr.position.set(s.x, s.y, s.z);
+    spr.userData.baseY = s.y;
+    spr.userData.phase = Math.random() * Math.PI * 2;
+    spr.userData.speed = 0.4 + Math.random() * 0.4;
+    scene.add(spr);
+    sprites.push(spr);
+  });
+
+  const onResize = debounce(() => {
+    const nw = canvas.clientWidth, nh = canvas.clientHeight;
+    camera.aspect = nw / nh;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nw, nh);
+  }, 150);
+  window.addEventListener('resize', onResize);
+
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    if (state.currentSection !== 'skills') return;   // PERF: was rendering every frame even off-screen
+    t += 0.012;
+
+    sprites.forEach(spr => {
+      spr.position.y = spr.userData.baseY + Math.sin(t * spr.userData.speed + spr.userData.phase) * 0.12;
+    });
+
+    // Parallax on mouse
+    scene.rotation.y = lerp(scene.rotation.y, state.mouse.nx * 0.15, 0.04);
+    scene.rotation.x = lerp(scene.rotation.x, state.mouse.ny * 0.08, 0.04);
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+  state.scenes.skills = { renderer, scene, camera };
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   CANVAS — CONTACT SCENE
-   Animated perspective grid with mouse parallax
+   THREE.JS — CONTACT GRID PLANE
    ══════════════════════════════════════════════════════════════════ */
 function initContactScene() {
   const canvas = $('contactCanvas');
-  if (!canvas || state.scenes.contact) return;
-  state.scenes.contact = true;
+  if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
   const parent = canvas.parentElement;
-  let W = parent.clientWidth || 600;
-  let H = parent.clientHeight || 500;
-  canvas.width = W; canvas.height = H;
+  const w = parent.clientWidth  || 600;
+  const h = parent.clientHeight || 500;
 
-  window.addEventListener('resize', debounce(() => {
-    W = parent.clientWidth; H = parent.clientHeight;
-    canvas.width = W; canvas.height = H;
-  }, 150));
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  renderer.setClearColor(0x000000, 0);
 
-  let angle = 0;
+  const scene  = new Scene();
+  const camera = new PerspectiveCamera(60, w / h, 0.1, 100);
+  camera.position.set(0, 3, 5);
+  camera.lookAt(0, 0, 0);
 
-  function draw() {
-    requestAnimationFrame(draw);
-    if (state.section !== 'contact') return;
+  // Grid plane
+  const gridHelper = new GridHelper(14, 14, GOLD, 0x1a1a12);
+  gridHelper.material.transparent = true;
+  gridHelper.material.opacity = 0.45;
+  gridHelper.position.y = -1.5;
+  scene.add(gridHelper);
 
-    ctx.clearRect(0, 0, W, H);
-    angle += 0.003;
+  // Subtle ambient
+  scene.add(new AmbientLight(WHITE, 0.3));
+  const spot = new PointLight(GOLD, 1.2, 20);
+  spot.position.set(0, 4, 2);
+  scene.add(spot);
 
-    const px   = lerp(0, state.mouse.nx * W * 0.05, 0.6);
-    const vpX  = W / 2 + px;
-    const vpY  = H * 0.36;
-    const cols = 10, rows = 10;
-    const sprd = W * 0.88;
-    const dep  = H * 0.62;
+  const onResize = debounce(() => {
+    const nw = parent.clientWidth, nh = parent.clientHeight;
+    camera.aspect = nw / nh;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nw, nh);
+  }, 150);
+  window.addEventListener('resize', onResize);
 
-    // Vertical lines
-    for (let i = 0; i <= cols; i++) {
-      const t  = i / cols;
-      const bx = -sprd / 2 + sprd * t;
-      const ox = bx * Math.sin(angle) * 0.18;
-      const ed = Math.abs(t - 0.5) * 2;
-      ctx.beginPath();
-      ctx.moveTo(vpX + ox * 0.2, vpY);
-      ctx.lineTo(vpX + bx, vpY + dep);
-      ctx.strokeStyle = GOLD(0.38 - ed * 0.24);
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-
-    // Horizontal lines
-    for (let j = 1; j <= rows; j++) {
-      const ft = Math.pow(j / rows, 1.55);
-      const y  = vpY + ft * dep;
-      ctx.beginPath();
-      ctx.moveTo(vpX + lerp(0, -sprd / 2, ft), y);
-      ctx.lineTo(vpX + lerp(0,  sprd / 2, ft), y);
-      ctx.strokeStyle = GOLD(ft * 0.38);
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-
-    // Horizon fade
-    const grd = ctx.createLinearGradient(0, 0, 0, vpY + 24);
-    grd.addColorStop(0, 'rgba(10,10,10,1)');
-    grd.addColorStop(1, 'rgba(10,10,10,0)');
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, vpY + 24);
+  function animate() {
+    requestAnimationFrame(animate);
+    if (state.currentSection !== 'contact') return;   // PERF: was rendering every frame even off-screen
+    gridHelper.rotation.y += 0.003;
+    scene.rotation.y = lerp(scene.rotation.y, state.mouse.nx * 0.1, 0.04);
+    renderer.render(scene, camera);
   }
 
-  if (!REDUCED) draw();
+  animate();
+  state.scenes.contact = { renderer, scene, camera };
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   BOOT  — safe: handles both fast pages and slow ones
+   BOOT — Deferred Three.js Initialization
+   PERF: WebGL compilation blocks the main thread. By deferring it
+   to requestIdleCallback (or a slight timeout), we allow the browser
+   to paint the HTML/CSS instantly, keeping LCP and TBT low.
    ══════════════════════════════════════════════════════════════════ */
-setTimeout(triggerReveal, 100);
-
-onLoad(() => {
+function boot() {
   initHeroScene();
+  initAvatarScene();
+  // Skills + Contact are lazy-inited on first section switch
+
+  // Trigger initial reveals
   setTimeout(triggerReveal, 200);
+}
+
+if (document.readyState === 'complete') {
+  setTimeout(boot, 50);
+} else {
+  window.addEventListener('load', () => {
+    if (window.requestIdleCallback) {
+      requestIdleCallback(boot, { timeout: 1000 });
+    } else {
+      setTimeout(boot, 50);
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RESIZE — update hero renderer
+   ══════════════════════════════════════════════════════════════════ */
+window.addEventListener('resize', debounce(() => {
+  const sc = state.scenes.hero;
+  if (!sc) return;
+  const canvas = $('heroCanvas');
+  if (!canvas) return;
+  sc.camera.aspect = canvas.clientWidth / canvas.clientHeight;
+  sc.camera.updateProjectionMatrix();
+  sc.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+}, 150));
+
+/* ══════════════════════════════════════════════════════════════════
+   KEYBOARD NAVIGATION (accessibility)
+   ══════════════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', (e) => {
+  const sections = ['hero', 'about', 'projects', 'skills', 'contact'];
+  const idx      = sections.indexOf(state.currentSection);
+
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    if (idx < sections.length - 1) window.navigateTo(sections[idx + 1]);
+  }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    if (idx > 0) window.navigateTo(sections[idx - 1]);
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   PERFORMANCE — pause renders when tab is hidden
+   ══════════════════════════════════════════════════════════════════ */
+document.addEventListener('visibilitychange', () => {
+  // RAF callbacks check tab visibility automatically;
+  // Three.js animates via RAF so this is handled natively.
 });
