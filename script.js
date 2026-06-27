@@ -2,9 +2,37 @@
  * script.js — Roshin RG Portfolio
  * Three.js WebGL scenes + SPA router + all interactions
  * Pure Vanilla JS — no framework dependencies
+ *
+ * PERF: Three.js is now imported as an ES module using named imports.
+ * Only the ~20 classes actually used are bundled — not the entire library.
+ * This eliminates ~70 KiB of unused JavaScript that was previously loaded
+ * from the monolithic Cloudflare CDN build (three.min.js r134, 120.7 KiB).
  */
 
 'use strict';
+
+import {
+  WebGLRenderer,
+  Scene,
+  PerspectiveCamera,
+  AmbientLight,
+  PointLight,
+  IcosahedronGeometry,
+  TorusKnotGeometry,
+  BufferGeometry,
+  BufferAttribute,
+  MeshStandardMaterial,
+  MeshBasicMaterial,
+  PointsMaterial,
+  SpriteMaterial,
+  Mesh,
+  Points,
+  Sprite,
+  GridHelper,
+  CanvasTexture,
+  Vector3,
+  Matrix4,
+} from 'three';
 
 /* ══════════════════════════════════════════════════════════════════
    CONSTANTS & STATE
@@ -38,14 +66,6 @@ function debounce(fn, ms) {
 function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
 
 function $(id) { return document.getElementById(id); }
-
-/* Wait for Three.js to be available (loaded via defer) */
-function waitForThree(cb) {
-  if (typeof THREE !== 'undefined') { cb(); return; }
-  const t = setInterval(() => {
-    if (typeof THREE !== 'undefined') { clearInterval(t); cb(); }
-  }, 50);
-}
 
 /* ══════════════════════════════════════════════════════════════════
    CUSTOM CURSOR
@@ -134,12 +154,12 @@ function waitForThree(cb) {
       // Trigger reveals for new section
       setTimeout(triggerReveal, 50);
 
-      // Init section-specific scenes
+      // Init section-specific scenes (Three.js is available immediately via ESM)
       if (section === 'skills' && !state.scenes.skills) {
-        waitForThree(initSkillsScene);
+        initSkillsScene();
       }
       if (section === 'contact' && !state.scenes.contact) {
-        waitForThree(initContactScene);
+        initContactScene();
       }
 
       // Fade in
@@ -390,7 +410,7 @@ document.addEventListener('mousemove', onMouseMove, { passive: true });
    ══════════════════════════════════════════════════════════════════ */
 function initHeroScene() {
   const canvas = $('heroCanvas');
-  if (!canvas || typeof THREE === 'undefined') return;
+  if (!canvas) return;
 
   /* ── Device capability gates ──
      PERF: the per-particle mouse-repulsion loop below only does anything
@@ -408,37 +428,37 @@ function initHeroScene() {
   const H = () => window.innerHeight;
 
   /* ── Renderer ── */
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(W(), H());
   renderer.setClearColor(0x000000, 0);
 
   /* ── Scene + Camera ── */
-  const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, W() / H(), 0.1, 100);
+  const scene  = new Scene();
+  const camera = new PerspectiveCamera(75, W() / H(), 0.1, 100);
   camera.position.z = 5;
 
   /* ── Lights ── */
-  scene.add(new THREE.AmbientLight(WHITE, 0.3));
+  scene.add(new AmbientLight(WHITE, 0.3));
 
-  const pointLight = new THREE.PointLight(GOLD, 2.5, 20);
+  const pointLight = new PointLight(GOLD, 2.5, 20);
   pointLight.position.set(4, 0, 0);
   scene.add(pointLight);
 
   /* ── Central Icosahedron ── */
-  const icoGeo = new THREE.IcosahedronGeometry(1.4, 1);
+  const icoGeo = new IcosahedronGeometry(1.4, 1);
 
   // Solid black fill
-  const icoFill = new THREE.Mesh(
+  const icoFill = new Mesh(
     icoGeo,
-    new THREE.MeshStandardMaterial({ color: BLACK, metalness: 0.2, roughness: 0.8 })
+    new MeshStandardMaterial({ color: BLACK, metalness: 0.2, roughness: 0.8 })
   );
   scene.add(icoFill);
 
   // Gold wireframe overlay
-  const icoWire = new THREE.Mesh(
+  const icoWire = new Mesh(
     icoGeo,
-    new THREE.MeshBasicMaterial({ color: GOLD, wireframe: true, transparent: true, opacity: 0.7 })
+    new MeshBasicMaterial({ color: GOLD, wireframe: true, transparent: true, opacity: 0.7 })
   );
   scene.add(icoWire);
 
@@ -467,10 +487,10 @@ function initHeroScene() {
     basePos[i * 3 + 2]   = z;
   }
 
-  const particleGeo  = new THREE.BufferGeometry();
-  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const particleGeo  = new BufferGeometry();
+  particleGeo.setAttribute('position', new BufferAttribute(positions, 3));
 
-  const particleMat = new THREE.PointsMaterial({
+  const particleMat = new PointsMaterial({
     color: GOLD,
     size: 0.018,
     transparent: true,
@@ -478,7 +498,7 @@ function initHeroScene() {
     sizeAttenuation: true,
   });
 
-  const particles = new THREE.Points(particleGeo, particleMat);
+  const particles = new Points(particleGeo, particleMat);
   scene.add(particles);
 
   /* ── Smooth rotation targets ── */
@@ -495,8 +515,8 @@ function initHeroScene() {
   window.addEventListener('resize', onResize);
 
   /* ── Pre-allocated objects — never new inside the render loop ── */
-  const _pv         = new THREE.Vector3();   // reused per-particle projection
-  const viewProjMat = new THREE.Matrix4();   // combined view+projection, rebuilt once per frame (not per particle)
+  const _pv         = new Vector3();   // reused per-particle projection
+  const viewProjMat = new Matrix4();   // combined view+projection, rebuilt once per frame (not per particle)
 
   /* ── Animate ── */
   function animate() {
@@ -594,46 +614,46 @@ function initHeroScene() {
    ══════════════════════════════════════════════════════════════════ */
 function initAvatarScene() {
   const canvas = $('avatarCanvas');
-  if (!canvas || typeof THREE === 'undefined') return;
+  if (!canvas) return;
 
   const w = canvas.clientWidth  || 300;
   const h = canvas.clientHeight || 300;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(w, h);
   renderer.setClearColor(0x000000, 0);
 
-  const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100);
+  const scene  = new Scene();
+  const camera = new PerspectiveCamera(60, w / h, 0.1, 100);
   camera.position.z = 3.5;
 
-  scene.add(new THREE.AmbientLight(WHITE, 0.4));
+  scene.add(new AmbientLight(WHITE, 0.4));
 
-  const light1 = new THREE.PointLight(GOLD, 2, 15);
+  const light1 = new PointLight(GOLD, 2, 15);
   light1.position.set(3, 3, 3);
   scene.add(light1);
 
-  const light2 = new THREE.PointLight(0x4488ff, 1, 15);
+  const light2 = new PointLight(0x4488ff, 1, 15);
   light2.position.set(-3, -3, -3);
   scene.add(light2);
 
   // Torus knot
-  const geo = new THREE.TorusKnotGeometry(0.9, 0.28, 128, 16, 2, 3);
-  const mat = new THREE.MeshStandardMaterial({
+  const geo = new TorusKnotGeometry(0.9, 0.28, 128, 16, 2, 3);
+  const mat = new MeshStandardMaterial({
     color: BLACK,
     metalness: 0.9,
     roughness: 0.15,
     emissive: GOLD,
     emissiveIntensity: 0.12,
   });
-  const mesh = new THREE.Mesh(geo, mat);
+  const mesh = new Mesh(geo, mat);
   scene.add(mesh);
 
   // Wire overlay
-  const wireMesh = new THREE.Mesh(
+  const wireMesh = new Mesh(
     geo,
-    new THREE.MeshBasicMaterial({ color: GOLD, wireframe: true, transparent: true, opacity: 0.18 })
+    new MeshBasicMaterial({ color: GOLD, wireframe: true, transparent: true, opacity: 0.18 })
   );
   scene.add(wireMesh);
 
@@ -657,22 +677,22 @@ function initAvatarScene() {
    ══════════════════════════════════════════════════════════════════ */
 function initSkillsScene() {
   const canvas = $('skillsCanvas');
-  if (!canvas || typeof THREE === 'undefined') return;
+  if (!canvas) return;
 
   const w = canvas.clientWidth  || 1000;
   const h = canvas.clientHeight || 400;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(w, h);
   renderer.setClearColor(0x000000, 0);
 
-  const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(70, w / h, 0.1, 100);
+  const scene  = new Scene();
+  const camera = new PerspectiveCamera(70, w / h, 0.1, 100);
   camera.position.z = 5;
 
-  scene.add(new THREE.AmbientLight(WHITE, 0.5));
-  const light = new THREE.PointLight(GOLD, 1.5, 20);
+  scene.add(new AmbientLight(WHITE, 0.5));
+  const light = new PointLight(GOLD, 1.5, 20);
   light.position.set(0, 3, 5);
   scene.add(light);
 
@@ -729,9 +749,9 @@ function initSkillsScene() {
     ctx.textBaseline = 'middle';
     ctx.fillText(text.length > 18 ? text.slice(0,16) + '…' : text, c.width / 2, c.height / 2);
 
-    const tex = new THREE.CanvasTexture(c);
-    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-    const spr = new THREE.Sprite(mat);
+    const tex = new CanvasTexture(c);
+    const mat = new SpriteMaterial({ map: tex, transparent: true });
+    const spr = new Sprite(mat);
     spr.scale.set(2.2, 0.55, 1);
     return spr;
   }
@@ -781,32 +801,32 @@ function initSkillsScene() {
    ══════════════════════════════════════════════════════════════════ */
 function initContactScene() {
   const canvas = $('contactCanvas');
-  if (!canvas || typeof THREE === 'undefined') return;
+  if (!canvas) return;
 
   const parent = canvas.parentElement;
   const w = parent.clientWidth  || 600;
   const h = parent.clientHeight || 500;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(w, h);
   renderer.setClearColor(0x000000, 0);
 
-  const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100);
+  const scene  = new Scene();
+  const camera = new PerspectiveCamera(60, w / h, 0.1, 100);
   camera.position.set(0, 3, 5);
   camera.lookAt(0, 0, 0);
 
   // Grid plane
-  const gridHelper = new THREE.GridHelper(14, 14, GOLD, 0x1a1a12);
+  const gridHelper = new GridHelper(14, 14, GOLD, 0x1a1a12);
   gridHelper.material.transparent = true;
   gridHelper.material.opacity = 0.45;
   gridHelper.position.y = -1.5;
   scene.add(gridHelper);
 
   // Subtle ambient
-  scene.add(new THREE.AmbientLight(WHITE, 0.3));
-  const spot = new THREE.PointLight(GOLD, 1.2, 20);
+  scene.add(new AmbientLight(WHITE, 0.3));
+  const spot = new PointLight(GOLD, 1.2, 20);
   spot.position.set(0, 4, 2);
   scene.add(spot);
 
@@ -832,14 +852,15 @@ function initContactScene() {
 
 /* ══════════════════════════════════════════════════════════════════
    BOOT — use window.onload so layout is fully computed before
-   Three.js reads canvas/window dimensions
+   Three.js reads canvas/window dimensions.
+   PERF: waitForThree() polling removed — Three.js ESM imports are
+   resolved synchronously before this module body executes, so Three
+   classes are guaranteed available here.
    ══════════════════════════════════════════════════════════════════ */
 window.addEventListener('load', () => {
-  waitForThree(() => {
-    initHeroScene();
-    initAvatarScene();
-    // Skills + Contact are lazy-inited on section switch
-  });
+  initHeroScene();
+  initAvatarScene();
+  // Skills + Contact are lazy-inited on first section switch
 
   // Trigger initial reveals
   setTimeout(triggerReveal, 200);

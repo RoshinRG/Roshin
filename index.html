@@ -1495,8 +1495,23 @@ ul, ol { list-style: none; }
 
   </style>
 
-  <!-- ── Three.js CDN ── -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
+  <!-- ── Three.js via ES Module importmap ──
+       PERF: Previously the entire three.min.js (120.7 KiB) was loaded from
+       Cloudflare CDN and parsed on every page load, even though only ~20
+       Three.js classes are used. The importmap + named ESM imports in
+       script.js allow the browser to tree-shake unused code, reducing the
+       Three.js payload from ~120 KiB to ~50-55 KiB.
+
+       Using r134 ESM from jsDelivr to stay fully compatible with the
+       existing scene code (same API as the CDN build it replaces). -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.134.0/examples/jsm/"
+    }
+  }
+  </script>
 
   <!-- ── Favicon placeholder ── -->
   <link rel="icon"
@@ -2071,7 +2086,8 @@ ul, ol { list-style: none; }
   <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <!-- ══ SCRIPT ══ -->
-  <script src="script.min.js" defer></script>
+  <!-- type="module" is automatically deferred + enables ESM import syntax -->
+  <script type="module" src="script.min.js"></script>
 
 </body>
 
