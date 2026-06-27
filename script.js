@@ -32,7 +32,7 @@ import {
   CanvasTexture,
   Vector3,
   Matrix4,
-} from 'three/src/Three.js';
+} from 'three';
 
 /* ══════════════════════════════════════════════════════════════════
    CONSTANTS & STATE
