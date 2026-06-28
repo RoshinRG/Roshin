@@ -1,12 +1,12 @@
 /**
  * skills.js
  * SkillsScene — 3D floating skill labels orbiting center.
- * Iron Man hand repulsor at center follows mouse.
+ * Glowing core node at center follows mouse.
  */
 
 import * as THREE from 'three';
-import { IronManScene, createGoldKeyLight, createAmbientLight, isMobile } from '../utils/three-setup.js';
-import { repulsorShader, createShaderMaterial } from '../utils/shader.js';
+import { BaseScene, createNeonKeyLight, createAmbientLight, isMobile } from '../utils/three-setup.js';
+import { scanPulseShader, createShaderMaterial } from '../utils/shader.js';
 
 const SKILLS = [
   'Three.js', 'WebGL', 'GLSL', 'JavaScript', 'TypeScript',
@@ -15,7 +15,7 @@ const SKILLS = [
   'Performance', 'WebXR', 'Vite',
 ];
 
-export class SkillsScene extends IronManScene {
+export class SkillsScene extends BaseScene {
   constructor() {
     super('skillsCanvas', { alpha: true });
     this._mouse = new THREE.Vector2(0, 0);
@@ -26,7 +26,7 @@ export class SkillsScene extends IronManScene {
     if (!this.canvas) return;
 
     createAmbientLight(this.scene);
-    createGoldKeyLight(this.scene);
+    createNeonKeyLight(this.scene);
 
     /* ── Skill label sprites ─────────────────────────────── */
     this.labelGroup = new THREE.Group();
@@ -48,9 +48,9 @@ export class SkillsScene extends IronManScene {
     });
     this.scene.add(this.labelGroup);
 
-    /* ── Central repulsor hand ───────────────────────────── */
-    this.repulsorMesh = this._buildRepulsor();
-    this.scene.add(this.repulsorMesh);
+    /* ── Central Core Node ───────────────────────────────── */
+    this.coreNodeMesh = this._buildCoreNode();
+    this.scene.add(this.coreNodeMesh);
 
     /* ── Camera ─────────────────────────────────────────── */
     this.camera.position.set(0, 0, 5);
@@ -76,8 +76,8 @@ export class SkillsScene extends IronManScene {
     ctx.font         = 'bold 22px "Space Mono", monospace';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle    = '#d4af37';
-    ctx.shadowColor  = 'rgba(212,175,55,0.8)';
+    ctx.fillStyle    = '#00ff41';
+    ctx.shadowColor  = 'rgba(0,255,65,0.8)';
     ctx.shadowBlur   = 8;
     ctx.fillText(text, 128, 32);
 
@@ -93,22 +93,27 @@ export class SkillsScene extends IronManScene {
     return sprite;
   }
 
-  _buildRepulsor() {
+  _buildCoreNode() {
     const group = new THREE.Group();
-    group.name  = 'repulsorHand';
+    group.name  = 'coreNode';
 
-    // Outer glow plane
-    const mat   = createShaderMaterial(repulsorShader);
+    // Outer glow plane using scanPulseShader
+    const mat   = createShaderMaterial(scanPulseShader);
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
-    plane.name  = 'repulsorGlow';
+    plane.name  = 'coreGlow';
     group.userData.mat = mat;
     group.add(plane);
 
-    // Small hand geometry hint
-    const handMat = new THREE.MeshPhongMaterial({ color: 0xcc2200, shininess: 120 });
-    const palm    = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.28, 0.15), handMat);
-    palm.position.z = -0.05;
-    group.add(palm);
+    // Inner glowing sphere
+    const sphereMat = new THREE.MeshStandardMaterial({ 
+      color: 0x00ff41, 
+      emissive: 0x00ff41,
+      emissiveIntensity: 0.8,
+      roughness: 0.2 
+    });
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), sphereMat);
+    sphere.position.z = 0.05;
+    group.add(sphere);
 
     return group;
   }
@@ -138,17 +143,17 @@ export class SkillsScene extends IronManScene {
       const proximity = Math.max(0, 1 - d / 1.5);
       const m = sprite.material;
       m.opacity = 0.7 + proximity * 0.3;
-      m.color?.setHSL(0.12, 1, 0.5 + proximity * 0.3);
+      m.color?.setHSL(0.35, 1, 0.5 + proximity * 0.3);
     });
 
-    /* ── Smooth mouse follow for repulsor ────────────────── */
+    /* ── Smooth mouse follow for core node ───────────────── */
     this._target.x += (this._mouse.x - this._target.x) * 0.06;
     this._target.y += (this._mouse.y - this._target.y) * 0.06;
-    this.repulsorMesh.position.set(this._target.x * 2.5, this._target.y * 2.5, 0.2);
+    this.coreNodeMesh.position.set(this._target.x * 2.5, this._target.y * 2.5, 0.2);
 
-    /* ── Repulsor shader time ────────────────────────────── */
-    if (this.repulsorMesh.userData.mat) {
-      this.repulsorMesh.userData.mat.uniforms.uTime.value = elapsed;
+    /* ── Core Node shader time ───────────────────────────── */
+    if (this.coreNodeMesh.userData.mat) {
+      this.coreNodeMesh.userData.mat.uniforms.uTime.value = elapsed;
     }
 
     /* ── Slowly rotate label group ───────────────────────── */

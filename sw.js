@@ -3,7 +3,7 @@
  * Strategy: Cache-first for static assets, network-first for API calls.
  */
 
-const CACHE_NAME    = 'rgr-portfolio-v1';
+const CACHE_NAME    = 'rgr-portfolio-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -16,7 +16,7 @@ const STATIC_ASSETS = [
   '/js/scenes/projects.js',
   '/js/scenes/skills.js',
   '/js/scenes/contact.js',
-  '/js/scenes/shared.js',
+  '/js/scenes/constructs.js',
   '/js/utils/three-setup.js',
   '/js/utils/particle-system.js',
   '/js/utils/shader.js',

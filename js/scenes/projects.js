@@ -5,10 +5,10 @@
  */
 
 import * as THREE from 'three';
-import { IronManScene, createAmbientLight, isMobile } from '../utils/three-setup.js';
+import { BaseScene, createAmbientLight, isMobile } from '../utils/three-setup.js';
 import { ParticleSystem } from '../utils/particle-system.js';
 
-export class ProjectsScene extends IronManScene {
+export class ProjectsScene extends BaseScene {
   constructor() { super('projectsCanvas'); }
 
   init() {
@@ -22,7 +22,7 @@ export class ProjectsScene extends IronManScene {
       spread:  12,
       size:    0.025,
       speed:   0.15,
-      palette: ['#d4af37', '#b8960f', '#00d9ff', '#ffffff'],
+      palette: ['#00ff41', '#008f11', '#003b00', '#ffffff'],
     });
 
     /* ── Camera — flat orthographic-ish perspective ──────── */
@@ -30,7 +30,7 @@ export class ProjectsScene extends IronManScene {
     this.camera.position.set(0, 0, 6);
     this.camera.updateProjectionMatrix();
 
-    /* ── Repulsor rings (CSS2D alternative: we fire CSS) ─── */
+    /* ── Scan Pulse (CSS2D alternative: we fire CSS) ─────── */
     this._setupCardHover();
   }
 
@@ -42,12 +42,12 @@ export class ProjectsScene extends IronManScene {
       const card = e.target.closest('.project-card');
       if (!card) return;
       // Reset then fire animation via CSS class toggle
-      const ripple = card.querySelector('.project-card__repulsor');
-      if (!ripple) return;
-      ripple.style.animation = 'none';
+      const pulse = card.querySelector('.project-card__pulse');
+      if (!pulse) return;
+      pulse.style.animation = 'none';
       // Trigger reflow
-      void ripple.offsetWidth;
-      ripple.style.animation = '';
+      void pulse.offsetWidth;
+      pulse.style.animation = '';
     }, true);
   }
 
@@ -56,6 +56,9 @@ export class ProjectsScene extends IronManScene {
   }
 
   dispose() {
+    if (this._setupCardHover) {
+       // Just clean up particles, delegated listener lives on DOM but safe to leave since singleton
+    }
     if (this.particles) this.particles.dispose();
     super.dispose();
   }

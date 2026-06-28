@@ -1,15 +1,15 @@
 /**
  * hero.js
- * HeroScene — Full Iron Man suit, floating animation, arc reactor glow,
+ * HeroScene — Geodesic core centerpiece, floating animation, core glow,
  * particle trails, cursor look-at interaction.
  */
 
 import * as THREE from 'three';
-import { IronManScene, createGoldKeyLight, createAmbientLight, createFillLight, isMobile } from '../utils/three-setup.js';
+import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight, isMobile } from '../utils/three-setup.js';
 import { ParticleSystem } from '../utils/particle-system.js';
-import { buildIronManSuit } from './shared.js';
+import { createCyberCube } from './constructs.js';
 
-export class HeroScene extends IronManScene {
+export class HeroScene extends BaseScene {
   constructor() { super('heroCanvas'); }
 
   init() {
@@ -17,33 +17,29 @@ export class HeroScene extends IronManScene {
 
     /* ── Lights ─────────────────────────────────────────── */
     createAmbientLight(this.scene);
-    this.keyLight  = createGoldKeyLight(this.scene);
+    this.keyLight  = createNeonKeyLight(this.scene);
     this.fillLight = createFillLight(this.scene);
 
     /* ── Background gradient fog ────────────────────────── */
     this.scene.fog = new THREE.FogExp2(0x050505, 0.08);
 
-    /* ── Iron Man suit ──────────────────────────────────── */
-    this.suit = buildIronManSuit();
-    this.suit.position.set(isMobile() ? 0 : 2.8, 0, 0);
-    this.scene.add(this.suit);
+    /* ── Cyber Cube ─────────────────────────────────────── */
+    this.core = createCyberCube();
+    this.core.position.set(isMobile() ? 0 : 2.8, 0, 0);
+    this.scene.add(this.core);
 
-    /* ── Arc reactor point light (at chest) ─────────────── */
-    this.arcLight = new THREE.PointLight(0xd4af37, 4, 3);
-    this.arcLight.position.set(
-      this.suit.position.x,
-      this.suit.position.y + 0.35 * 0.7,
-      0.5
-    );
-    this.scene.add(this.arcLight);
+    /* ── Core point light ───────────────────────────────── */
+    this.coreLight = new THREE.PointLight(0xd4af37, 4, 4);
+    this.coreLight.position.copy(this.core.position);
+    this.scene.add(this.coreLight);
 
-    /* ── Particle trail system ──────────────────────────── */
+    /* ── Particle nebula system ─────────────────────────── */
     this.particles = new ParticleSystem(this.scene, {
-      count:   isMobile() ? 40 : 120,
-      spread:  5,
+      count:   isMobile() ? 60 : 200,
+      spread:  6,
       size:    0.03,
-      speed:   0.4,
-      palette: ['#d4af37', '#ffd700', '#00d9ff'],
+      speed:   0.3,
+      palette: ['#00d9ff', '#d4af37', '#ffffff'],
     });
 
     /* ── Camera position ────────────────────────────────── */
@@ -62,29 +58,41 @@ export class HeroScene extends IronManScene {
   }
 
   update(dt, elapsed) {
-    if (!this.suit) return;
+    if (!this.core) return;
 
     /* ── Y-axis rotation ─────────────────────────────────── */
-    this.suit.rotation.y = elapsed * (Math.PI * 2 / 8); // 360° / 8s
+    this.core.rotation.y = elapsed * 0.5;
+    
+    if (this.core.userData.outer) {
+      this.core.userData.outer.rotation.x = elapsed * 0.2;
+      this.core.userData.outer.rotation.y = -elapsed * 0.1;
+    }
+    
+    if (this.core.userData.inner) {
+      this.core.userData.inner.scale.setScalar(1 + 0.05 * Math.sin(elapsed * 4));
+    }
+    
+    if (this.core.userData.orbits) {
+      this.core.userData.orbits.rotation.z = elapsed;
+    }
 
     /* ── Floating Y bobbing (0–20px range ~4s) ──────────── */
     const baseY = isMobile() ? 0 : 0;
-    this.suit.position.y = baseY + Math.sin(elapsed * 1.5) * 0.18;
+    this.core.position.y = baseY + Math.sin(elapsed * 1.5) * 0.18;
 
-    /* ── Head cursor look-at (desktop only) ─────────────── */
-    if (!isMobile() && this.suit.userData.head) {
-      const head = this.suit.userData.head;
-      const targetRX = -this._mouse.y * 0.3;
-      const targetRY = this._mouse.x  * 0.4 + this.suit.rotation.y;
-      head.rotation.x += (targetRX - head.rotation.x) * 0.06;
-      head.rotation.y += (targetRY - head.rotation.y) * 0.06;
+    /* ── Core tilt via cursor (desktop only) ────────────── */
+    if (!isMobile()) {
+      const targetRX = -this._mouse.y * 0.5;
+      const targetRY = this._mouse.x  * 0.5;
+      this.core.rotation.x += (targetRX - this.core.rotation.x) * 0.05;
+      // We don't overwrite rotation.y because it's spinning continuously, 
+      // but we can tilt the Z axis instead
+      this.core.rotation.z += (targetRY - this.core.rotation.z) * 0.05;
     }
 
-    /* ── Arc reactor glow pulse ──────────────────────────── */
-    if (this.suit.userData.arcMat) {
-      this.suit.userData.arcMat.uniforms.uTime.value = elapsed;
-      this.arcLight.intensity = 3 + 1.5 * Math.sin(elapsed * 3);
-    }
+    /* ── Core glow pulse ────────────────────────────────── */
+    this.coreLight.intensity = 3 + 1.5 * Math.sin(elapsed * 3);
+    this.coreLight.position.copy(this.core.position);
 
     /* ── Key light subtle orbit ──────────────────────────── */
     this.keyLight.position.x = 3 + Math.sin(elapsed * 0.5) * 1;
@@ -92,7 +100,7 @@ export class HeroScene extends IronManScene {
 
     /* ── Particles ───────────────────────────────────────── */
     if (this.particles) {
-      this.particles.mesh.position.copy(this.suit.position);
+      this.particles.mesh.position.copy(this.core.position);
       this.particles.update(elapsed);
     }
   }

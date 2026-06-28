@@ -1,15 +1,15 @@
 /**
  * contact.js
- * ContactScene — Semi-transparent Iron Man hologram background
+ * ContactScene — Semi-transparent abstract geometric hologram background
  * with animated scan lines and noise flicker.
  */
 
 import * as THREE from 'three';
-import { IronManScene, createAmbientLight } from '../utils/three-setup.js';
+import { BaseScene, createAmbientLight } from '../utils/three-setup.js';
 import { hologramShader, createShaderMaterial } from '../utils/shader.js';
-import { buildIronManSuit } from './shared.js';
+import { createCyberGlobe } from './constructs.js';
 
-export class ContactScene extends IronManScene {
+export class ContactScene extends BaseScene {
   constructor() { super('contactCanvas'); }
 
   init() {
@@ -17,26 +17,24 @@ export class ContactScene extends IronManScene {
 
     createAmbientLight(this.scene);
 
-    /* ── Hologram suit ───────────────────────────────────── */
-    this.suit = buildIronManSuit({ redColor: 0x003366, goldColor: 0x004488 });
+    /* ── Hologram Sphere ─────────────────────────────────── */
+    const sphereGeo = createCyberGlobe(2.5);
 
-    // Override all materials with hologram shader
-    const holoMat = createShaderMaterial(hologramShader, { side: THREE.DoubleSide });
-    this.suit.traverse(child => {
-      if (child.isMesh) {
-        child.material = holoMat;
-        child.castShadow = false;
-      }
+    // Hologram shader material
+    const holoMat = createShaderMaterial(hologramShader, { 
+      side: THREE.DoubleSide,
+      wireframe: true 
     });
+    
+    this.hologramMesh = new THREE.Mesh(sphereGeo, holoMat);
     this._holoMat = holoMat;
 
-    this.suit.position.set(2.5, -0.3, -1);
-    this.suit.scale.setScalar(1.0);
-    this.scene.add(this.suit);
+    this.hologramMesh.position.set(2.5, 0, -1);
+    this.scene.add(this.hologramMesh);
 
     /* ── Scan-line plane (full-screen quad) ─────────────── */
     const scanMat = new THREE.MeshBasicMaterial({
-      color:       0x00d9ff,
+      color:       0x00ff41,
       transparent: true,
       opacity:     0.06,
       side:        THREE.DoubleSide,
@@ -48,8 +46,8 @@ export class ContactScene extends IronManScene {
     this._scanLine.position.z = 0.5;
     this.scene.add(this._scanLine);
 
-    /* ── Soft blue edge light ────────────────────────────── */
-    const edgeLight = new THREE.PointLight(0x00d9ff, 1, 10);
+    /* ── Soft green edge light ────────────────────────────── */
+    const edgeLight = new THREE.PointLight(0x00ff41, 1, 10);
     edgeLight.position.set(-3, 2, 2);
     this.scene.add(edgeLight);
 
@@ -59,10 +57,11 @@ export class ContactScene extends IronManScene {
   }
 
   update(dt, elapsed) {
-    if (!this.suit) return;
+    if (!this.hologramMesh) return;
 
-    /* ── Suit gentle rotation ────────────────────────────── */
-    this.suit.rotation.y = elapsed * 0.2;
+    /* ── Geometric gentle rotation ───────────────────────── */
+    this.hologramMesh.rotation.y = elapsed * 0.3;
+    this.hologramMesh.rotation.x = elapsed * 0.1;
 
     /* ── Hologram shader time ────────────────────────────── */
     if (this._holoMat) {
@@ -71,6 +70,13 @@ export class ContactScene extends IronManScene {
       // Random flicker
       const flicker = 0.28 + 0.07 * Math.sin(elapsed * 7.3) + 0.04 * Math.random();
       this._holoMat.uniforms.uOpacity.value = flicker;
+      
+      // Manual Glitch Translation
+      if (Math.random() > 0.95) {
+        this.hologramMesh.position.x = 2.5 + (Math.random() - 0.5) * 0.2;
+      } else {
+        this.hologramMesh.position.x = 2.5;
+      }
     }
 
     /* ── Scan line animation ─────────────────────────────── */

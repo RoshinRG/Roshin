@@ -6,13 +6,13 @@
 import * as THREE from 'three';
 
 /* ─────────────────────────────────────────────────────────
-   ARC REACTOR GLOW SHADER
-   A pulsing, energy-sphere look for the chest piece.
+   CORE GLOW SHADER
+   A pulsing, energy-sphere look for the geodesic core.
 ───────────────────────────────────────────────────────── */
-export const arcReactorShader = {
+export const coreGlowShader = {
   uniforms: {
     uTime:      { value: 0 },
-    uColor:     { value: new THREE.Color(0xd4af37) },
+    uColor:     { value: new THREE.Color(0x00ff41) },
     uCoreColor: { value: new THREE.Color(0xffffff) },
     uIntensity: { value: 1.0 },
   },
@@ -65,12 +65,12 @@ export const arcReactorShader = {
 
 /* ─────────────────────────────────────────────────────────
    HOLOGRAM SHADER
-   Blue-tinted scan-line effect for the contact section suit.
+   Blue-tinted scan-line effect for the contact section wireframe.
 ───────────────────────────────────────────────────────── */
 export const hologramShader = {
   uniforms: {
     uTime:    { value: 0 },
-    uColor:   { value: new THREE.Color(0x00d9ff) },
+    uColor:   { value: new THREE.Color(0x00ff41) },
     uOpacity: { value: 0.35 },
   },
   vertexShader: /* glsl */`
@@ -120,13 +120,13 @@ export const hologramShader = {
 };
 
 /* ─────────────────────────────────────────────────────────
-   REPULSOR GLOW SHADER
-   Radial energy glow for the hand / skill section.
+   SCAN PULSE SHADER
+   Radial energy glow for project cards and skill nodes.
 ───────────────────────────────────────────────────────── */
-export const repulsorShader = {
+export const scanPulseShader = {
   uniforms: {
     uTime:  { value: 0 },
-    uColor: { value: new THREE.Color(0x00d9ff) },
+    uColor: { value: new THREE.Color(0x00ff41) },
   },
   vertexShader: /* glsl */`
     varying vec2 vUv;

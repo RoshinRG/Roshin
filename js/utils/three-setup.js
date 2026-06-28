@@ -1,6 +1,6 @@
 /**
  * three-setup.js
- * IronManScene — Base class for all Three.js sections.
+ * BaseScene — Base class for all Three.js sections.
  * Handles renderer, camera, resize, pause/resume, device detection.
  */
 
@@ -10,7 +10,7 @@ export const isMobile = () => window.innerWidth <= 768;
 export const isReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export class IronManScene {
+export class BaseScene {
   constructor(canvasId, options = {}) {
     this.canvas = document.getElementById(canvasId);
     if (!this.canvas) return;
@@ -120,8 +120,8 @@ export class IronManScene {
 }
 
 /* ── Shared lighting factory ──────────────────────────────── */
-export function createGoldKeyLight(scene) {
-  const light = new THREE.PointLight(0xd4af37, 3, 20);
+export function createNeonKeyLight(scene) {
+  const light = new THREE.PointLight(0x00ff41, 3, 20);
   light.position.set(3, 4, 3);
   light.castShadow = !isMobile();
   scene.add(light);
@@ -129,13 +129,13 @@ export function createGoldKeyLight(scene) {
 }
 
 export function createAmbientLight(scene) {
-  const ambient = new THREE.AmbientLight(0x0a1a3a, 0.8);
+  const ambient = new THREE.AmbientLight(0x001f05, 0.8);
   scene.add(ambient);
   return ambient;
 }
 
 export function createFillLight(scene) {
-  const fill = new THREE.PointLight(0x00d9ff, 0.5, 15);
+  const fill = new THREE.PointLight(0x008f11, 0.5, 15);
   fill.position.set(-4, -2, 2);
   scene.add(fill);
   return fill;

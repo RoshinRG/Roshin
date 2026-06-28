@@ -16,7 +16,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { buildIronManSuit } from '../scenes/shared.js';
 
 /* Singleton DRACO decoder — shared across all loader instances */
 let _dracoLoader = null;
@@ -38,13 +37,11 @@ export class ModelLoader {
 
   /**
    * Load a GLTF/GLB model by URL.
-   * Falls back to procedural Iron Man suit on any error.
    *
    * @param {string} url  — Path or URL to .glb / .gltf file
-   * @param {object} opts — Options passed to buildIronManSuit on fallback
    * @returns {Promise<THREE.Group>}
    */
-  async load(url, opts = {}) {
+  async load(url) {
     if (this._cache.has(url)) {
       return this._cache.get(url).clone();
     }
@@ -60,9 +57,9 @@ export class ModelLoader {
         },
         undefined, // progress — omitted
         (err) => {
-          console.warn(`[ModelLoader] Failed to load "${url}", using procedural fallback.`, err);
-          const fallback = buildIronManSuit(opts);
-          resolve(fallback);
+          console.warn(`[ModelLoader] Failed to load "${url}".`, err);
+          // Return an empty group so scenes don't crash
+          resolve(new THREE.Group());
         }
       );
     });
