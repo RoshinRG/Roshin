@@ -1,0 +1,164 @@
+/**
+ * skills.js
+ * SkillsScene — 3D floating skill labels orbiting center.
+ * Iron Man hand repulsor at center follows mouse.
+ */
+
+import * as THREE from 'three';
+import { IronManScene, createGoldKeyLight, createAmbientLight, isMobile } from '../utils/three-setup.js';
+import { repulsorShader, createShaderMaterial } from '../utils/shader.js';
+
+const SKILLS = [
+  'Three.js', 'WebGL', 'GLSL', 'JavaScript', 'TypeScript',
+  'React', 'Next.js', 'CSS3', 'HTML5', 'PWA',
+  'Web Workers', 'GSAP', 'Canvas 2D', 'Node.js', 'Git',
+  'Performance', 'WebXR', 'Vite',
+];
+
+export class SkillsScene extends IronManScene {
+  constructor() {
+    super('skillsCanvas', { alpha: true });
+    this._mouse = new THREE.Vector2(0, 0);
+    this._target = new THREE.Vector2(0, 0);
+  }
+
+  init() {
+    if (!this.canvas) return;
+
+    createAmbientLight(this.scene);
+    createGoldKeyLight(this.scene);
+
+    /* ── Skill label sprites ─────────────────────────────── */
+    this.labelGroup = new THREE.Group();
+    this._labels    = [];
+
+    SKILLS.forEach((name, i) => {
+      const sprite = this._makeTextSprite(name);
+      const angle  = (i / SKILLS.length) * Math.PI * 2;
+      const r      = isMobile() ? 1.8 : 2.4;
+      const layer  = Math.floor(i / 6);
+      sprite.position.set(
+        Math.cos(angle) * (r - layer * 0.5),
+        Math.sin(angle) * (r - layer * 0.5) * 0.7,
+        (Math.random() - 0.5) * 1.5,
+      );
+      sprite.userData = { angle, speed: 0.12 + Math.random() * 0.08, r: r - layer * 0.5 };
+      this.labelGroup.add(sprite);
+      this._labels.push(sprite);
+    });
+    this.scene.add(this.labelGroup);
+
+    /* ── Central repulsor hand ───────────────────────────── */
+    this.repulsorMesh = this._buildRepulsor();
+    this.scene.add(this.repulsorMesh);
+
+    /* ── Camera ─────────────────────────────────────────── */
+    this.camera.position.set(0, 0, 5);
+
+    /* ── Mouse tracking ──────────────────────────────────── */
+    this._onMove = (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      this._mouse.x = ((e.clientX - rect.left) / rect.width  - 0.5) * 2;
+      this._mouse.y = -((e.clientY - rect.top)  / rect.height - 0.5) * 2;
+    };
+    this.canvas.addEventListener('mousemove', this._onMove);
+  }
+
+  _makeTextSprite(text) {
+    const canvas  = document.createElement('canvas');
+    canvas.width  = 256;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle   = 'rgba(0,0,0,0)';
+    ctx.fillRect(0, 0, 256, 64);
+
+    ctx.font         = 'bold 22px "Space Mono", monospace';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle    = '#d4af37';
+    ctx.shadowColor  = 'rgba(212,175,55,0.8)';
+    ctx.shadowBlur   = 8;
+    ctx.fillText(text, 128, 32);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const mat     = new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite:  false,
+    });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(1.4, 0.36, 1);
+    sprite.userData.text = text;
+    return sprite;
+  }
+
+  _buildRepulsor() {
+    const group = new THREE.Group();
+    group.name  = 'repulsorHand';
+
+    // Outer glow plane
+    const mat   = createShaderMaterial(repulsorShader);
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
+    plane.name  = 'repulsorGlow';
+    group.userData.mat = mat;
+    group.add(plane);
+
+    // Small hand geometry hint
+    const handMat = new THREE.MeshPhongMaterial({ color: 0xcc2200, shininess: 120 });
+    const palm    = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.28, 0.15), handMat);
+    palm.position.z = -0.05;
+    group.add(palm);
+
+    return group;
+  }
+
+  update(dt, elapsed) {
+    if (!this._labels) return;
+
+    /* ── Orbit labels ────────────────────────────────────── */
+    this._labels.forEach((sprite, i) => {
+      sprite.userData.angle += sprite.userData.speed * dt;
+      const a = sprite.userData.angle;
+      const r = sprite.userData.r;
+      sprite.position.x = Math.cos(a) * r;
+      sprite.position.y = Math.sin(a) * r * 0.7;
+
+      // Push away from mouse cursor (within canvas space)
+      const dx = sprite.position.x - this._target.x * 2.5;
+      const dy = sprite.position.y - this._target.y * 2.5;
+      const d  = Math.sqrt(dx * dx + dy * dy);
+      if (d < 1.2) {
+        const push = (1.2 - d) * 0.6;
+        sprite.position.x += (dx / d) * push;
+        sprite.position.y += (dy / d) * push;
+      }
+
+      // Glow pulse on proximity
+      const proximity = Math.max(0, 1 - d / 1.5);
+      const m = sprite.material;
+      m.opacity = 0.7 + proximity * 0.3;
+      m.color?.setHSL(0.12, 1, 0.5 + proximity * 0.3);
+    });
+
+    /* ── Smooth mouse follow for repulsor ────────────────── */
+    this._target.x += (this._mouse.x - this._target.x) * 0.06;
+    this._target.y += (this._mouse.y - this._target.y) * 0.06;
+    this.repulsorMesh.position.set(this._target.x * 2.5, this._target.y * 2.5, 0.2);
+
+    /* ── Repulsor shader time ────────────────────────────── */
+    if (this.repulsorMesh.userData.mat) {
+      this.repulsorMesh.userData.mat.uniforms.uTime.value = elapsed;
+    }
+
+    /* ── Slowly rotate label group ───────────────────────── */
+    this.labelGroup.rotation.z = Math.sin(elapsed * 0.1) * 0.05;
+  }
+
+  dispose() {
+    if (this._onMove)
+      this.canvas?.removeEventListener('mousemove', this._onMove);
+    this._labels.forEach(s => { s.material.map?.dispose(); s.material.dispose(); });
+    super.dispose();
+  }
+}
