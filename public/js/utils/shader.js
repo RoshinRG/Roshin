@@ -12,8 +12,8 @@ import * as THREE from 'three';
 export const coreGlowShader = {
   uniforms: {
     uTime:      { value: 0 },
-    uColor:     { value: new THREE.Color(0x00ff41) },
-    uCoreColor: { value: new THREE.Color(0xffffff) },
+    uColor:     { value: new THREE.Color(0xB76E79) }, // --rg-core
+    uCoreColor: { value: new THREE.Color(0xF7EDE8) }, // --rg-pearl
     uIntensity: { value: 1.0 },
   },
   vertexShader: /* glsl */`
@@ -70,7 +70,7 @@ export const coreGlowShader = {
 export const hologramShader = {
   uniforms: {
     uTime:    { value: 0 },
-    uColor:   { value: new THREE.Color(0x00ff41) },
+    uColor:   { value: new THREE.Color(0xB76E79) }, // --rg-core
     uOpacity: { value: 0.35 },
   },
   vertexShader: /* glsl */`
@@ -126,7 +126,7 @@ export const hologramShader = {
 export const scanPulseShader = {
   uniforms: {
     uTime:  { value: 0 },
-    uColor: { value: new THREE.Color(0x00ff41) },
+    uColor: { value: new THREE.Color(0xB76E79) }, // --rg-core
   },
   vertexShader: /* glsl */`
     varying vec2 vUv;

@@ -114,24 +114,35 @@ export class BaseScene {
   }
 }
 
-/* ── Shared lighting factory ──────────────────────────────── */
+/* ── Shared lighting factory — Rose Gold three-point rig ─── */
 export function createNeonKeyLight(scene) {
-  const light = new THREE.PointLight(0x00ff41, 3, 20);
-  light.position.set(3, 4, 3);
+  // Key light — rose gold warmth from upper left
+  const light = new THREE.PointLight(0xB76E79, 2.5, 80);
+  light.position.set(-20, 20, 10);
   light.castShadow = !isMobile();
   scene.add(light);
   return light;
 }
 
 export function createAmbientLight(scene) {
-  const ambient = new THREE.AmbientLight(0x001f05, 0.8);
+  // Ambient — dark warm shadow fill
+  const ambient = new THREE.AmbientLight(0x1A0D10, 0.6);
   scene.add(ambient);
   return ambient;
 }
 
 export function createFillLight(scene) {
-  const fill = new THREE.PointLight(0x008f11, 0.5, 15);
-  fill.position.set(-4, -2, 2);
+  // Rim light — cool shimmer from upper right
+  const fill = new THREE.PointLight(0xEDD5C8, 1.2, 60);
+  fill.position.set(20, 15, -10);
   scene.add(fill);
   return fill;
+}
+
+export function createDeepAccentLight(scene) {
+  // Deep accent — subtle deep rose from below
+  const accent = new THREE.PointLight(0x7A3D45, 0.8, 40);
+  accent.position.set(0, -15, 5);
+  scene.add(accent);
+  return accent;
 }

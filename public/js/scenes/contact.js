@@ -32,9 +32,9 @@ export class ContactScene extends BaseScene {
     this.hologramMesh.position.set(2.5, 0, -1);
     this.scene.add(this.hologramMesh);
 
-    /* ── Scan-line plane (full-screen quad) ─────────────── */
+    /* ── Scan-line plane (full-screen quad) ──────────────── */
     const scanMat = new THREE.MeshBasicMaterial({
-      color:       0x00ff41,
+      color:       0xB76E79, // --rg-core
       transparent: true,
       opacity:     0.06,
       side:        THREE.DoubleSide,
@@ -46,8 +46,8 @@ export class ContactScene extends BaseScene {
     this._scanLine.position.z = 0.5;
     this.scene.add(this._scanLine);
 
-    /* ── Soft green edge light ────────────────────────────── */
-    const edgeLight = new THREE.PointLight(0x00ff41, 1, 10);
+    /* ── Soft rose edge light ────────────────────────────── */
+    const edgeLight = new THREE.PointLight(0xB76E79, 1, 10); // --rg-core
     edgeLight.position.set(-3, 2, 2);
     this.scene.add(edgeLight);
 

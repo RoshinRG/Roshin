@@ -21,7 +21,7 @@ export class HeroScene extends BaseScene {
     this.fillLight = createFillLight(this.scene);
 
     /* ── Background gradient fog ────────────────────────── */
-    this.scene.fog = new THREE.FogExp2(0x050505, 0.08);
+    this.scene.fog = new THREE.FogExp2(0x050406, 0.0008); // --bg-void
 
     /* ── Cyber Cube ─────────────────────────────────────── */
     this.core = createCyberCube();
@@ -29,7 +29,7 @@ export class HeroScene extends BaseScene {
     this.scene.add(this.core);
 
     /* ── Core point light ───────────────────────────────── */
-    this.coreLight = new THREE.PointLight(0xd4af37, 4, 4);
+    this.coreLight = new THREE.PointLight(0xB76E79, 4, 4); // --rg-core
     this.coreLight.position.copy(this.core.position);
     this.scene.add(this.coreLight);
 
@@ -39,7 +39,11 @@ export class HeroScene extends BaseScene {
       spread:  6,
       size:    0.03,
       speed:   0.3,
-      palette: ['#00d9ff', '#d4af37', '#ffffff'],
+      // Rose Gold constellation — weighted: 50% dim, 30% core, 15% light, 5% shimmer
+      palette: ['#7A3D45', '#7A3D45', '#7A3D45', '#7A3D45', '#7A3D45',
+                '#B76E79', '#B76E79', '#B76E79',
+                '#DDB8BC', '#DDB8BC',
+                '#EDD5C8'],
     });
 
     /* ── Camera position ────────────────────────────────── */

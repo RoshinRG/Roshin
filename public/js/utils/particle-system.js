@@ -31,7 +31,7 @@ export class ParticleSystem {
       size:       opts.size      || 0.04,
       speed:      opts.speed     || 0.3,
       depthBound: opts.depthBound !== false,
-      palette:    opts.palette   || ['#d4af37', '#ffd700', '#00d9ff', '#ffffff'],
+      palette:    opts.palette   || ['#7A3D45', '#B76E79', '#DDB8BC', '#EDD5C8', '#C9878F'],
     };
 
     this._init();

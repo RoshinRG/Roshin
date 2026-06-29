@@ -57,11 +57,15 @@ export class SkillsScene extends BaseScene {
 
     /* ── Mouse tracking ──────────────────────────────────── */
     this._onMove = (e) => {
-      const rect = this.canvas.getBoundingClientRect();
+      const container = this.canvas.parentElement;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
       this._mouse.x = ((e.clientX - rect.left) / rect.width  - 0.5) * 2;
       this._mouse.y = -((e.clientY - rect.top)  / rect.height - 0.5) * 2;
     };
-    this.canvas.addEventListener('mousemove', this._onMove);
+    if (this.canvas.parentElement) {
+      this.canvas.parentElement.addEventListener('mousemove', this._onMove);
+    }
   }
 
   _makeTextSprite(text) {
@@ -73,11 +77,11 @@ export class SkillsScene extends BaseScene {
     ctx.fillStyle   = 'rgba(0,0,0,0)';
     ctx.fillRect(0, 0, 256, 64);
 
-    ctx.font         = 'bold 22px "Space Mono", monospace';
+    ctx.font         = 'bold 22px "JetBrains Mono", monospace';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle    = '#00ff41';
-    ctx.shadowColor  = 'rgba(0,255,65,0.8)';
+    ctx.fillStyle    = '#C9878F'; // --rg-mid
+    ctx.shadowColor  = 'rgba(183, 110, 121, 0.8)'; // --rg-core glow
     ctx.shadowBlur   = 8;
     ctx.fillText(text, 128, 32);
 
@@ -104,10 +108,10 @@ export class SkillsScene extends BaseScene {
     group.userData.mat = mat;
     group.add(plane);
 
-    // Inner glowing sphere
+    // Inner glowing sphere — rose gold
     const sphereMat = new THREE.MeshStandardMaterial({ 
-      color: 0x00ff41, 
-      emissive: 0x00ff41,
+      color: 0x1A0A0E, 
+      emissive: new THREE.Color(0xB76E79), // --rg-core
       emissiveIntensity: 0.8,
       roughness: 0.2 
     });
@@ -139,11 +143,11 @@ export class SkillsScene extends BaseScene {
         sprite.position.y += (dy / d) * push;
       }
 
-      // Glow pulse on proximity
+      // Glow pulse on proximity — rose gold hue
       const proximity = Math.max(0, 1 - d / 1.5);
       const m = sprite.material;
       m.opacity = 0.7 + proximity * 0.3;
-      m.color?.setHSL(0.35, 1, 0.5 + proximity * 0.3);
+      m.color?.setHSL(0.97, 0.7, 0.6 + proximity * 0.2); // rose gold hue
     });
 
     /* ── Smooth mouse follow for core node ───────────────── */
@@ -161,8 +165,9 @@ export class SkillsScene extends BaseScene {
   }
 
   dispose() {
-    if (this._onMove)
-      this.canvas?.removeEventListener('mousemove', this._onMove);
+    if (this._onMove && this.canvas.parentElement) {
+      this.canvas.parentElement.removeEventListener('mousemove', this._onMove);
+    }
     this._labels.forEach(s => { s.material.map?.dispose(); s.material.dispose(); });
     super.dispose();
   }

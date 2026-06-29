@@ -6,15 +6,9 @@ let currentCanvas = null;
 
 export function getRenderer() {
   if (!sharedRenderer) {
-    // Create a generic canvas for the renderer
     const canvas = document.createElement('canvas');
     canvas.id = 'sharedWebGLCanvas';
-    canvas.style.position = 'absolute';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.zIndex = '0'; // Should be behind content
+    // Remove hardcoded inline styles so that the CSS classes (like .skills__canvas) can properly control layout
 
     sharedRenderer = new THREE.WebGLRenderer({
       canvas: canvas,
@@ -25,6 +19,7 @@ export function getRenderer() {
 
     const dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.5 : 2);
     sharedRenderer.setPixelRatio(dpr);
+    sharedRenderer.setClearColor(0x050406, 1); // --bg-void
     sharedRenderer.outputColorSpace = THREE.SRGBColorSpace;
     sharedRenderer.toneMapping = THREE.ACESFilmicToneMapping;
     sharedRenderer.toneMappingExposure = 1.2;
@@ -59,6 +54,9 @@ export function mountRenderer(targetCanvas) {
   // Apply classes from target to shared canvas so it styles correctly
   renderer.domElement.className = targetCanvas.className;
   
+  // Clear any inline styles that might interfere with CSS class-based layout
+  renderer.domElement.style.cssText = '';
+  
   // Insert the shared renderer canvas exactly where the placeholder was
   if (targetCanvas.parentNode) {
       targetCanvas.parentNode.insertBefore(renderer.domElement, targetCanvas.nextSibling);
@@ -83,5 +81,6 @@ export function resizeRenderer(camera) {
   camera.updateProjectionMatrix();
   
   const renderer = getRenderer();
-  renderer.setSize(w, h);
+  // Pass false to prevent Three.js from setting inline style width/height
+  renderer.setSize(w, h, false);
 }

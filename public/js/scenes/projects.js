@@ -22,7 +22,7 @@ export class ProjectsScene extends BaseScene {
       spread:  12,
       size:    0.025,
       speed:   0.15,
-      palette: ['#00ff41', '#008f11', '#003b00', '#ffffff'],
+      palette: ['#7A3D45', '#7A3D45', '#7A3D45', '#B76E79', '#B76E79', '#DDB8BC', '#EDD5C8'],
     });
 
     /* ── Camera — flat orthographic-ish perspective ──────── */

@@ -12,25 +12,25 @@ import * as THREE from 'three';
 export function createCyberCube() {
   const group = new THREE.Group();
 
-  // Outer wireframe box
+  // Outer wireframe box — rose gold
   const outerGeo = new THREE.BoxGeometry(3, 3, 3);
   const outerMat = new THREE.MeshBasicMaterial({
-    color: 0x00ff41, // Terminal Green
+    color: 0xB76E79, // --rg-core
     wireframe: true,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.45
   });
   const outerMesh = new THREE.Mesh(outerGeo, outerMat);
   group.add(outerMesh);
 
-  // Inner solid core box
+  // Inner emissive core box
   const innerGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
   const innerMat = new THREE.MeshStandardMaterial({
-    color: 0x008f11,
-    emissive: 0x00ff41,
-    emissiveIntensity: 0.5,
-    roughness: 0.1,
+    color: 0x1A0A0E,
+    emissive: new THREE.Color(0xB76E79), // --rg-core
+    emissiveIntensity: 0.6,
     metalness: 0.9,
+    roughness: 0.15,
     wireframe: true
   });
   const innerMesh = new THREE.Mesh(innerGeo, innerMat);
@@ -38,7 +38,7 @@ export function createCyberCube() {
 
   // Data nodes orbiting
   const nodeGeo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
-  const nodeMat = new THREE.MeshBasicMaterial({ color: 0x00ff41 });
+  const nodeMat = new THREE.MeshBasicMaterial({ color: 0xC9878F }); // --rg-mid
   const orbitGroup = new THREE.Group();
   
   for (let i = 0; i < 6; i++) {
@@ -73,9 +73,9 @@ export function createCyberCube() {
 export function createDataStream(count = 200) {
   const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
   const material = new THREE.MeshStandardMaterial({
-    color: 0x00ff41,
-    emissive: 0x008f11,
-    emissiveIntensity: 0.4,
+    color: 0x1A0A0E,
+    emissive: new THREE.Color(0xB76E79), // --rg-core
+    emissiveIntensity: 0.45,
     roughness: 0.2,
     metalness: 0.8,
   });
