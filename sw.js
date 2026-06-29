@@ -72,11 +72,14 @@ self.addEventListener('fetch', event => {
             caches.open(CDN_CACHE).then(cache => cache.put(request, cloned));
           }
           return networkResponse;
-        }).catch(() => {
-          // Ignore network errors on update
         });
         
-        return cached || fetchPromise;
+        if (cached) {
+            fetchPromise.catch(() => {}); // Ignore network errors if we have cache
+            return cached;
+        }
+        
+        return fetchPromise;
       })
     );
     return;

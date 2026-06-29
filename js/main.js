@@ -41,16 +41,19 @@ const scenes = {};
 ───────────────────────────────────────────────────────── */
 let currentRoute = null;
 let navigationCount = 0;
+let isNavigating = false;
 const transition = document.getElementById('pageTransition');
 
 function navigate(route, pushState = true) {
-  if (!ROUTES[route] || route === currentRoute) return;
+  if (isNavigating || !ROUTES[route] || route === currentRoute) return;
+  isNavigating = true;
 
   // ── Fade out ────────────────────────────────────────────
   transition?.classList.add('page-transition--active');
 
   setTimeout(() => {
     // ── Deactivate current ─────────────────────────────────
+    let prevRoute = currentRoute;
     if (currentRoute) {
       const prev = ROUTES[currentRoute];
       const prevSection = document.getElementById(prev.sectionId);
@@ -103,7 +106,7 @@ function navigate(route, pushState = true) {
     // Dispose old scenes that haven't been active recently
     Object.keys(scenes).forEach(sceneRoute => {
       if (sceneRoute === currentRoute) return;
-      if (sceneRoute === prev?.sectionId.replace('section', '').toLowerCase()) return; // rudimentary check, let's keep it simple
+      if (sceneRoute === prevRoute) return;
 
       const scene = scenes[sceneRoute];
       if (!scene._lastNavCount) scene._lastNavCount = navigationCount;
@@ -128,6 +131,8 @@ function navigate(route, pushState = true) {
 
     // ── Fade in ─────────────────────────────────────────────
     transition?.classList.remove('page-transition--active');
+    
+    setTimeout(() => { isNavigating = false; }, 50);
   }, 280);
 }
 
