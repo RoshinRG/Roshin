@@ -9,7 +9,7 @@ import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight } fr
 import { createDataStream } from './constructs.js';
 
 export class AboutScene extends BaseScene {
-  constructor() { super('aboutCanvas'); }
+  constructor() { super('avatarCanvas'); }
 
   init() {
     if (!this.canvas) return;

@@ -20,6 +20,8 @@ import {
   initFooterYear,
 } from './animations.js';
 
+import { mountRenderer, resizeRenderer } from './utils/renderer-singleton.js';
+
 /* ─────────────────────────────────────────────────────────
    ROUTE DEFINITIONS
 ───────────────────────────────────────────────────────── */
@@ -38,6 +40,7 @@ const scenes = {};
    ROUTER
 ───────────────────────────────────────────────────────── */
 let currentRoute = null;
+let navigationCount = 0;
 const transition = document.getElementById('pageTransition');
 
 function navigate(route, pushState = true) {
@@ -80,6 +83,32 @@ function navigate(route, pushState = true) {
     }
 
     currentRoute = route;
+    navigationCount++;
+
+    // Mount shared renderer to the new scene's canvas slot
+    if (scenes[route].canvas) {
+      mountRenderer(scenes[route].canvas);
+      resizeRenderer(scenes[route].camera);
+    }
+
+    // Dispose old scenes that haven't been active recently
+    Object.keys(scenes).forEach(sceneRoute => {
+      if (sceneRoute === currentRoute) return;
+      if (sceneRoute === prev?.sectionId.replace('section', '').toLowerCase()) return; // rudimentary check, let's keep it simple
+
+      const scene = scenes[sceneRoute];
+      if (!scene._lastNavCount) scene._lastNavCount = navigationCount;
+      
+      if (navigationCount - scene._lastNavCount > 2) {
+        scene.dispose();
+        delete scenes[sceneRoute];
+      }
+    });
+    
+    // Update active scene's nav count
+    if (scenes[route]) {
+      scenes[route]._lastNavCount = navigationCount;
+    }
 
     // Trigger scroll reveal for visible items
     setTimeout(() => {

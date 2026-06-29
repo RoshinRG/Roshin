@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three';
+import { getRenderer, mountRenderer, resizeRenderer } from './renderer-singleton.js';
 
 export const isMobile = () => window.innerWidth <= 768;
 export const isReducedMotion = () =>
@@ -27,30 +28,13 @@ export class BaseScene {
     this.isActive = false;
     this.animId   = null;
 
-    this._buildRenderer();
+    mountRenderer(this.canvas);
+    this.renderer = getRenderer();
     this._buildCamera();
     this._onResize = this._onResize.bind(this);
     window.addEventListener('resize', this._onResize);
   }
 
-  /* ── Renderer ───────────────────────────────────────────── */
-  _buildRenderer() {
-    this.renderer = new THREE.WebGLRenderer({
-      canvas:         this.canvas,
-      alpha:          this.options.alpha,
-      antialias:      this.options.antialias,
-      powerPreference: this.options.powerPreference,
-    });
-
-    const dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.5 : 2);
-    this.renderer.setPixelRatio(dpr);
-    this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping      = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
-    this.renderer.shadowMap.enabled = !isMobile();
-    this.renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
-  }
 
   /* ── Camera ─────────────────────────────────────────────── */
   _buildCamera() {
@@ -63,12 +47,16 @@ export class BaseScene {
   /* ── Resize handler ─────────────────────────────────────── */
   _onResize() {
     if (!this.canvas) return;
-    const w = this.canvas.clientWidth;
-    const h = this.canvas.clientHeight;
-    this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(w, h);
-    if (this.onResize) this.onResize(w, h);
+    
+    // Only resize the shared renderer and camera if this scene is active
+    if (this.isActive) {
+        resizeRenderer(this.camera);
+    }
+    
+    const w = this.canvas.clientWidth || (this.canvas.parentElement ? this.canvas.parentElement.clientWidth : 0);
+    const h = this.canvas.clientHeight || (this.canvas.parentElement ? this.canvas.parentElement.clientHeight : 0);
+    
+    if (this.onResize && w > 0 && h > 0) this.onResize(w, h);
   }
 
   /* ── Lifecycle ──────────────────────────────────────────── */
@@ -115,7 +103,7 @@ export class BaseScene {
           obj.material.dispose();
       }
     });
-    this.renderer.dispose();
+    // this.renderer.dispose(); // DO NOT DISPOSE SHARED RENDERER
   }
 }
 

@@ -4,14 +4,12 @@
  */
 
 import * as THREE from 'three';
-import { getThemeColors } from '../utils/three-setup.js';
 
 /**
  * createCyberCube
  * Creates a glowing tesseract/wireframe cube for the hero centerpiece.
  */
 export function createCyberCube() {
-  const colors = getThemeColors();
   const group = new THREE.Group();
 
   // Outer wireframe box
