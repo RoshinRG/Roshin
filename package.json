@@ -5,10 +5,10 @@
   "author": "Roshin R G <roshin.rg.2024.aids@rajalakshmi.edu.in>",
   "license": "MIT",
   "private": true,
-  "homepage": "https://roshinrg.github.io",
+  "homepage": "https://roshinrg.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/roshinrg/roshinrg.github.io"
+    "url": "https://github.com/roshinrg/roshinrg.dev"
   },
   "keywords": [
     "portfolio",

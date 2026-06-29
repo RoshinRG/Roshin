@@ -19,7 +19,7 @@
  *   SMTP_PASS=your-app-password
  *   MAIL_TO=roshin.rg.2024.aids@rajalakshmi.edu.in
  *   MAIL_FROM="RGR Portfolio <no-reply@roshinrg.dev>"
- *   ALLOWED_ORIGIN=https://roshinrg.github.io
+ *   ALLOWED_ORIGIN=https://roshinrg.dev
  */
 
 "use strict";
@@ -45,7 +45,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://localhost:3131",
-      process.env.ALLOWED_ORIGIN || "https://roshinrg.github.io",
+      process.env.ALLOWED_ORIGIN || "https://roshinrg.dev",
     ],
     methods: ["GET", "POST"],
   }),
