@@ -81,6 +81,17 @@ function createTransporter() {
   });
 }
 
+/* ─── Helpers ───────────────────────────────────────────── */
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 /* ─── POST /api/contact ─────────────────────────────────── */
 app.post("/api/contact", contactLimiter, async (req, res) => {
   const { name, email, subject, message } = req.body;
@@ -114,12 +125,12 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
           <h2 style="color:#d4af37">New Portfolio Message</h2>
           <table style="width:100%;border-collapse:collapse">
-            <tr><td style="padding:8px;color:#888;width:80px">Name</td><td style="padding:8px">${name}</td></tr>
-            <tr><td style="padding:8px;color:#888">Email</td><td style="padding:8px"><a href="mailto:${email}">${email}</a></td></tr>
-            ${subject ? `<tr><td style="padding:8px;color:#888">Subject</td><td style="padding:8px">${subject}</td></tr>` : ""}
+            <tr><td style="padding:8px;color:#888;width:80px">Name</td><td style="padding:8px">${escapeHtml(name)}</td></tr>
+            <tr><td style="padding:8px;color:#888">Email</td><td style="padding:8px"><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
+            ${subject ? `<tr><td style="padding:8px;color:#888">Subject</td><td style="padding:8px">${escapeHtml(subject)}</td></tr>` : ""}
           </table>
           <hr style="border:1px solid #222;margin:16px 0" />
-          <p style="white-space:pre-wrap;line-height:1.6">${message}</p>
+          <p style="white-space:pre-wrap;line-height:1.6">${escapeHtml(message)}</p>
         </div>
       `,
     });
