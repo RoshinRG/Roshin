@@ -91,6 +91,7 @@ export class ParticleSystem {
   update(elapsed) {
     const { count, spread, speed } = this.opts;
     const half = spread / 2;
+    let colorChanged = false;
 
     for (let i = 0; i < count; i++) {
       const ix = i * 3, iy = ix + 1, iz = ix + 2;
@@ -143,11 +144,14 @@ export class ParticleSystem {
         const hex = this.opts.palette[Math.floor(Math.random() * this.opts.palette.length)];
         _color.set(hex);
         this.mesh.setColorAt(i, _color);
-        this.mesh.instanceColor.needsUpdate = true;
+        colorChanged = true;
       }
     }
 
     this.mesh.instanceMatrix.needsUpdate = true;
+    if (colorChanged) {
+        this.mesh.instanceColor.needsUpdate = true;
+    }
   }
 
   dispose() {
