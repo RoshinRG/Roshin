@@ -22,8 +22,8 @@
   "scripts": {
     "start":   "node server.js",
     "dev":     "nodemon server.js",
-    "serve":   "npx serve . --listen 3000 --single",
-    "preview": "npx serve . --listen 3131 --single"
+    "serve":   "npx serve public --listen 3000 --single",
+    "preview": "npx serve public --listen 3131 --single"
   },
   "dependencies": {
     "cors":                 "^2.8.5",

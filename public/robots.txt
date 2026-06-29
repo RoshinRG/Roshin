@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://roshinrg.dev/sitemap.xml

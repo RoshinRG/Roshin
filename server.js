@@ -62,7 +62,7 @@ const contactLimiter = rateLimit({
 
 /* ─── Static files (serve the SPA) ─────────────────────── */
 app.use(
-  express.static(path.join(__dirname), {
+  express.static(path.join(__dirname, "public"), {
     index: "index.html",
     extensions: ["html"],
   }),
@@ -148,7 +148,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 
 /* ─── SPA fallback — all other routes serve index.html ─── */
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 /* ─── Start ─────────────────────────────────────────────── */
