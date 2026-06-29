@@ -3,7 +3,8 @@
  * Strategy: Cache-first for static assets, network-first for API calls.
  */
 
-const CACHE_NAME    = 'rgr-portfolio-v2';
+const CACHE_NAME    = 'rgr-portfolio-v3';
+const CDN_CACHE     = 'rgr-cdn-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -22,6 +23,7 @@ const STATIC_ASSETS = [
   '/js/utils/shader.js',
   '/googlef5738759e2f6272f.html',
   '/sitemap.xml',
+  'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap'
 ];
 
 /* ── INSTALL: pre-cache static assets ──────────────────── */
@@ -56,12 +58,29 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET, cross-origin, and CDN Three.js (cache handled by browser)
+  // Skip non-GET and formspree
   if (request.method !== 'GET') return;
   if (url.hostname.includes('formspree.io')) return;
-  if (url.hostname.includes('jsdelivr.net')) return;
-  if (url.hostname.includes('googleapis.com')) return;
-  if (url.hostname.includes('gstatic.com')) return;
+
+  // Stale-while-revalidate for CDN assets (Three.js, Fonts)
+  if (url.hostname.includes('jsdelivr.net') || url.hostname.includes('googleapis.com') || url.hostname.includes('gstatic.com')) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        const fetchPromise = fetch(request).then(networkResponse => {
+          if (networkResponse.ok) {
+            const cloned = networkResponse.clone();
+            caches.open(CDN_CACHE).then(cache => cache.put(request, cloned));
+          }
+          return networkResponse;
+        }).catch(() => {
+          // Ignore network errors on update
+        });
+        
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request).then(cached => {
