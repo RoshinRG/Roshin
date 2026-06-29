@@ -3,8 +3,8 @@
  * Strategy: Cache-first for static assets, network-first for API calls.
  */
 
-const CACHE_NAME    = 'rgr-portfolio-v3';
-const CDN_CACHE     = 'rgr-cdn-v1';
+const CACHE_NAME    = 'rgr-portfolio-v4';
+const CDN_CACHE     = 'rgr-cdn-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

@@ -75,7 +75,12 @@ export class BaseScene {
 
   start() {
     if (this.isActive) return;
-    if (isReducedMotion()) return;
+    if (isReducedMotion()) {
+      // Render at least one frame so the canvas isn't empty
+      this.update(0.016, 0);
+      this.renderer.render(this.scene, this.camera);
+      return;
+    }
     this.isActive = true;
     this.clock.start();
     this._tick();
