@@ -22,7 +22,6 @@ const STATIC_ASSETS = [
   '/js/utils/particle-system.js',
   '/js/utils/shader.js',
   '/js/utils/renderer-singleton.js',
-  '/googlef5738759e2f6272f.html',
   '/sitemap.xml',
   '/robots.txt',
   'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap'

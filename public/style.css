@@ -664,6 +664,8 @@ h1, h2, h3, h4 {
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
+  width: 100%;
+  aspect-ratio: 3 / 4;
 }
 
 .about__avatar-canvas {
@@ -1002,6 +1004,8 @@ ul.skills__tags li.skill-tag {
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
+  width: 100%;
+  aspect-ratio: 1;
 }
 
 .skills__canvas {

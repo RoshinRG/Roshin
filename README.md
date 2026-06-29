@@ -1,8 +1,8 @@
-# ⚡ RGR Portfolio — Iron Man SPA
+# ⚡ RGR Portfolio — Terminal-themed SPA
 
 > **"The best abstraction is the one you understand completely."**
 
-A production-grade **Single-Page Application** portfolio built with **zero frameworks** — pure vanilla JavaScript, BEM CSS, and live Three.js/WebGL Iron Man animations across all five sections.
+A production-grade **Single-Page Application** portfolio built with **zero frameworks** — pure vanilla JavaScript, BEM CSS, and live Three.js/WebGL Cyberpunk animations across all five sections.
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-roshinrg.github.io-d4af37?style=flat-square&logo=github)](https://roshinrg.github.io)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-100-brightgreen?style=flat-square&logo=googlechrome)](https://roshinrg.github.io)
@@ -54,7 +54,7 @@ This portfolio is both a **showcase** and a **demonstration** of what's possible
 
 | Section | Route | 3D Scene |
 |---|---|---|
-| Hero | `/` | Iron Man suit + particle trails |
+| Hero | `/` | Cyber grid + data streams |
 | About | `/about` | Armor assembly animation |
 | Projects | `/projects` | Ambient particle field |
 | Skills | `/skills` | Orbiting skill labels + repulsor hand |
@@ -130,7 +130,7 @@ RGR PORTFOLIO/
     ├── animations.js        ← Scroll reveal, contact form, theme, hamburger
     │
     ├── scenes/              ← One Three.js scene per portfolio section
-    │   ├── shared.js        ← Procedural Iron Man suit geometry (shared)
+    │   ├── shared.js        ← Procedural Cyberpunk data constructs geometry (shared)
     │   ├── hero.js          ← Hero: full suit + particle trail system
     │   ├── about.js         ← About: armor plate assembly animation
     │   ├── projects.js      ← Projects: ambient instanced particle field
@@ -188,11 +188,11 @@ Syne (headings)  ·  Space Grotesk (body)  ·  Space Mono (monospace)
 
 ### 🎭 Five Distinct Three.js Scenes
 
-- **Hero** — Procedural Iron Man suit (gold/red armor plates) with glowing arc reactor and trailing particles that follow cursor movement
+- **Hero** — Procedural Cyberpunk data constructs (gold/red armor plates) with glowing arc reactor and trailing particles that follow cursor movement
 - **About** — Armor assembly animation where plates orbit and lock into position; resets on click
 - **Projects** — Ambient particle field with 3,000 InstancedMesh particles creating an electric atmosphere
 - **Skills** — 18 skill labels rendered as CanvasTexture sprites orbiting at varying radii; a repulsor hand follows your mouse and pushes labels away on proximity
-- **Contact** — Hologram Iron Man suit with real-time scan-line sweep, Fresnel edge glow, and random opacity flicker
+- **Contact** — Hologram Cyberpunk data constructs with real-time scan-line sweep, Fresnel edge glow, and random opacity flicker
 
 ### ⚡ Custom GLSL Shaders
 
@@ -215,7 +215,7 @@ Syne (headings)  ·  Space Grotesk (body)  ·  Space Mono (monospace)
 |---|---|---|
 | Primary Gold | `#d4af37` | Main accent, headings, CTAs |
 | Accent Cyan | `#00d9ff` | Expert skill tags, links |
-| Iron Red | `#cc2200` | Iron Man suit detail |
+| Hacker Green | `#00ff41` | Cyberpunk data constructs detail |
 | Background | `#080808` | Page background |
 | Surface | `#111111` | Cards, nav, form inputs |
 
@@ -288,7 +288,7 @@ ALLOWED_ORIGIN=https://roshinrg.github.io
 
 ```bash
 git add .
-git commit -m "feat: Iron Man SPA portfolio"
+git commit -m "feat: Terminal-themed SPA portfolio"
 git push origin main
 ```
 
@@ -382,7 +382,7 @@ All design tokens are CSS custom properties at the top of `style.css`:
 :root {
   --color-primary-gold:  #d4af37;   /* Main accent */
   --color-accent-cyan:   #00d9ff;   /* Secondary accent */
-  --color-iron-red:      #cc2200;   /* Suit red */
+  --color-iron-red:      #00ff41;   /* Suit red */
   --color-bg-primary:    #080808;   /* Page background */
   --color-surface:       #111111;   /* Cards/inputs */
 }
