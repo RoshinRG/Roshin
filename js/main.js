@@ -20,7 +20,7 @@ import {
   initFooterYear,
 } from './animations.js';
 
-import { mountRenderer, resizeRenderer } from './utils/renderer-singleton.js';
+import { mountRenderer, resizeRenderer, getRenderer } from './utils/renderer-singleton.js';
 
 /* ─────────────────────────────────────────────────────────
    ROUTE DEFINITIONS
@@ -68,6 +68,15 @@ function navigate(route, pushState = true) {
       const instance = new next.SceneClass();
       instance.init();
       scenes[route] = instance;
+      
+      // Validation logging (only happens once per scene)
+      setTimeout(() => {
+          const renderer = getRenderer(); // Requires import
+          if (renderer && renderer.info) {
+              console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
+              console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
+          }
+      }, 500); // Wait for first render
     }
     scenes[route].resume();
 
