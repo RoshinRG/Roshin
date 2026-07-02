@@ -667,10 +667,12 @@ code, pre { font-family: var(--font-mono); color: var(--rg-mid); }
   right: 16px;
   top: 0;
   width: 2px;
-  height: 0%;
+  height: 100%;
   background: linear-gradient(to bottom, var(--rg-core), transparent);
   z-index: var(--z-nav);
-  transition: height 100ms linear;
+  transform-origin: top;
+  transform: scaleY(0);
+  transition: transform 100ms linear;
   border-radius: var(--radius-pill);
   box-shadow: var(--glow-sm);
 }

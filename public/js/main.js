@@ -4,7 +4,6 @@
  * Lazy-initialises Three.js scenes on first section activation.
  */
 
-import { HeroScene } from './scenes/hero.js';
 
 import {
   initScrollReveal,
@@ -16,13 +15,12 @@ import {
   initFooterYear,
 } from './animations.js';
 
-import { mountRenderer, resizeRenderer, getRenderer } from './utils/renderer-singleton.js';
 
 /* ─────────────────────────────────────────────────────────
    ROUTE DEFINITIONS
 ───────────────────────────────────────────────────────── */
 const ROUTES = {
-  hero:     { sectionId: 'sectionHero',     getScene: () => Promise.resolve(HeroScene) },
+  hero:     { sectionId: 'sectionHero',     getScene: () => import('./scenes/hero.js').then(m => m.HeroScene) },
   about:    { sectionId: 'sectionAbout',    getScene: () => import('./scenes/about.js').then(m => m.AboutScene) },
   projects: { sectionId: 'sectionProjects', getScene: () => import('./scenes/projects.js').then(m => m.ProjectsScene) },
   skills:   { sectionId: 'sectionSkills',   getScene: () => import('./scenes/skills.js').then(m => m.SkillsScene) },
@@ -78,11 +76,13 @@ async function navigate(route, pushState = true) {
       
       // Validation logging (only happens once per scene)
       setTimeout(() => {
-          const renderer = getRenderer(); // Requires import
-          if (renderer && renderer.info) {
-              console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
-              console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
-          }
+          import('./utils/renderer-singleton.js').then(({ getRenderer }) => {
+            const renderer = getRenderer();
+            if (renderer && renderer.info) {
+                console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
+                console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
+            }
+          });
       }, 500); // Wait for first render
     }
     if (scenes[route]) scenes[route].resume();
@@ -103,8 +103,10 @@ async function navigate(route, pushState = true) {
 
     // Mount shared renderer to the new scene's canvas slot
     if (scenes[route].canvas) {
-      mountRenderer(scenes[route].canvas);
-      resizeRenderer(scenes[route].camera);
+      import('./utils/renderer-singleton.js').then(({ mountRenderer, resizeRenderer }) => {
+        mountRenderer(scenes[route].canvas);
+        resizeRenderer(scenes[route].camera);
+      });
     }
 
     // Dispose old scenes that haven't been active recently
@@ -210,7 +212,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Navigate to initial route (loads + starts first scene)
   const initial = resolveInitialRoute();
-  navigate(initial, false);
+  
+  // Yield to the browser to paint FCP/LCP before blocking the main thread with WebGL initialization
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      navigate(initial, false);
+    }, 0);
+  });
 
   // Register Service Worker after page is interactive
   registerSW();
