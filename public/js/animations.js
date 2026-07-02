@@ -107,7 +107,7 @@ export function initContactForm() {
         method:  'POST',
         headers: { 
           'Accept': 'application/json',
-          'Content-Type': 'application/json' 
+          'Content-Type': 'text/plain' 
         },
         body:    JSON.stringify(data),
       });
