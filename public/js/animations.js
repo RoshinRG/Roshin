@@ -61,10 +61,12 @@ export function initContactForm() {
 
   const nameInput    = document.getElementById('contactName');
   const emailInput   = document.getElementById('contactEmail');
+  const phoneInput   = document.getElementById('contactPhone');
   const messageInput = document.getElementById('contactMessage');
 
   const nameError    = document.getElementById('nameError');
   const emailError   = document.getElementById('emailError');
+  const phoneError   = document.getElementById('phoneError');
   const messageError = document.getElementById('messageError');
 
   function validateField(input, errorEl, validator) {
@@ -76,15 +78,18 @@ export function initContactForm() {
   const validators = {
     name:    v => v.length >= 2,
     email:   v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+    phone:   v => v.length === 0 || /^[\d\+\-\s\(\)]+$/.test(v), // optional, but if present must look like a phone number
     message: v => v.length >= 10,
   };
 
   nameError.dataset.msg    = 'Please enter your name (2+ characters)';
   emailError.dataset.msg   = 'Please enter a valid email address';
+  phoneError.dataset.msg   = 'Please enter a valid phone number';
   messageError.dataset.msg = 'Message must be at least 10 characters';
 
   nameInput.addEventListener('blur',    () => validateField(nameInput,    nameError,    validators.name));
   emailInput.addEventListener('blur',   () => validateField(emailInput,   emailError,   validators.email));
+  phoneInput.addEventListener('blur',   () => validateField(phoneInput,   phoneError,   validators.phone));
   messageInput.addEventListener('blur', () => validateField(messageInput, messageError, validators.message));
 
   form.addEventListener('submit', async (e) => {
@@ -92,9 +97,10 @@ export function initContactForm() {
 
     const okName    = validateField(nameInput,    nameError,    validators.name);
     const okEmail   = validateField(emailInput,   emailError,   validators.email);
+    const okPhone   = validateField(phoneInput,   phoneError,   validators.phone);
     const okMessage = validateField(messageInput, messageError, validators.message);
 
-    if (!okName || !okEmail || !okMessage) return;
+    if (!okName || !okEmail || !okPhone || !okMessage) return;
 
     submit.classList.add('btn--loading');
     submit.disabled = true;
@@ -103,25 +109,22 @@ export function initContactForm() {
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
 
-      const res = await fetch(form.action, {
-        method:  'POST',
-        headers: { 
-          'Accept': 'application/json',
-          'Content-Type': 'text/plain' 
+      // Use mode: 'no-cors' with plain text to avoid CORS preflight errors with Google Apps Script
+      await fetch(form.action, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
         },
-        body:    JSON.stringify(data),
+        body: JSON.stringify(data),
       });
 
-      if (res.ok) {
-        form.reset();
-        showToast(toast);
-      } else {
-        const data = await res.json().catch(() => ({}));
-        const msg  = data.errors?.map(e => e.message).join(', ') || 'Submit failed. Try again.';
-        messageError.textContent = msg;
-      }
+      // With no-cors, the response is opaque (status 0), so we can't read the success flag.
+      // Assuming success if the network request didn't throw an error.
+      form.reset();
+      showToast(toast);
     } catch {
-      messageError.textContent = 'Network error. Please try again.';
+      messageError.textContent = 'Submit failed. Try again.';
     } finally {
       submit.classList.remove('btn--loading');
       submit.disabled = false;
