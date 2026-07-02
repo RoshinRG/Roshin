@@ -37,20 +37,13 @@
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
   <!-- Fonts: Hosted locally in style.css via @font-face -->
-
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-9.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-39.woff2" crossorigin>
   <!-- Styles -->
   <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="style.css"></noscript>
 
 
-  <!-- Three.js Import Map -->
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "/js/vendor/three.min.js"
-    }
-  }
-  </script>
 </head>
 
 <body class="body" data-theme="dark">
@@ -651,7 +644,7 @@
   </script>
 
   <!-- Main SPA entry point (ES module) -->
-  <script type="module" src="js/main.js" defer></script>
+  <script type="module" src="/dist/main.js" defer></script>
 
   <!-- Vercel Speed Insights -->
   <script>

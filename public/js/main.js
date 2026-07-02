@@ -2,19 +2,7 @@
  * main.js
  * SPA Router — history API + IntersectionObserver scene management.
  * Lazy-initialises Three.js scenes on first section activation.
- */
-
-
-import {
-  initScrollReveal,
-  initScrollTracer,
-  initContactForm,
-  initThemeToggle,
-  initMobileMenu,
-  initButtonGlow,
-  initFooterYear,
-} from './animations.js';
-
+import { isMobile } from './utils/three-setup.js';
 
 /* ─────────────────────────────────────────────────────────
    ROUTE DEFINITIONS
@@ -101,12 +89,16 @@ async function navigate(route, pushState = true) {
     currentRoute = route;
     navigationCount++;
 
-    // Mount shared renderer to the new scene's canvas slot
+    // Mount shared renderer to the new scene's canvas slot (skip secondary on mobile)
     if (scenes[route].canvas) {
-      import('./utils/renderer-singleton.js').then(({ mountRenderer, resizeRenderer }) => {
-        mountRenderer(scenes[route].canvas);
-        resizeRenderer(scenes[route].camera);
-      });
+      if (isMobile() && route !== 'hero') {
+        scenes[route].pause();
+      } else {
+        import('./utils/renderer-singleton.js').then(({ mountRenderer, resizeRenderer }) => {
+          mountRenderer(scenes[route].canvas);
+          resizeRenderer(scenes[route].camera);
+        });
+      }
     }
 
     // Dispose old scenes that haven't been active recently
@@ -201,14 +193,7 @@ async function registerSW() {
    BOOT
 ───────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Start non-Three.js interactivity immediately
-  initThemeToggle();
-  initMobileMenu();
-  initScrollTracer();
-  initScrollReveal();
-  initContactForm();
-  initButtonGlow();
-  initFooterYear();
+
 
   // Navigate to initial route (loads + starts first scene)
   const initial = resolveInitialRoute();
@@ -217,6 +202,20 @@ document.addEventListener('DOMContentLoaded', () => {
   requestAnimationFrame(() => {
     setTimeout(() => {
       navigate(initial, false);
+      
+      // Load and initialize UI animations after critical path
+      const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+      idle(() => {
+        import('./animations.js').then(module => {
+          module.initThemeToggle();
+          module.initMobileMenu();
+          module.initScrollTracer();
+          module.initScrollReveal();
+          module.initContactForm();
+          module.initButtonGlow();
+          module.initFooterYear();
+        });
+      });
     }, 0);
   });
 

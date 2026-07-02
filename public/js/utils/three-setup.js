@@ -7,7 +7,7 @@
 import { AmbientLight, Clock, PerspectiveCamera, PointLight, Scene } from 'three';
 import { getRenderer, mountRenderer, resizeRenderer } from './renderer-singleton.js';
 
-export const isMobile = () => window.innerWidth <= 768;
+export const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 export const isReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
