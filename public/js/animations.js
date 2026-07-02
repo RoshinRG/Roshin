@@ -109,22 +109,25 @@ export function initContactForm() {
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
 
-      // Use mode: 'no-cors' with plain text to avoid CORS preflight errors with Google Apps Script
-      await fetch(form.action, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
+      const res = await fetch(form.action, {
+        method:  'POST',
+        headers: { 
+          'Accept': 'application/json',
+          'Content-Type': 'application/json' 
         },
-        body: JSON.stringify(data),
+        body:    JSON.stringify(data),
       });
 
-      // With no-cors, the response is opaque (status 0), so we can't read the success flag.
-      // Assuming success if the network request didn't throw an error.
-      form.reset();
-      showToast(toast);
+      if (res.ok) {
+        form.reset();
+        showToast(toast);
+      } else {
+        const resData = await res.json().catch(() => ({}));
+        const msg  = resData.errors?.map(e => e.message).join(', ') || 'Submit failed. Try again.';
+        messageError.textContent = msg;
+      }
     } catch {
-      messageError.textContent = 'Submit failed. Try again.';
+      messageError.textContent = 'Network error. Please try again.';
     } finally {
       submit.classList.remove('btn--loading');
       submit.disabled = false;

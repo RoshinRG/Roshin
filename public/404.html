@@ -46,12 +46,15 @@
   <!-- Styles -->
   <link rel="stylesheet" href="style.css">
 
+  <!-- ES Module Shims for older browsers without native import map support -->
+  <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
   <!-- Three.js Import Map -->
   <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
     }
   }
   </script>
@@ -564,6 +567,13 @@
               <input class="form__input" type="email" id="contactEmail" name="email" placeholder="tony@stark.com"
                 autocomplete="email" required aria-required="true">
               <span class="form__error" id="emailError" role="alert"></span>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="contactPhone">Phone Number</label>
+              <input class="form__input" type="tel" id="contactPhone" name="phone" placeholder="+1 (555) 000-0000"
+                autocomplete="tel">
+              <span class="form__error" id="phoneError" role="alert"></span>
             </div>
 
             <div class="form__group">
