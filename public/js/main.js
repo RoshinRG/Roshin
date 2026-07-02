@@ -2,8 +2,9 @@
  * main.js
  * SPA Router — history API + IntersectionObserver scene management.
  * Lazy-initialises Three.js scenes on first section activation.
-import { isMobile } from './utils/three-setup.js';
+ */
 
+import { isMobile } from './utils/three-setup.js';
 /* ─────────────────────────────────────────────────────────
    ROUTE DEFINITIONS
 ───────────────────────────────────────────────────────── */
