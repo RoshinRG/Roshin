@@ -175,8 +175,8 @@ RGR PORTFOLIO/
 
 ```html
 <!-- Three.js via import map (in index.html) -->
-"three":          "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
-"three/addons/":  "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+"three":          "https://unpkg.com/three@0.160.0/build/three.module.js"
+"three/addons/":  "https://unpkg.com/three@0.160.0/examples/jsm/"
 
 <!-- Google Fonts -->
 Syne (headings)  ·  Space Grotesk (body)  ·  Space Mono (monospace)
@@ -540,7 +540,8 @@ Update `index.html` form action:
 | Mobile Chrome | 89+ | Auto reduced particles |
 | Mobile Safari | 16.4+ | Full support |
 
-> **Internet Explorer** — Not supported. This project requires ES Modules, CSS Custom Properties, and WebGL 2.
+> **Internet Explorer** — Not supported. This project requires CSS Custom Properties and WebGL 2.
+> **Import Maps** — Older browsers without native import map support (e.g., Safari < 16.4) are supported via the included `es-module-shims` polyfill.
 
 ---
 
