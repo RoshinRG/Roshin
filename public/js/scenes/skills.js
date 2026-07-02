@@ -4,7 +4,7 @@
  * Glowing core node at center follows mouse.
  */
 
-import * as THREE from 'three';
+import { CanvasTexture, Color, Group, Mesh, MeshStandardMaterial, PlaneGeometry, SphereGeometry, Sprite, SpriteMaterial, Vector2 } from 'three';
 import { BaseScene, createNeonKeyLight, createAmbientLight, isMobile } from '../utils/three-setup.js';
 import { scanPulseShader, createShaderMaterial } from '../utils/shader.js';
 
@@ -18,8 +18,8 @@ const SKILLS = [
 export class SkillsScene extends BaseScene {
   constructor() {
     super('skillsCanvas', { alpha: true });
-    this._mouse = new THREE.Vector2(0, 0);
-    this._target = new THREE.Vector2(0, 0);
+    this._mouse = new Vector2(0, 0);
+    this._target = new Vector2(0, 0);
   }
 
   init() {
@@ -29,7 +29,7 @@ export class SkillsScene extends BaseScene {
     createNeonKeyLight(this.scene);
 
     /* ── Skill label sprites ─────────────────────────────── */
-    this.labelGroup = new THREE.Group();
+    this.labelGroup = new Group();
     this._labels    = [];
 
     SKILLS.forEach((name, i) => {
@@ -85,37 +85,37 @@ export class SkillsScene extends BaseScene {
     ctx.shadowBlur   = 8;
     ctx.fillText(text, 128, 32);
 
-    const texture = new THREE.CanvasTexture(canvas);
-    const mat     = new THREE.SpriteMaterial({
+    const texture = new CanvasTexture(canvas);
+    const mat     = new SpriteMaterial({
       map: texture,
       transparent: true,
       depthWrite:  false,
     });
-    const sprite = new THREE.Sprite(mat);
+    const sprite = new Sprite(mat);
     sprite.scale.set(1.4, 0.36, 1);
     sprite.userData.text = text;
     return sprite;
   }
 
   _buildCoreNode() {
-    const group = new THREE.Group();
+    const group = new Group();
     group.name  = 'coreNode';
 
     // Outer glow plane using scanPulseShader
     const mat   = createShaderMaterial(scanPulseShader);
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
+    const plane = new Mesh(new PlaneGeometry(1, 1), mat);
     plane.name  = 'coreGlow';
     group.userData.mat = mat;
     group.add(plane);
 
     // Inner glowing sphere — rose gold
-    const sphereMat = new THREE.MeshStandardMaterial({ 
+    const sphereMat = new MeshStandardMaterial({ 
       color: 0x1A0A0E, 
-      emissive: new THREE.Color(0xB76E79), // --rg-core
+      emissive: new Color(0xB76E79), // --rg-core
       emissiveIntensity: 0.8,
       roughness: 0.2 
     });
-    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), sphereMat);
+    const sphere = new Mesh(new SphereGeometry(0.15, 16, 16), sphereMat);
     sphere.position.z = 0.05;
     group.add(sphere);
 

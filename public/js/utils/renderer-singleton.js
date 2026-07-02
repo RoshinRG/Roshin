@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace, WebGLRenderer } from 'three';
 import { isMobile } from './three-setup.js';
 
 let sharedRenderer = null;
@@ -10,7 +10,7 @@ export function getRenderer() {
     canvas.id = 'sharedWebGLCanvas';
     // Remove hardcoded inline styles so that the CSS classes (like .skills__canvas) can properly control layout
 
-    sharedRenderer = new THREE.WebGLRenderer({
+    sharedRenderer = new WebGLRenderer({
       canvas: canvas,
       alpha: true,
       antialias: !isMobile(),
@@ -20,11 +20,11 @@ export function getRenderer() {
     const dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.5 : 2);
     sharedRenderer.setPixelRatio(dpr);
     sharedRenderer.setClearColor(0x050406, 1); // --bg-void
-    sharedRenderer.outputColorSpace = THREE.SRGBColorSpace;
-    sharedRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    sharedRenderer.outputColorSpace = SRGBColorSpace;
+    sharedRenderer.toneMapping = ACESFilmicToneMapping;
     sharedRenderer.toneMappingExposure = 1.2;
     sharedRenderer.shadowMap.enabled = !isMobile();
-    sharedRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    sharedRenderer.shadowMap.type = PCFSoftShadowMap;
   }
   return sharedRenderer;
 }

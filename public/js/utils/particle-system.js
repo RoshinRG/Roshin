@@ -4,15 +4,15 @@
  * alpha fade near edges, and gold/cyan color flicker.
  */
 
-import * as THREE from 'three';
+import { Color, DynamicDrawUsage, InstancedBufferAttribute, InstancedMesh, MeshBasicMaterial, Object3D, Scene, SphereGeometry } from 'three';
 import { isMobile } from './three-setup.js';
 
-const _dummy  = new THREE.Object3D();
-const _color  = new THREE.Color();
+const _dummy  = new Object3D();
+const _color  = new Color();
 
 export class ParticleSystem {
   /**
-   * @param {THREE.Scene} scene
+   * @param {Scene} scene
    * @param {object} opts
    * @param {number}  opts.count       - particle count (desktop)
    * @param {number}  opts.spread      - position spread radius
@@ -40,15 +40,15 @@ export class ParticleSystem {
   _init() {
     const { count, size, spread, palette } = this.opts;
 
-    const geo = new THREE.SphereGeometry(size, 4, 4);
-    const mat = new THREE.MeshBasicMaterial({
+    const geo = new SphereGeometry(size, 4, 4);
+    const mat = new MeshBasicMaterial({
       vertexColors: true,
       transparent:  true,
     });
 
-    this.mesh = new THREE.InstancedMesh(geo, mat, count);
-    this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.mesh.instanceColor = new THREE.InstancedBufferAttribute(
+    this.mesh = new InstancedMesh(geo, mat, count);
+    this.mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+    this.mesh.instanceColor = new InstancedBufferAttribute(
       new Float32Array(count * 3), 3
     );
 

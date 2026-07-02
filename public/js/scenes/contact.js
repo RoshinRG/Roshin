@@ -4,7 +4,7 @@
  * with animated scan lines and noise flicker.
  */
 
-import * as THREE from 'three';
+import { DoubleSide, Mesh, MeshBasicMaterial, PlaneGeometry, PointLight } from 'three';
 import { BaseScene, createAmbientLight } from '../utils/three-setup.js';
 import { hologramShader, createShaderMaterial } from '../utils/shader.js';
 import { createCyberGlobe } from './constructs.js';
@@ -22,32 +22,32 @@ export class ContactScene extends BaseScene {
 
     // Hologram shader material
     const holoMat = createShaderMaterial(hologramShader, { 
-      side: THREE.DoubleSide,
+      side: DoubleSide,
       wireframe: true 
     });
     
-    this.hologramMesh = new THREE.Mesh(sphereGeo, holoMat);
+    this.hologramMesh = new Mesh(sphereGeo, holoMat);
     this._holoMat = holoMat;
 
     this.hologramMesh.position.set(2.5, 0, -1);
     this.scene.add(this.hologramMesh);
 
     /* ── Scan-line plane (full-screen quad) ──────────────── */
-    const scanMat = new THREE.MeshBasicMaterial({
+    const scanMat = new MeshBasicMaterial({
       color:       0xB76E79, // --rg-core
       transparent: true,
       opacity:     0.06,
-      side:        THREE.DoubleSide,
+      side:        DoubleSide,
     });
-    this._scanLine = new THREE.Mesh(
-      new THREE.PlaneGeometry(20, 0.03),
+    this._scanLine = new Mesh(
+      new PlaneGeometry(20, 0.03),
       scanMat
     );
     this._scanLine.position.z = 0.5;
     this.scene.add(this._scanLine);
 
     /* ── Soft rose edge light ────────────────────────────── */
-    const edgeLight = new THREE.PointLight(0xB76E79, 1, 10); // --rg-core
+    const edgeLight = new PointLight(0xB76E79, 1, 10); // --rg-core
     edgeLight.position.set(-3, 2, 2);
     this.scene.add(edgeLight);
 

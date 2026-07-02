@@ -4,7 +4,7 @@
  * Handles renderer, camera, resize, pause/resume, device detection.
  */
 
-import * as THREE from 'three';
+import { AmbientLight, Clock, PerspectiveCamera, PointLight, Scene } from 'three';
 import { getRenderer, mountRenderer, resizeRenderer } from './renderer-singleton.js';
 
 export const isMobile = () => window.innerWidth <= 768;
@@ -23,8 +23,8 @@ export class BaseScene {
       ...options,
     };
 
-    this.scene    = new THREE.Scene();
-    this.clock    = new THREE.Clock();
+    this.scene    = new Scene();
+    this.clock    = new Clock();
     this.isActive = false;
     this.animId   = null;
 
@@ -40,7 +40,7 @@ export class BaseScene {
   _buildCamera() {
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
-    this.camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
+    this.camera = new PerspectiveCamera(60, w / h, 0.1, 1000);
     this.camera.position.set(0, 0, 5);
   }
 
@@ -123,7 +123,7 @@ export class BaseScene {
 /* ── Shared lighting factory — Rose Gold three-point rig ─── */
 export function createNeonKeyLight(scene) {
   // Key light — rose gold warmth from upper left
-  const light = new THREE.PointLight(0xB76E79, 2.5, 80);
+  const light = new PointLight(0xB76E79, 2.5, 80);
   light.position.set(-20, 20, 10);
   light.castShadow = !isMobile();
   scene.add(light);
@@ -132,14 +132,14 @@ export function createNeonKeyLight(scene) {
 
 export function createAmbientLight(scene) {
   // Ambient — dark warm shadow fill
-  const ambient = new THREE.AmbientLight(0x1A0D10, 0.6);
+  const ambient = new AmbientLight(0x1A0D10, 0.6);
   scene.add(ambient);
   return ambient;
 }
 
 export function createFillLight(scene) {
   // Rim light — cool shimmer from upper right
-  const fill = new THREE.PointLight(0xEDD5C8, 1.2, 60);
+  const fill = new PointLight(0xEDD5C8, 1.2, 60);
   fill.position.set(20, 15, -10);
   scene.add(fill);
   return fill;
@@ -147,7 +147,7 @@ export function createFillLight(scene) {
 
 export function createDeepAccentLight(scene) {
   // Deep accent — subtle deep rose from below
-  const accent = new THREE.PointLight(0x7A3D45, 0.8, 40);
+  const accent = new PointLight(0x7A3D45, 0.8, 40);
   accent.position.set(0, -15, 5);
   scene.add(accent);
   return accent;

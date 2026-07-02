@@ -4,7 +4,7 @@
  * particle trails, cursor look-at interaction.
  */
 
-import * as THREE from 'three';
+import { FogExp2, PointLight, Vector2 } from 'three';
 import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight, isMobile } from '../utils/three-setup.js';
 import { ParticleSystem } from '../utils/particle-system.js';
 import { createCyberCube } from './constructs.js';
@@ -21,7 +21,7 @@ export class HeroScene extends BaseScene {
     this.fillLight = createFillLight(this.scene);
 
     /* ── Background gradient fog ────────────────────────── */
-    this.scene.fog = new THREE.FogExp2(0x050406, 0.0008); // --bg-void
+    this.scene.fog = new FogExp2(0x050406, 0.0008); // --bg-void
 
     /* ── Cyber Cube ─────────────────────────────────────── */
     this.core = createCyberCube();
@@ -29,7 +29,7 @@ export class HeroScene extends BaseScene {
     this.scene.add(this.core);
 
     /* ── Core point light ───────────────────────────────── */
-    this.coreLight = new THREE.PointLight(0xB76E79, 4, 4); // --rg-core
+    this.coreLight = new PointLight(0xB76E79, 4, 4); // --rg-core
     this.coreLight.position.copy(this.core.position);
     this.scene.add(this.coreLight);
 
@@ -51,7 +51,7 @@ export class HeroScene extends BaseScene {
     this.camera.lookAt(isMobile() ? 0 : 2, 0.2, 0);
 
     /* ── Cursor tracking ────────────────────────────────── */
-    this._mouse = new THREE.Vector2(0, 0);
+    this._mouse = new Vector2(0, 0);
     if (!isMobile()) {
       this._onMouseMove = (e) => {
         this._mouse.x = (e.clientX / window.innerWidth  - 0.5) * 2;

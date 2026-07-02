@@ -3,7 +3,7 @@
  * Custom GLSL shaders for arc reactor glow and hologram scan-line effects.
  */
 
-import * as THREE from 'three';
+import { Color, FrontSide, ShaderMaterial, UniformsUtils } from 'three';
 
 /* ─────────────────────────────────────────────────────────
    CORE GLOW SHADER
@@ -12,8 +12,8 @@ import * as THREE from 'three';
 export const coreGlowShader = {
   uniforms: {
     uTime:      { value: 0 },
-    uColor:     { value: new THREE.Color(0xB76E79) }, // --rg-core
-    uCoreColor: { value: new THREE.Color(0xF7EDE8) }, // --rg-pearl
+    uColor:     { value: new Color(0xB76E79) }, // --rg-core
+    uCoreColor: { value: new Color(0xF7EDE8) }, // --rg-pearl
     uIntensity: { value: 1.0 },
   },
   vertexShader: /* glsl */`
@@ -70,7 +70,7 @@ export const coreGlowShader = {
 export const hologramShader = {
   uniforms: {
     uTime:    { value: 0 },
-    uColor:   { value: new THREE.Color(0xB76E79) }, // --rg-core
+    uColor:   { value: new Color(0xB76E79) }, // --rg-core
     uOpacity: { value: 0.35 },
   },
   vertexShader: /* glsl */`
@@ -126,7 +126,7 @@ export const hologramShader = {
 export const scanPulseShader = {
   uniforms: {
     uTime:  { value: 0 },
-    uColor: { value: new THREE.Color(0xB76E79) }, // --rg-core
+    uColor: { value: new Color(0xB76E79) }, // --rg-core
   },
   vertexShader: /* glsl */`
     varying vec2 vUv;
@@ -157,13 +157,13 @@ export const scanPulseShader = {
    Helper: create a ShaderMaterial from a shader definition
 ───────────────────────────────────────────────────────── */
 export function createShaderMaterial(shaderDef, extra = {}) {
-  return new THREE.ShaderMaterial({
-    uniforms:       THREE.UniformsUtils.clone(shaderDef.uniforms),
+  return new ShaderMaterial({
+    uniforms:       UniformsUtils.clone(shaderDef.uniforms),
     vertexShader:   shaderDef.vertexShader,
     fragmentShader: shaderDef.fragmentShader,
     transparent:    true,
     depthWrite:     false,
-    side:           THREE.FrontSide,
+    side:           FrontSide,
     ...extra,
   });
 }

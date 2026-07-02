@@ -4,11 +4,7 @@
  * Lazy-initialises Three.js scenes on first section activation.
  */
 
-import { HeroScene }     from './scenes/hero.js';
-import { AboutScene }    from './scenes/about.js';
-import { ProjectsScene } from './scenes/projects.js';
-import { SkillsScene }   from './scenes/skills.js';
-import { ContactScene }  from './scenes/contact.js';
+import { HeroScene } from './scenes/hero.js';
 
 import {
   initScrollReveal,
@@ -26,11 +22,11 @@ import { mountRenderer, resizeRenderer, getRenderer } from './utils/renderer-sin
    ROUTE DEFINITIONS
 ───────────────────────────────────────────────────────── */
 const ROUTES = {
-  hero:     { sectionId: 'sectionHero',     SceneClass: HeroScene     },
-  about:    { sectionId: 'sectionAbout',    SceneClass: AboutScene    },
-  projects: { sectionId: 'sectionProjects', SceneClass: ProjectsScene },
-  skills:   { sectionId: 'sectionSkills',  SceneClass: SkillsScene   },
-  contact:  { sectionId: 'sectionContact', SceneClass: ContactScene  },
+  hero:     { sectionId: 'sectionHero',     getScene: () => Promise.resolve(HeroScene) },
+  about:    { sectionId: 'sectionAbout',    getScene: () => import('./scenes/about.js').then(m => m.AboutScene) },
+  projects: { sectionId: 'sectionProjects', getScene: () => import('./scenes/projects.js').then(m => m.ProjectsScene) },
+  skills:   { sectionId: 'sectionSkills',   getScene: () => import('./scenes/skills.js').then(m => m.SkillsScene) },
+  contact:  { sectionId: 'sectionContact',  getScene: () => import('./scenes/contact.js').then(m => m.ContactScene) },
 };
 
 /* Scene instances — lazy-created on first activation */
@@ -44,12 +40,21 @@ let navigationCount = 0;
 let isNavigating = false;
 const transition = document.getElementById('pageTransition');
 
-function navigate(route, pushState = true) {
+async function navigate(route, pushState = true) {
   if (isNavigating || !ROUTES[route] || route === currentRoute) return;
   isNavigating = true;
 
   // ── Fade out ────────────────────────────────────────────
   transition?.classList.add('page-transition--active');
+
+  // Pre-fetch the scene class while fading out
+  const next = ROUTES[route];
+  let SceneClass;
+  try {
+    SceneClass = await next.getScene();
+  } catch (e) {
+    console.error('Failed to load scene', e);
+  }
 
   setTimeout(() => {
     // ── Deactivate current ─────────────────────────────────
@@ -62,13 +67,12 @@ function navigate(route, pushState = true) {
     }
 
     // ── Activate new ───────────────────────────────────────
-    const next = ROUTES[route];
     const nextSection = document.getElementById(next.sectionId);
     if (nextSection) nextSection.hidden = false;
 
     // Lazy-init scene
-    if (!scenes[route]) {
-      const instance = new next.SceneClass();
+    if (!scenes[route] && SceneClass) {
+      const instance = new SceneClass();
       instance.init();
       scenes[route] = instance;
       
@@ -81,7 +85,7 @@ function navigate(route, pushState = true) {
           }
       }, 500); // Wait for first render
     }
-    scenes[route].resume();
+    if (scenes[route]) scenes[route].resume();
 
     // Update nav active state
     document.querySelectorAll('[data-section]').forEach(el => {

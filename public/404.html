@@ -36,25 +36,18 @@
   <link rel="apple-touch-icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet">
+  <!-- Fonts: Hosted locally in style.css via @font-face -->
 
   <!-- Styles -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="style.css"></noscript>
 
-  <!-- ES Module Shims for older browsers without native import map support -->
-  <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
 
   <!-- Three.js Import Map -->
   <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      "three": "/js/vendor/three.min.js"
     }
   }
   </script>
@@ -658,7 +651,7 @@
   </script>
 
   <!-- Main SPA entry point (ES module) -->
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js" defer></script>
 
   <!-- Vercel Speed Insights -->
   <script>

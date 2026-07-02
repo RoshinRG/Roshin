@@ -4,7 +4,7 @@
  * Matrix cubes fall and assemble into a single data block.
  */
 
-import * as THREE from 'three';
+import { Object3D } from 'three';
 import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight } from '../utils/three-setup.js';
 import { createDataStream } from './constructs.js';
 
@@ -58,7 +58,7 @@ export class AboutScene extends BaseScene {
     const progress = Math.min(uData.time / 3.5, 1);
     const ease = 1 - Math.pow(1 - progress, 4); // easeOutQuart
 
-    const dummy = new THREE.Object3D();
+    const dummy = new Object3D();
     for (let i = 0; i < this.stream.count; i++) {
       // Lerp position
       const curr = uData.currents[i];

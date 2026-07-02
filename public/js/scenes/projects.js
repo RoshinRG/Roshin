@@ -4,7 +4,7 @@
  * CSS handles repulsor blast on project card hover.
  */
 
-import * as THREE from 'three';
+
 import { BaseScene, createAmbientLight, isMobile } from '../utils/three-setup.js';
 import { ParticleSystem } from '../utils/particle-system.js';
 
