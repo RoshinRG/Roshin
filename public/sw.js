@@ -24,7 +24,7 @@ const STATIC_ASSETS = [
   '/js/utils/renderer-singleton.js',
   '/sitemap.xml',
   '/robots.txt',
-  'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap'
 ];
 
 /* ── INSTALL: pre-cache static assets ──────────────────── */
@@ -47,7 +47,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
+          .filter(key => key !== CACHE_NAME && key !== CDN_CACHE)
           .map(key => caches.delete(key))
       )
     ).then(() => self.clients.claim())
@@ -64,7 +64,7 @@ self.addEventListener('fetch', event => {
   if (url.hostname.includes('formspree.io')) return;
 
   // Stale-while-revalidate for CDN assets (Three.js, Fonts)
-  if (url.hostname.includes('jsdelivr.net') || url.hostname.includes('googleapis.com') || url.hostname.includes('gstatic.com')) {
+  if (url.hostname.includes('unpkg.com') || url.hostname.includes('googleapis.com') || url.hostname.includes('gstatic.com')) {
     event.respondWith(
       caches.match(request).then(cached => {
         const fetchPromise = fetch(request).then(networkResponse => {

@@ -76,6 +76,7 @@ export class BaseScene {
   start() {
     if (this.isActive) return;
     if (isReducedMotion()) {
+      console.warn('[A11Y] Reduced motion is enabled on your OS. Three.js animations are paused.');
       // Render at least one frame so the canvas isn't empty
       this.update(0.016, 0);
       this.renderer.render(this.scene, this.camera);

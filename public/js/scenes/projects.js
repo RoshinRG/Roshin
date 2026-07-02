@@ -38,17 +38,20 @@ export class ProjectsScene extends BaseScene {
     const grid = document.getElementById('projectsGrid');
     if (!grid) return;
 
-    grid.addEventListener('mouseenter', (e) => {
-      const card = e.target.closest('.project-card');
-      if (!card) return;
-      // Reset then fire animation via CSS class toggle
-      const pulse = card.querySelector('.project-card__pulse');
-      if (!pulse) return;
-      pulse.style.animation = 'none';
-      // Trigger reflow
-      void pulse.offsetWidth;
-      pulse.style.animation = '';
-    }, true);
+    if (!this._onCardHover) {
+      this._onCardHover = (e) => {
+        const card = e.target.closest('.project-card');
+        if (!card) return;
+        // Reset then fire animation via CSS class toggle
+        const pulse = card.querySelector('.project-card__pulse');
+        if (!pulse) return;
+        pulse.style.animation = 'none';
+        // Trigger reflow
+        void pulse.offsetWidth;
+        pulse.style.animation = '';
+      };
+    }
+    grid.addEventListener('mouseenter', this._onCardHover, true);
   }
 
   update(dt, elapsed) {
@@ -56,8 +59,9 @@ export class ProjectsScene extends BaseScene {
   }
 
   dispose() {
-    if (this._setupCardHover) {
-       // Just clean up particles, delegated listener lives on DOM but safe to leave since singleton
+    const grid = document.getElementById('projectsGrid');
+    if (grid && this._onCardHover) {
+      grid.removeEventListener('mouseenter', this._onCardHover, true);
     }
     if (this.particles) this.particles.dispose();
     super.dispose();

@@ -100,10 +100,16 @@ export function initContactForm() {
     submit.disabled = true;
 
     try {
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
       const res = await fetch(form.action, {
         method:  'POST',
-        headers: { 'Accept': 'application/json' },
-        body:    new FormData(form),
+        headers: { 
+          'Accept': 'application/json',
+          'Content-Type': 'application/json' 
+        },
+        body:    JSON.stringify(data),
       });
 
       if (res.ok) {
