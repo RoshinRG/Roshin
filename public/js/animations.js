@@ -150,16 +150,16 @@ function showToast(toast) {
 ───────────────────────────────────────────────────────── */
 export function initThemeToggle() {
   const btn  = document.getElementById('themeToggle');
-  const body = document.body;
+  const root = document.documentElement; // <html> is the source of truth for data-theme
   const icon = btn?.querySelector('.nav__theme-icon');
 
-  const saved = localStorage.getItem('rgr-theme') || 'dark';
-  body.dataset.theme = saved;
-  if (icon) icon.textContent = saved === 'dark' ? '◑' : '☀';
+  // Reflect the already-applied theme (set by the blocking script in <head>) into the icon
+  const current = root.dataset.theme || 'dark';
+  if (icon) icon.textContent = current === 'dark' ? '◑' : '☀';
 
   btn?.addEventListener('click', () => {
-    const next = body.dataset.theme === 'dark' ? 'light' : 'dark';
-    body.dataset.theme = next;
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
     if (icon) icon.textContent = next === 'dark' ? '◑' : '☀';
     localStorage.setItem('rgr-theme', next);
   });

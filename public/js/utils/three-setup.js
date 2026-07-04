@@ -29,7 +29,12 @@ export class BaseScene {
     this.renderer = getRenderer();
     this._buildCamera();
     this._onResize = this._onResize.bind(this);
-    window.addEventListener('resize', this._onResize);
+    // Debounce resize to avoid cascading layout reads during drag-resize (fixes forced reflow)
+    this._onResizeDebounced = (() => {
+      let timer;
+      return () => { clearTimeout(timer); timer = setTimeout(() => this._onResize(), 100); };
+    })();
+    window.addEventListener('resize', this._onResizeDebounced);
   }
 
 
@@ -96,7 +101,7 @@ export class BaseScene {
 
   dispose() {
     this.pause();
-    window.removeEventListener('resize', this._onResize);
+    window.removeEventListener('resize', this._onResizeDebounced);
     this.scene.traverse(obj => {
       if (obj.geometry) obj.geometry.dispose();
       if (obj.material) {

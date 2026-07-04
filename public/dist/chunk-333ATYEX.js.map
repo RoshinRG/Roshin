@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../js/utils/device.js"],
-  "sourcesContent": ["export const isMobile = () => window.matchMedia('(max-width: 768px)').matches;\nexport const isReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;\n"],
-  "mappings": "AAAO,IAAMA,EAAW,IAAM,OAAO,WAAW,oBAAoB,EAAE,QACzDC,EAAkB,IAAM,OAAO,WAAW,kCAAkC,EAAE",
-  "names": ["isMobile", "isReducedMotion"]
-}

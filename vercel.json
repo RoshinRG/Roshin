@@ -1,8 +1,17 @@
 {
   "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/dist/(.*)\\.map",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    }
+  ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!dist/.*\\.map$).*)",
       "destination": "/index.html"
     }
   ]

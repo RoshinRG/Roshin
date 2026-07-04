@@ -453,8 +453,8 @@
   --z-toast:      300;
 }
 
-/* Light theme overrides */
-[data-theme="light"] {
+/* Light theme overrides — targets <html data-theme="light"> set by inline script */
+html[data-theme="light"] {
   --bg-void:       #f5eff0;
   --bg-base:       #ece4e6;
   --bg-elevated:   #e0d5d7;
@@ -486,6 +486,11 @@ body {
   color: var(--color-text-primary);
   line-height: 1.6;
   overflow-x: hidden;
+  /* No transition here: transitions are added after first paint to prevent CLS */
+}
+
+/* Enable smooth transitions only after first paint (set by inline script in <head>) */
+.theme-ready body {
   transition: background-color var(--transition-slow), color var(--transition-slow);
 }
 

@@ -5,6 +5,7 @@
  */
 
 import { isMobile } from './utils/device.js';
+import { mountRenderer, resizeRenderer, getRenderer } from './utils/renderer-singleton.js';
 /* ─────────────────────────────────────────────────────────
    ROUTE DEFINITIONS
 ───────────────────────────────────────────────────────── */
@@ -65,13 +66,11 @@ async function navigate(route, pushState = true) {
       
       // Validation logging (only happens once per scene)
       setTimeout(() => {
-          import('./utils/renderer-singleton.js').then(({ getRenderer }) => {
-            const renderer = getRenderer();
-            if (renderer && renderer.info) {
-                console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
-                console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
-            }
-          });
+          const renderer = getRenderer();
+          if (renderer && renderer.info) {
+              console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
+              console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
+          }
       }, 500); // Wait for first render
     }
     if (scenes[route]) scenes[route].resume();
@@ -95,10 +94,8 @@ async function navigate(route, pushState = true) {
       if (isMobile() && route !== 'hero') {
         scenes[route].pause();
       } else {
-        import('./utils/renderer-singleton.js').then(({ mountRenderer, resizeRenderer }) => {
-          mountRenderer(scenes[route].canvas);
-          resizeRenderer(scenes[route].camera);
-        });
+        mountRenderer(scenes[route].canvas);
+        resizeRenderer(scenes[route].camera);
       }
     }
 

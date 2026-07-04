@@ -1,7 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
+  <!-- ⚡ Theme init — synchronous blocking script, MUST stay first in <head>.
+       Reads localStorage and stamps data-theme on <html> before any CSS parses,
+       so users with a saved "light" preference never see the dark-flash CLS hit. -->
+  <script>
+    (function () {
+      var t = localStorage.getItem('rgr-theme');
+      if (t === 'light' || t === 'dark') {
+        document.documentElement.dataset.theme = t;
+      }
+      // After 2 RAFs (≈ first painted frame), add .theme-ready so the CSS
+      // body transition is enabled — this ensures zero transition on initial load.
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          document.documentElement.classList.add('theme-ready');
+        });
+      });
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#050406">
@@ -45,17 +63,15 @@
 
 
 
-      <link rel="modulepreload" href="/dist/chunk-333ATYEX.js">
-  <link rel="modulepreload" href="/dist/hero-3QWGE7CT.js">
-  <link rel="modulepreload" href="/dist/chunk-GBMENEWO.js">
-  <link rel="modulepreload" href="/dist/chunk-XC6Q6NIR.js">
-  <link rel="modulepreload" href="/dist/chunk-NWCE2QON.js">
-  <link rel="modulepreload" href="/dist/chunk-NPWKEJZG.js">
-  <link rel="modulepreload" href="/dist/animations-RZSIINB2.js">
-  <link rel="modulepreload" href="/dist/renderer-singleton-NMLYUNCG.js">
+        <link rel="modulepreload" href="/dist/chunk-36J466AD.js">
+  <link rel="modulepreload" href="/dist/hero-O6HO47Z3.js">
+  <link rel="modulepreload" href="/dist/chunk-3QSQPBZN.js">
+  <link rel="modulepreload" href="/dist/chunk-J3M4QGNS.js">
+  <link rel="modulepreload" href="/dist/chunk-LB4HSRTT.js">
+  <link rel="modulepreload" href="/dist/animations-QGA7FQGI.js">
 </head>
 
-<body class="body" data-theme="dark">
+<body class="body">
 
   <!-- Skip Navigation -->
   <a href="/#main-content" class="skip-link">Skip to main content</a>
