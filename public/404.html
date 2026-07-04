@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050406">
+  <meta name="description"
+    content="Roshin R G — Front-End Developer &amp; SPA Architect. B.Tech AI &amp; Data Science student at Rajalakshmi Engineering College, Chennai. Building high-performance SPAs with vanilla JS, BEM CSS, and Three.js/WebGL.">
+  <meta name="keywords"
+    content="Roshin RG, front-end developer, SPA architect, Three.js, WebGL, vanilla JavaScript, BEM CSS, PWA, RGR Nexus, Chennai, portfolio">
+  <meta name="author" content="Roshin R G">
+  <link rel="canonical" href="https://roshinrg.dev/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://roshinrg.dev/">
+  <meta property="og:title" content="Roshin R G — Front-End Developer &amp; SPA Architect">
+  <meta property="og:description"
+    content="Front-end developer specialising in vanilla JS SPA architecture, BEM CSS, and Three.js/WebGL. B.Tech AI &amp; DS student, Chennai.">
+  <!-- TODO: create og-image.png -->
+  <meta property="og:image" content="https://roshinrg.dev/og-image.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Roshin R G — SPA Architect &amp; Front-End Developer">
+  <meta name="twitter:description"
+    content="Vanilla JS, BEM CSS, Three.js — SPA Expert | CSS Enthusiast | Code Craftsman. Based in Chennai, India.">
+
+  <title>Roshin R G — Front-End Developer &amp; SPA Architect</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="apple-touch-icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+  <!-- Fonts: Hosted locally in style.css via @font-face -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-9.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-39.woff2" crossorigin>
+  <!-- Styles -->
+  <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="style.css"></noscript>
+
+
+    <link rel="modulepreload" href="/dist/chunk-AD5DZV6Z.js">
+  <link rel="modulepreload" href="/dist/hero-TYJRXS4P.js">
+  <link rel="modulepreload" href="/dist/chunk-VPR25TOL.js">
+  <link rel="modulepreload" href="/dist/chunk-TWBA4RQG.js">
+  <link rel="modulepreload" href="/dist/renderer-singleton-KKPLY7EA.js">
+</head>
+
+<body class="body" data-theme="dark">
+
+  <!-- Skip Navigation -->
+  <a href="/#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Fade Transition Overlay -->
+  <div class="page-transition" id="pageTransition" aria-hidden="true"></div>
+
+  <!-- Scroll Progress Tracer -->
+  <div class="scroll-tracer" id="scrollTracer" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <header class="nav" id="mainNav">
+    <div class="nav__container">
+      <a href="/#hero" class="nav__logo" data-section="hero" aria-label="Roshin RG — Home">
+        <span class="nav__logo-arc" aria-hidden="true">⬡</span>
+        <span class="nav__logo-text">RGR</span>
+      </a>
+
+      <nav class="nav__links" aria-label="Main navigation">
+        <a href="/#hero" class="nav__link nav__link--active" data-section="hero" aria-current="page">Home</a>
+        <a href="/#about" class="nav__link" data-section="about">About</a>
+        <a href="/#projects" class="nav__link" data-section="projects">Projects</a>
+        <a href="/#skills" class="nav__link" data-section="skills">Skills</a>
+        <a href="/#contact" class="nav__link" data-section="contact">Contact</a>
+      </nav>
+
+      <div class="nav__controls">
+        <button class="nav__theme-toggle" id="themeToggle" aria-label="Toggle theme" type="button">
+          <span class="nav__theme-icon" aria-hidden="true">◑</span>
+        </button>
+        <button class="nav__hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" type="button">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="nav__mobile-menu" id="mobileMenu" role="dialog" aria-label="Mobile navigation" inert>
+      <a href="/#hero" class="nav__mobile-link" data-section="hero">Home</a>
+      <a href="/#about" class="nav__mobile-link" data-section="about">About</a>
+      <a href="/#projects" class="nav__mobile-link" data-section="projects">Projects</a>
+      <a href="/#skills" class="nav__mobile-link" data-section="skills">Skills</a>
+      <a href="/#contact" class="nav__mobile-link" data-section="contact">Contact</a>
+    </div>
+  </header>
+
+  <!-- Main SPA Content -->
+  <main id="main-content">
+
+    <!-- ═══════════════════════════════════════════
+         SECTION 1 — HERO
+    ════════════════════════════════════════════ -->
+    <section class="section hero" id="sectionHero" data-route="hero" aria-label="Hero — Introduction">
+      <canvas class="hero__canvas" id="heroCanvas" aria-label="Cyberpunk grid and data stream 3D animation"
+        role="img"></canvas>
+
+      <div class="hero__content">
+        <p class="hero__eyebrow">
+          <span class="hero__arc-dot" aria-hidden="true"></span>
+          Open to freelance &amp; internships · Chennai, India
+        </p>
+        <h1 class="hero__title">
+          <span class="hero__title-line">Roshin</span>
+          <span class="hero__title-line hero__title-line--accent">RG</span>
+        </h1>
+        <p class="hero__role">Front&#8209;End Developer &amp; SPA Architect</p>
+        <p class="hero__tagline">
+          I build high-performance single-page applications with<br>
+          <em>vanilla JS, BEM CSS, and 3D web experiences.</em>
+        </p>
+
+        <div class="hero__ctas">
+          <a href="/#projects" class="btn btn--primary" data-section="projects">
+            <span class="btn__glow" aria-hidden="true"></span>
+            View Projects
+          </a>
+          <a href="/#contact" class="btn btn--outline" data-section="contact">
+            Get In Touch
+          </a>
+        </div>
+
+        <div class="hero__stats">
+          <div class="hero__stat">
+            <span class="hero__stat-number">4+</span>
+            <span class="hero__stat-label">Projects</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-number">15+</span>
+            <span class="hero__stat-label">Core Skills</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-number">∞</span>
+            <span class="hero__stat-label">CSS Mastery</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION 2 — ABOUT
+    ════════════════════════════════════════════ -->
+    <section class="section about" id="sectionAbout" data-route="about" aria-label="About Roshin RG" hidden>
+      <div class="section__arc-bg" aria-hidden="true"></div>
+
+      <div class="about__container">
+        <div class="about__avatar-col">
+          <canvas class="about__avatar-canvas" id="avatarCanvas" aria-label="Holographic cyber globe assembly animation"
+            role="img" tabindex="0"></canvas>
+          <p class="about__canvas-hint" aria-hidden="true">Hover to pause · Click to reset</p>
+        </div>
+
+        <div class="about__content">
+          <h2 class="section__heading reveal-item">
+            <span class="section__heading-label">01 — About</span>
+            About Me
+          </h2>
+
+          <p class="about__bio reveal-item">
+            I'm <strong>Roshin R G</strong>, a front-end developer and AI &amp; Data Science student
+            at <strong>Rajalakshmi Engineering College, Chennai</strong>. I specialise in building
+            single-page applications with <strong>vanilla JavaScript</strong>, strict
+            <strong>BEM CSS</strong>, and integrated WebGL experiences.
+          </p>
+          <p class="about__bio reveal-item">
+            My philosophy is simple: <em>the best abstraction is the one you understand
+              completely.</em> I believe in deliberate, intentional code — every event listener,
+            every DOM query matters. I bridge the gap between data literacy and front-end
+            precision, building interfaces that let humans interact with complex systems
+            elegantly.
+          </p>
+
+          <div class="about__stats reveal-item">
+            <div class="about__stat-card">
+              <span class="about__stat-num">4+</span>
+              <span class="about__stat-desc">Shipped projects</span>
+            </div>
+            <div class="about__stat-card">
+              <span class="about__stat-num">15+</span>
+              <span class="about__stat-desc">Core skills mastered</span>
+            </div>
+            <div class="about__stat-card">
+              <span class="about__stat-num">100</span>
+              <span class="about__stat-desc">Portfolio Lighthouse score</span>
+            </div>
+          </div>
+
+          <div class="about__internship reveal-item">
+            <div class="about__internship-badge">🎓 Education</div>
+            <div class="about__internship-detail">
+              <strong>B.Tech — AI &amp; Data Science</strong> · Rajalakshmi Engineering College<br>
+              <span>2024 – 2028 · Currently 2nd Year · Chennai, Tamil Nadu</span>
+            </div>
+          </div>
+
+          <div class="about__internship reveal-item">
+            <div class="about__internship-badge">💼 Internship</div>
+            <div class="about__internship-detail">
+              <strong>Frontend Developer</strong> — Decode Labs<br>
+              <span>May 2026 · 1 Month · Remote — Built premium dark-themed interactive sites</span>
+            </div>
+          </div>
+
+          <div class="about__internship reveal-item">
+            <div class="about__internship-badge">🤖 AI/ML Intern</div>
+            <div class="about__internship-detail">
+              <strong>AI/ML Intern</strong> — AK InfoPark Pvt Ltd<br>
+              <span>2024 · 15 Days — House Buyer Prediction · Python, Linear Regression, EDA</span>
+            </div>
+          </div>
+
+          <div class="about__links reveal-item">
+            <a href="Roshin_RG_CV.pdf" download class="about__link" aria-label="Download Resume">
+              ↓ Resume
+            </a>
+            <a href="https://github.com/roshinrg" class="about__link" target="_blank" rel="noopener"
+              aria-label="GitHub profile">
+              GitHub ↗
+            </a>
+            <a href="https://roshinrg.dev" class="about__link" target="_blank" rel="noopener" aria-label="Portfolio">
+              Portfolio ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION 3 — PROJECTS
+    ════════════════════════════════════════════ -->
+    <section class="section projects" id="sectionProjects" data-route="projects" aria-label="Projects" hidden>
+      <div class="section__arc-bg" aria-hidden="true"></div>
+      <canvas class="projects__bg-canvas" id="projectsCanvas" aria-label="Ambient particle field" role="presentation"
+        aria-hidden="true"></canvas>
+
+      <div class="projects__container">
+        <h2 class="section__heading reveal-item">
+          <span class="section__heading-label">02 — Projects</span>
+          Selected Work
+        </h2>
+
+        <div class="projects__grid" id="projectsGrid">
+
+          <!-- Project Card 1 — Portfolio SPA -->
+          <article class="project-card reveal-item" data-project="0">
+            <div class="project-card__pulse" aria-hidden="true"></div>
+            <div class="project-card__inner">
+              <div class="project-card__header">
+                <span class="project-card__tag">Vanilla JS</span>
+                <span class="project-card__tag">Three.js</span>
+                <span class="project-card__tag">PWA</span>
+                <span class="project-card__tag">BEM CSS</span>
+              </div>
+              <h3 class="project-card__title">Portfolio Website</h3>
+              <p class="project-card__desc">
+                This very site — a zero-framework SPA with a custom history API router,
+                Cyberpunk Three.js/WebGL animations across all 5 sections, Service Worker
+                offline support, and a perfect 100 Lighthouse score.
+              </p>
+              <div class="project-card__footer">
+                <a href="https://roshinrg.dev" class="project-card__btn project-card__btn--primary" target="_blank"
+                  rel="noopener">
+                  Live Demo ↗
+                </a>
+                <a href="https://github.com/roshinrg" class="project-card__btn project-card__btn--ghost" target="_blank"
+                  rel="noopener">
+                  GitHub
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project Card 2 — Restaurant System -->
+          <article class="project-card reveal-item" data-project="1">
+            <div class="project-card__pulse" aria-hidden="true"></div>
+            <div class="project-card__inner">
+              <div class="project-card__header">
+                <span class="project-card__tag">Node.js</span>
+                <span class="project-card__tag">Express</span>
+                <span class="project-card__tag">Full-Stack</span>
+              </div>
+              <h3 class="project-card__title">Location Multi Cuisine Restaurant</h3>
+              <p class="project-card__desc">
+                Full-stack restaurant management system built with Node.js and Express.
+                Features menu management, order tracking, location-based discovery, and a
+                responsive front-end with smooth scroll-reveal animations.
+              </p>
+              <div class="project-card__footer">
+                <a href="https://github.com/roshinrg" class="project-card__btn project-card__btn--primary"
+                  target="_blank" rel="noopener">
+                  GitHub ↗
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project Card 3 — Secure-Pay -->
+          <article class="project-card reveal-item" data-project="2">
+            <div class="project-card__pulse" aria-hidden="true"></div>
+            <div class="project-card__inner">
+              <div class="project-card__header">
+                <span class="project-card__tag">jQuery</span>
+                <span class="project-card__tag">Vanilla JS</span>
+                <span class="project-card__tag">CSS Animations</span>
+              </div>
+              <h3 class="project-card__title">Secure-Pay</h3>
+              <p class="project-card__desc">
+                A polished jQuery payment form with real-time card-type detection (Visa,
+                Mastercard, Amex), live card flip preview animation, inline validation,
+                and smooth micro-interaction transitions.
+              </p>
+              <div class="project-card__footer">
+                <a href="https://github.com/roshinrg" class="project-card__btn project-card__btn--primary"
+                  target="_blank" rel="noopener">
+                  GitHub ↗
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project Card 4 — Art Gallery -->
+          <article class="project-card reveal-item" data-project="3">
+            <div class="project-card__pulse" aria-hidden="true"></div>
+            <div class="project-card__inner">
+              <div class="project-card__header">
+                <span class="project-card__tag">CSS Grid</span>
+                <span class="project-card__tag">Masonry</span>
+                <span class="project-card__tag">Zero JS</span>
+              </div>
+              <h3 class="project-card__title">Art Gallery</h3>
+              <p class="project-card__desc">
+                A pure CSS masonry art gallery — zero JavaScript required. Showcases
+                advanced CSS Grid layout techniques with hover zoom, caption reveal,
+                and fully responsive multi-column masonry flow.
+              </p>
+              <div class="project-card__footer">
+                <a href="https://github.com/roshinrg" class="project-card__btn project-card__btn--primary"
+                  target="_blank" rel="noopener">
+                  GitHub ↗
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project Card 5 — Spotify Personality (WIP) -->
+          <article class="project-card reveal-item" data-project="4">
+            <div class="project-card__pulse" aria-hidden="true"></div>
+            <div class="project-card__inner">
+              <div class="project-card__header">
+                <span class="project-card__tag">Spotify API</span>
+                <span class="project-card__tag">Vanilla JS</span>
+                <span class="project-card__tag">Data Viz</span>
+                <span class="project-card__tag project-card__tag--wip">In Progress</span>
+              </div>
+              <h3 class="project-card__title">Spotify Personality Analyser</h3>
+              <p class="project-card__desc">
+                Web app that analyses your Spotify listening history to surface personality
+                insights — top genres, audio feature trends (energy, valence, tempo), and
+                a dynamic visual identity based on your taste profile.
+              </p>
+              <div class="project-card__footer">
+                <a href="https://github.com/roshinrg" class="project-card__btn project-card__btn--ghost" target="_blank"
+                  rel="noopener">
+                  GitHub
+                </a>
+              </div>
+            </div>
+          </article>
+
+        </div><!-- /projects__grid -->
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION 4 — SKILLS
+    ════════════════════════════════════════════ -->
+    <section class="section skills" id="sectionSkills" data-route="skills" aria-label="Skills" hidden>
+      <div class="section__arc-bg" aria-hidden="true"></div>
+
+      <div class="skills__container">
+        <div class="skills__content">
+          <h2 class="section__heading reveal-item">
+            <span class="section__heading-label">03 — Skills</span>
+            Arsenal
+          </h2>
+
+          <div class="skills__categories reveal-item">
+
+            <div class="skills__category">
+              <h3 class="skills__cat-title">Expert ★★★★★</h3>
+              <ul class="skills__tags">
+                <li class="skill-tag skill-tag--accent">Vanilla JavaScript</li>
+                <li class="skill-tag skill-tag--accent">HTML5 &amp; Semantic HTML</li>
+                <li class="skill-tag skill-tag--accent">CSS3 &amp; BEM</li>
+                <li class="skill-tag skill-tag--accent">jQuery</li>
+                <li class="skill-tag skill-tag--accent">DOM Manipulation</li>
+              </ul>
+            </div>
+
+            <div class="skills__category">
+              <h3 class="skills__cat-title">Proficient ★★★★</h3>
+              <ul class="skills__tags">
+                <li class="skill-tag">SPA Architecture</li>
+                <li class="skill-tag">Three.js &amp; WebGL</li>
+                <li class="skill-tag">Service Workers</li>
+                <li class="skill-tag">PWA Development</li>
+                <li class="skill-tag">CSS Grid &amp; Flexbox</li>
+                <li class="skill-tag">Python</li>
+                <li class="skill-tag">Git &amp; GitHub</li>
+              </ul>
+            </div>
+
+            <div class="skills__category">
+              <h3 class="skills__cat-title">Familiar ★★★</h3>
+              <ul class="skills__tags">
+                <li class="skill-tag">React.js</li>
+                <li class="skill-tag">Next.js</li>
+                <li class="skill-tag">Node.js &amp; Express</li>
+                <li class="skill-tag">Supabase</li>
+                <li class="skill-tag">Tailwind CSS</li>
+                <li class="skill-tag">R Programming</li>
+                <li class="skill-tag">C Programming</li>
+              </ul>
+            </div>
+
+            <div class="skills__category">
+              <h3 class="skills__cat-title">Currently Exploring</h3>
+              <ul class="skills__tags">
+                <li class="skill-tag">GLSL Shaders</li>
+                <li class="skill-tag">WebXR / Spatial Computing</li>
+                <li class="skill-tag">Advanced 3D Graphics</li>
+                <li class="skill-tag">Music Technology</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="skills__canvas-col">
+          <canvas class="skills__canvas" id="skillsCanvas" aria-label="3D floating skill labels interactive canvas"
+            role="img" tabindex="0"></canvas>
+          <p class="skills__canvas-hint" aria-hidden="true">Move cursor to interact</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION 5 — CONTACT
+    ════════════════════════════════════════════ -->
+    <section class="section contact" id="sectionContact" data-route="contact" aria-label="Contact" hidden>
+      <canvas class="contact__canvas" id="contactCanvas" aria-label="Abstract geometric hologram background"
+        role="presentation" tabindex="-1"></canvas>
+
+      <div class="contact__container">
+        <div class="contact__header reveal-item">
+          <h2 class="section__heading">
+            <span class="section__heading-label">04 — Contact</span>
+            Let's Build Something
+          </h2>
+          <p class="contact__subtitle">
+            Have a project in mind or want to discuss opportunities?<br>
+            I respond within 24 hours.
+          </p>
+        </div>
+
+        <div class="contact__body">
+          <div class="contact__info reveal-item">
+            <div class="contact__info-item">
+              <span class="contact__info-icon" aria-hidden="true">📧</span>
+              <div>
+                <strong>Email</strong>
+                <a href="mailto:roshin.rg.2024.aids@rajalakshmi.edu.in"
+                  class="contact__info-link">roshin.rg.2024.aids@rajalakshmi.edu.in</a>
+              </div>
+            </div>
+            <div class="contact__info-item">
+              <span class="contact__info-icon" aria-hidden="true">📍</span>
+              <div>
+                <strong>Location</strong>
+                <span>Chennai, Tamil Nadu, India · Open to remote</span>
+              </div>
+            </div>
+            <div class="contact__info-item">
+              <span class="contact__info-icon" aria-hidden="true">📱</span>
+              <div>
+                <strong>Phone</strong>
+                <a href="tel:+916369460964" class="contact__info-link">+91&nbsp;6369&nbsp;460&nbsp;964</a>
+              </div>
+            </div>
+            <div class="contact__social">
+              <a href="https://github.com/roshinrg" class="contact__social-link" target="_blank" rel="noopener"
+                aria-label="GitHub">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.207 11.387.6.113.82-.26.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.085 1.838 1.236 1.838 1.236 1.07 1.835 2.807 1.305 3.492.998.108-.776.42-1.305.763-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.3 1.23A11.51 11.51 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.652.242 2.873.12 3.176.77.84 1.232 1.91 1.232 3.22 0 4.61-2.807 5.625-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .32.218.694.825.576C20.565 21.796 24 17.298 24 12c0-6.63-5.37-12-12-12z" />
+                </svg>
+              </a>
+              <a href="https://roshinrg.dev" class="contact__social-link" target="_blank" rel="noopener"
+                aria-label="Portfolio">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 15v-4H8l4-8 1 1-2 4h3l-4 7z" />
+                </svg>
+              </a>
+              <a href="mailto:roshin.rg.2024.aids@rajalakshmi.edu.in" class="contact__social-link"
+                aria-label="Send email">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z" />
+                </svg>
+              </a>
+              <a href="https://linkedin.com/in/roshinrg" class="contact__social-link" target="_blank" rel="noopener"
+                aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+              </a>
+              <a href="https://twitter.com/roshinrg" class="contact__social-link" target="_blank" rel="noopener"
+                aria-label="Twitter / X">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Contact Form -->
+          <form class="contact__form reveal-item" id="contactForm" action="https://script.google.com/macros/s/AKfycbw97MFfNON_HAKfOryamFU21x33bhZzeWXBRjfnxUD51pxMpw2L_T5rwe56kka_iAI/exec" method="POST" novalidate
+            aria-label="Contact form">
+
+            <div class="contact__repulsor-charge" id="repulsorCharge" aria-hidden="true"></div>
+
+            <div class="form__group">
+              <label class="form__label" for="contactName">Name</label>
+              <input class="form__input" type="text" id="contactName" name="name" placeholder="Tony Stark"
+                autocomplete="name" required aria-required="true">
+              <span class="form__error" id="nameError" role="alert"></span>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="contactEmail">Email</label>
+              <input class="form__input" type="email" id="contactEmail" name="email" placeholder="tony@stark.com"
+                autocomplete="email" required aria-required="true">
+              <span class="form__error" id="emailError" role="alert"></span>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="contactPhone">Phone Number</label>
+              <input class="form__input" type="tel" id="contactPhone" name="phone" placeholder="+1 (555) 000-0000"
+                autocomplete="tel">
+              <span class="form__error" id="phoneError" role="alert"></span>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="contactSubject">Subject</label>
+              <input class="form__input" type="text" id="contactSubject" name="subject" placeholder="Let's collaborate!"
+                autocomplete="off">
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="contactMessage">Message</label>
+              <textarea class="form__input form__textarea" id="contactMessage" name="message"
+                placeholder="Describe your project..." rows="5" required aria-required="true"></textarea>
+              <span class="form__error" id="messageError" role="alert"></span>
+            </div>
+
+            <button class="btn btn--primary btn--submit" id="contactSubmit" type="submit">
+              <span class="btn__glow" aria-hidden="true"></span>
+              <span class="btn__text">Launch Message</span>
+              <span class="btn__loading" aria-hidden="true">Sending…</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Toast Notification -->
+      <div class="toast" id="successToast" role="alert" aria-live="polite" aria-atomic="true">
+        <span class="toast__icon" aria-hidden="true">⚡</span>
+        <span class="toast__text">Message sent! I'll respond within 24 hours.</span>
+      </div>
+    </section>
+
+  </main><!-- /main -->
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__container">
+      <p class="footer__text">
+        Crafted with ⚡ by <strong>Roshin R G</strong> · RGR Nexus · Three.js + Vanilla JS
+      </p>
+      <p class="footer__copy">
+        © <span id="footerYear"></span> Roshin R G. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Roshin R G",
+    "alternateName": "RGR",
+    "url": "https://roshinrg.dev",
+    "email": "roshin.rg.2024.aids@rajalakshmi.edu.in",
+    "telephone": "+916369460964",
+    "jobTitle": "Front-End Developer & SPA Architect",
+    "description": "B.Tech AI & Data Science student at Rajalakshmi Engineering College, Chennai. Specialises in vanilla JavaScript SPA architecture, BEM CSS, and Three.js/WebGL experiences.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Chennai",
+      "addressRegion": "Tamil Nadu",
+      "addressCountry": "IN"
+    },
+    "alumniOf": {
+      "@type": "EducationalOrganization",
+      "name": "Rajalakshmi Engineering College",
+      "address": "Chennai, Tamil Nadu, India"
+    },
+    "knowsAbout": [
+      "Vanilla JavaScript", "SPA Architecture", "BEM CSS", "Three.js", "WebGL",
+      "HTML5", "jQuery", "Service Workers", "PWA", "Node.js", "Python"
+    ],
+    "brand": {
+      "@type": "Brand",
+      "name": "RGR Nexus"
+    },
+    "sameAs": [
+      "https://github.com/roshinrg",
+      "https://roshinrg.dev"
+    ]
+  }
+  </script>
+
+  <!-- Main SPA entry point (ES module) -->
+  <script type="module" src="/dist/main.js" defer></script>
+
+  <!-- Vercel Speed Insights -->
+  <script>
+    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+
+</html>
