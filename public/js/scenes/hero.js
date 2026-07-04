@@ -5,7 +5,8 @@
  */
 
 import { FogExp2, PointLight, Vector2 } from 'three';
-import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight, isMobile } from '../utils/three-setup.js';
+import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight } from '../utils/three-setup.js';
+import { isMobile } from '../utils/device.js';
 import { ParticleSystem } from '../utils/particle-system.js';
 import { createCyberCube } from './constructs.js';
 

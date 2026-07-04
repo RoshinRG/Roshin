@@ -4,7 +4,7 @@
  */
 
 import { BoxGeometry, Color, DynamicDrawUsage, Euler, Group, InstancedMesh, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, SphereGeometry, Vector3 } from 'three';
-import { isMobile } from '../utils/three-setup.js';
+import { isMobile } from '../utils/device.js';
 
 /**
  * createCyberCube

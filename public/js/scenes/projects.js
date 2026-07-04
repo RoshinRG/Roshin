@@ -5,7 +5,8 @@
  */
 
 
-import { BaseScene, createAmbientLight, isMobile } from '../utils/three-setup.js';
+import { BaseScene, createAmbientLight } from '../utils/three-setup.js';
+import { isMobile } from '../utils/device.js';
 import { ParticleSystem } from '../utils/particle-system.js';
 
 export class ProjectsScene extends BaseScene {

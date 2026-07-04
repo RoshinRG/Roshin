@@ -21,6 +21,7 @@
   ],
   "scripts": {
     "start": "node server.js",
+    "build": "node build.js",
     "dev": "nodemon server.js",
     "serve": "npx serve public --listen 3000 --single",
     "preview": "npx serve public --listen 3131 --single"

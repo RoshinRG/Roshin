@@ -5,7 +5,7 @@
  */
 
 import { Color, DynamicDrawUsage, InstancedBufferAttribute, InstancedMesh, MeshBasicMaterial, Object3D, Scene, SphereGeometry } from 'three';
-import { isMobile } from './three-setup.js';
+import { isMobile } from './device.js';
 
 const _dummy  = new Object3D();
 const _color  = new Color();

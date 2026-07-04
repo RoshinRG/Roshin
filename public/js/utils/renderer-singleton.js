@@ -1,5 +1,5 @@
 import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace, WebGLRenderer } from 'three';
-import { isMobile } from './three-setup.js';
+import { isMobile } from './device.js';
 
 let sharedRenderer = null;
 let currentCanvas = null;

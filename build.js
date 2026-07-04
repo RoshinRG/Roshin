@@ -43,6 +43,12 @@ async function build() {
       getDependencies(heroChunk, preloads);
     }
 
+    const animationsChunk = outputs.find(o => o.includes('/animations-') && !o.endsWith('.map'));
+    if (animationsChunk) {
+      preloads.add(animationsChunk);
+      getDependencies(animationsChunk, preloads);
+    }
+
     // Add renderer manually because it's a dynamic import from main.js but critical for hero
     const rendererChunk = outputs.find(o => o.includes('/renderer-singleton-') && !o.endsWith('.map'));
     if (rendererChunk) {
@@ -60,7 +66,7 @@ async function build() {
       let html = fs.readFileSync(file, 'utf8');
       
       // Remove old modulepreloads if they exist
-      html = html.replace(/<link rel="modulepreload" href="\/dist\/.*?">\n\s*/g, '');
+      html = html.replace(/<link rel="modulepreload" href="\/dist\/.*?">\s*/g, '');
       
       // Inject new ones right before </head>
       html = html.replace('</head>', `  ${preloadHtml}\n</head>`);
