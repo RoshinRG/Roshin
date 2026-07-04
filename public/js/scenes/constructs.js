@@ -4,6 +4,7 @@
  */
 
 import { BoxGeometry, Color, DynamicDrawUsage, Euler, Group, InstancedMesh, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, SphereGeometry, Vector3 } from 'three';
+import { isMobile } from '../utils/three-setup.js';
 
 /**
  * createCyberCube
@@ -21,8 +22,6 @@ export function createCyberCube() {
     opacity: 0.45
   });
   const outerMesh = new Mesh(outerGeo, outerMat);
-  group.add(outerMesh);
-
   // Inner emissive core box
   const innerGeo = new BoxGeometry(1.5, 1.5, 1.5);
   const innerMat = new MeshStandardMaterial({
@@ -34,7 +33,11 @@ export function createCyberCube() {
     wireframe: true
   });
   const innerMesh = new Mesh(innerGeo, innerMat);
-  group.add(innerMesh);
+  
+  if (!isMobile()) {
+    group.add(outerMesh);
+    group.add(innerMesh);
+  }
 
   // Data nodes orbiting
   const nodeGeo = new BoxGeometry(0.15, 0.15, 0.15);

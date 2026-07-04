@@ -38,7 +38,7 @@ export function initScrollTracer() {
     const scrolled = window.scrollY;
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const pct = maxScroll > 0 ? (scrolled / maxScroll) * 100 : 0;
-    tracer.style.height = pct + '%';
+    tracer.style.transform = `scaleY(${pct / 100})`;
 
     // Nav scroll class
     if (nav) {

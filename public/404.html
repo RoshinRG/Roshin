@@ -37,7 +37,8 @@
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
   <!-- Fonts: Hosted locally in style.css via @font-face -->
-
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-9.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-39.woff2" crossorigin>
   <!-- Styles -->
   <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="style.css"></noscript>
@@ -57,12 +58,18 @@
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
+
+  <link rel="modulepreload" href="/dist/chunk-AD5DZV6Z.js">
+  <link rel="modulepreload" href="/dist/hero-TYJRXS4P.js">
+  <link rel="modulepreload" href="/dist/chunk-VPR25TOL.js">
+  <link rel="modulepreload" href="/dist/chunk-TWBA4RQG.js">
+  <link rel="modulepreload" href="/dist/renderer-singleton-KKPLY7EA.js">
 </head>
 
 <body class="body" data-theme="dark">
 
   <!-- Skip Navigation -->
-  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <a href="/#main-content" class="skip-link">Skip to main content</a>
 
   <!-- Fade Transition Overlay -->
   <div class="page-transition" id="pageTransition" aria-hidden="true"></div>
@@ -73,17 +80,17 @@
   <!-- Navigation -->
   <header class="nav" id="mainNav">
     <div class="nav__container">
-      <a href="#hero" class="nav__logo" data-section="hero" aria-label="Roshin RG — Home">
+      <a href="/#hero" class="nav__logo" data-section="hero" aria-label="Roshin RG — Home">
         <span class="nav__logo-arc" aria-hidden="true">⬡</span>
         <span class="nav__logo-text">RGR</span>
       </a>
 
       <nav class="nav__links" aria-label="Main navigation">
-        <a href="#hero" class="nav__link nav__link--active" data-section="hero" aria-current="page">Home</a>
-        <a href="#about" class="nav__link" data-section="about">About</a>
-        <a href="#projects" class="nav__link" data-section="projects">Projects</a>
-        <a href="#skills" class="nav__link" data-section="skills">Skills</a>
-        <a href="#contact" class="nav__link" data-section="contact">Contact</a>
+        <a href="/#hero" class="nav__link nav__link--active" data-section="hero" aria-current="page">Home</a>
+        <a href="/#about" class="nav__link" data-section="about">About</a>
+        <a href="/#projects" class="nav__link" data-section="projects">Projects</a>
+        <a href="/#skills" class="nav__link" data-section="skills">Skills</a>
+        <a href="/#contact" class="nav__link" data-section="contact">Contact</a>
       </nav>
 
       <div class="nav__controls">
@@ -98,11 +105,11 @@
 
     <!-- Mobile Menu -->
     <div class="nav__mobile-menu" id="mobileMenu" role="dialog" aria-label="Mobile navigation" inert>
-      <a href="#hero" class="nav__mobile-link" data-section="hero">Home</a>
-      <a href="#about" class="nav__mobile-link" data-section="about">About</a>
-      <a href="#projects" class="nav__mobile-link" data-section="projects">Projects</a>
-      <a href="#skills" class="nav__mobile-link" data-section="skills">Skills</a>
-      <a href="#contact" class="nav__mobile-link" data-section="contact">Contact</a>
+      <a href="/#hero" class="nav__mobile-link" data-section="hero">Home</a>
+      <a href="/#about" class="nav__mobile-link" data-section="about">About</a>
+      <a href="/#projects" class="nav__mobile-link" data-section="projects">Projects</a>
+      <a href="/#skills" class="nav__mobile-link" data-section="skills">Skills</a>
+      <a href="/#contact" class="nav__mobile-link" data-section="contact">Contact</a>
     </div>
   </header>
 
@@ -132,11 +139,11 @@
         </p>
 
         <div class="hero__ctas">
-          <a href="#projects" class="btn btn--primary" data-section="projects">
+          <a href="/#projects" class="btn btn--primary" data-section="projects">
             <span class="btn__glow" aria-hidden="true"></span>
             View Projects
           </a>
-          <a href="#contact" class="btn btn--outline" data-section="contact">
+          <a href="/#contact" class="btn btn--outline" data-section="contact">
             Get In Touch
           </a>
         </div>
@@ -232,7 +239,7 @@
           </div>
 
           <div class="about__links reveal-item">
-            <a href="Roshin_RG_CV.md" download class="about__link" aria-label="Download Resume">
+            <a href="Roshin_RG_CV.pdf" download class="about__link" aria-label="Download Resume">
               ↓ Resume
             </a>
             <a href="https://github.com/roshinrg" class="about__link" target="_blank" rel="noopener"
@@ -657,7 +664,7 @@
   </script>
 
   <!-- Main SPA entry point (ES module) -->
-  <script type="module" src="js/main.js" defer></script>
+  <script type="module" src="/dist/main.js" defer></script>
 
   <!-- Vercel Speed Insights -->
   <script>

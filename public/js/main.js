@@ -4,25 +4,12 @@
  * Lazy-initialises Three.js scenes on first section activation.
  */
 
-import { HeroScene } from './scenes/hero.js';
-
-import {
-  initScrollReveal,
-  initScrollTracer,
-  initContactForm,
-  initThemeToggle,
-  initMobileMenu,
-  initButtonGlow,
-  initFooterYear,
-} from './animations.js';
-
-import { mountRenderer, resizeRenderer, getRenderer } from './utils/renderer-singleton.js';
-
+import { isMobile } from './utils/three-setup.js';
 /* ─────────────────────────────────────────────────────────
    ROUTE DEFINITIONS
 ───────────────────────────────────────────────────────── */
 const ROUTES = {
-  hero:     { sectionId: 'sectionHero',     getScene: () => Promise.resolve(HeroScene) },
+  hero:     { sectionId: 'sectionHero',     getScene: () => import('./scenes/hero.js').then(m => m.HeroScene) },
   about:    { sectionId: 'sectionAbout',    getScene: () => import('./scenes/about.js').then(m => m.AboutScene) },
   projects: { sectionId: 'sectionProjects', getScene: () => import('./scenes/projects.js').then(m => m.ProjectsScene) },
   skills:   { sectionId: 'sectionSkills',   getScene: () => import('./scenes/skills.js').then(m => m.SkillsScene) },
@@ -78,11 +65,13 @@ async function navigate(route, pushState = true) {
       
       // Validation logging (only happens once per scene)
       setTimeout(() => {
-          const renderer = getRenderer(); // Requires import
-          if (renderer && renderer.info) {
-              console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
-              console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
-          }
+          import('./utils/renderer-singleton.js').then(({ getRenderer }) => {
+            const renderer = getRenderer();
+            if (renderer && renderer.info) {
+                console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
+                console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
+            }
+          });
       }, 500); // Wait for first render
     }
     if (scenes[route]) scenes[route].resume();
@@ -101,10 +90,16 @@ async function navigate(route, pushState = true) {
     currentRoute = route;
     navigationCount++;
 
-    // Mount shared renderer to the new scene's canvas slot
+    // Mount shared renderer to the new scene's canvas slot (skip secondary on mobile)
     if (scenes[route].canvas) {
-      mountRenderer(scenes[route].canvas);
-      resizeRenderer(scenes[route].camera);
+      if (isMobile() && route !== 'hero') {
+        scenes[route].pause();
+      } else {
+        import('./utils/renderer-singleton.js').then(({ mountRenderer, resizeRenderer }) => {
+          mountRenderer(scenes[route].canvas);
+          resizeRenderer(scenes[route].camera);
+        });
+      }
     }
 
     // Dispose old scenes that haven't been active recently
@@ -199,18 +194,31 @@ async function registerSW() {
    BOOT
 ───────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Start non-Three.js interactivity immediately
-  initThemeToggle();
-  initMobileMenu();
-  initScrollTracer();
-  initScrollReveal();
-  initContactForm();
-  initButtonGlow();
-  initFooterYear();
+
 
   // Navigate to initial route (loads + starts first scene)
   const initial = resolveInitialRoute();
-  navigate(initial, false);
+  
+  // Yield to the browser to paint FCP/LCP before blocking the main thread with WebGL initialization
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      navigate(initial, false);
+      
+      // Load and initialize UI animations after critical path
+      const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+      idle(() => {
+        import('./animations.js').then(module => {
+          module.initThemeToggle();
+          module.initMobileMenu();
+          module.initScrollTracer();
+          module.initScrollReveal();
+          module.initContactForm();
+          module.initButtonGlow();
+          module.initFooterYear();
+        });
+      });
+    }, 0);
+  });
 
   // Register Service Worker after page is interactive
   registerSW();
