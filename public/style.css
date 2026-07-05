@@ -79,15 +79,30 @@
   src: url(/fonts/font-8.woff2) format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-/* latin */
+/* latin — primary display font, preloaded, size/metric adjusted */
 @font-face {
   font-family: 'Cormorant Garamond';
   font-style: normal;
   font-weight: 300;
   font-display: optional;
   size-adjust: 105%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
   src: url(/fonts/font-9.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Metric-matched Georgia fallback — eliminates CLS on Cormorant swap */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 300;
+  font-display: optional;
+  size-adjust: 105%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+  src: local('Georgia');
 }
 /* cyrillic-ext */
 @font-face {
@@ -170,14 +185,30 @@
   src: url(/fonts/font-18.woff2) format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-/* latin */
+/* latin — semibold, used for nav logo RGR text and headings */
 @font-face {
   font-family: 'Cormorant Garamond';
   font-style: normal;
   font-weight: 600;
   font-display: optional;
+  size-adjust: 105%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
   src: url(/fonts/font-19.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Metric-matched Georgia fallback for weight 600 */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  size-adjust: 105%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+  src: local('Georgia Bold'), local('Georgia-Bold');
 }
 /* latin-ext */
 @font-face {
@@ -619,7 +650,9 @@ code, pre { font-family: var(--font-mono); color: var(--rg-mid); }
 }
 
 @keyframes slide-in-up {
-  from { opacity: 0; transform: translateY(30px); }
+  /* Start visible but offset — opacity stays 1 so LCP text is immediately
+     measurable by the browser, preventing mobile LCP delay from invisible state */
+  from { opacity: 1; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -721,6 +754,9 @@ code, pre { font-family: var(--font-mono); color: var(--rg-mid); }
   text-decoration: none;
   text-shadow: var(--glow-sm);
   animation: nav-logo-pulse 3s ease-in-out infinite;
+  /* Reserve intrinsic space so font-swap cannot shift adjacent nav items */
+  min-width: 88px;
+  contain: layout style;
 }
 .nav__logo-arc {
   font-size: 1.4rem;
@@ -922,6 +958,8 @@ code, pre { font-family: var(--font-mono); color: var(--rg-mid); }
   font-weight: 300;
   line-height: 0.95;
   margin-bottom: var(--space-lg);
+  /* Promote to own layer — prevents font-swap from triggering ancestor reflows */
+  will-change: contents;
 }
 .hero__title-line { display: block; color: var(--rg-pearl); }
 .hero__title-line--accent {

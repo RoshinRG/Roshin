@@ -79,14 +79,14 @@ async function build() {
       .map(p => `  <link rel="modulepreload" href="/${p.replace('public/', '')}">`)
       .join('\n');
 
-    // \u2500\u2500 Patch HTML files \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    // ── Patch HTML files ──────────────────────────────────────────────────
     ['public/index.html', 'public/404.html'].forEach(file => {
       let html = fs.readFileSync(file, 'utf8');
 
       // 1. Ensure <html> has data-theme="dark" (synchronous default)
       html = html.replace(/<html lang="en"(?! data-theme)>/, '<html lang="en" data-theme="dark">');
 
-      // 2. Remove data-theme from <body> \u2014 <html> is the single source of truth
+      // 2. Remove data-theme from <body> — <html> is the single source of truth
       html = html.replace(/<body class="body" data-theme="[^"]*">/, '<body class="body">');
 
       // 3. Inject theme blocking script after <head> (idempotent)
@@ -94,7 +94,25 @@ async function build() {
         html = html.replace('<head>', '<head>\n' + THEME_SCRIPT);
       }
 
-      // 4. Replace modulepreloads (remove old, inject fresh hashed filenames)
+      // 4. Fix CSS loading: use synchronous <link rel="stylesheet"> instead of the
+      //    async preload+onload trick. The async trick hides the hero content behind
+      //    a CSS gap on slow mobile CPUs, delaying LCP by 3-4 seconds.
+      //    The CSS is still preloaded (fetch priority is high), but now it blocks
+      //    rendering correctly so opacity:1 hero text is painted immediately.
+      html = html.replace(
+        /<link rel="preload" href="style\.css" as="style" onload="[^"]*">/,
+        '<link rel="stylesheet" href="style.css">'
+      );
+      // Remove the noscript fallback (no longer needed with sync load)
+      html = html.replace(/<noscript><link rel="stylesheet" href="style\.css"><\/noscript>\s*/g, '');
+
+      // 5. Ensure font-9.woff2 (Cormorant Garamond latin, the LCP font) has fetchpriority=high
+      html = html.replace(
+        /<link rel="preload" as="font" type="font\/woff2" href="\/fonts\/font-9\.woff2" crossorigin>/,
+        '<link rel="preload" as="font" type="font/woff2" href="/fonts/font-9.woff2" crossorigin fetchpriority="high">'
+      );
+
+      // 6. Replace modulepreloads (remove old, inject fresh hashed filenames)
       html = html.replace(/<link rel="modulepreload" href="\/dist\/.*?">\s*/g, '');
       html = html.replace('</head>', `${preloadHtml}\n</head>`);
 

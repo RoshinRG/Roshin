@@ -192,31 +192,35 @@ async function registerSW() {
 ───────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
 
-
   // Navigate to initial route (loads + starts first scene)
   const initial = resolveInitialRoute();
   
-  // Yield to the browser to paint FCP/LCP before blocking the main thread with WebGL initialization
+  // Yield one frame so the browser can paint the FCP before we block with WebGL init
   requestAnimationFrame(() => {
     setTimeout(() => {
       navigate(initial, false);
-      
-      // Load and initialize UI animations after critical path
-      const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
-      idle(() => {
-        import('./animations.js').then(module => {
-          module.initThemeToggle();
-          module.initMobileMenu();
-          module.initScrollTracer();
-          module.initScrollReveal();
-          module.initContactForm();
-          module.initButtonGlow();
-          module.initFooterYear();
-        });
-      });
     }, 0);
   });
+
+  // Load UI animations after the page has fully loaded — this ensures animations.js
+  // never competes with LCP painting on mobile. window.load fires after all resources
+  // (images, fonts, scripts) have settled, which is the safest deferral point.
+  window.addEventListener('load', () => {
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+    idle(() => {
+      import('./animations.js').then(module => {
+        module.initThemeToggle();
+        module.initMobileMenu();
+        module.initScrollTracer();
+        module.initScrollReveal();
+        module.initContactForm();
+        module.initButtonGlow();
+        module.initFooterYear();
+      });
+    });
+  }, { once: true });
 
   // Register Service Worker after page is interactive
   registerSW();
 });
+
