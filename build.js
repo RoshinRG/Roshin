@@ -68,8 +68,9 @@ async function build() {
     const heroChunk = outputs.find(o => o.includes('/hero-') && !o.endsWith('.map'));
     if (heroChunk) { preloads.add(heroChunk); getDependencies(heroChunk, preloads); }
 
-    const animationsChunk = outputs.find(o => o.includes('/animations-') && !o.endsWith('.map'));
-    if (animationsChunk) { preloads.add(animationsChunk); getDependencies(animationsChunk, preloads); }
+    // animations.js is deferred to window.load + requestIdleCallback in main.js.
+    // Do NOT preload it — adding it to modulepreload would put it on the critical
+    // request chain and delay LCP/FCP (Lighthouse audit confirmed 1,469ms impact).
 
     const rendererChunk = outputs.find(o => o.includes('/renderer-singleton-') && !o.endsWith('.map'));
     if (rendererChunk) { preloads.add(rendererChunk); getDependencies(rendererChunk, preloads); }
@@ -115,6 +116,13 @@ async function build() {
       // 6. Replace modulepreloads (remove old, inject fresh hashed filenames)
       html = html.replace(/<link rel="modulepreload" href="\/dist\/.*?">\s*/g, '');
       html = html.replace('</head>', `${preloadHtml}\n</head>`);
+
+      // 7. Add fetchpriority="high" to the main.js ES module script tag so the
+      //    browser prioritises fetching the SPA entry point over other resources.
+      html = html.replace(
+        /<script type="module" src="\/dist\/main\.js"(?: defer)?><\/script>/,
+        '<script type="module" src="/dist/main.js" fetchpriority="high"></script>'
+      );
 
       fs.writeFileSync(file, html);
       console.log(`Patched and injected modulepreloads into ${file}`);

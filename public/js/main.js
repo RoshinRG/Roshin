@@ -195,11 +195,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Navigate to initial route (loads + starts first scene)
   const initial = resolveInitialRoute();
   
-  // Yield one frame so the browser can paint the FCP before we block with WebGL init
+  // Yield to the browser so it can paint the FCP hero text *before* the main
+  // thread is occupied by WebGL context creation + Three.js chunk parsing.
+  // Two rAFs ensure the first frame is committed; the 50ms gap gives slow mobile
+  // CPUs enough runway to finish CSS paint before blocking JS work starts.
   requestAnimationFrame(() => {
-    setTimeout(() => {
-      navigate(initial, false);
-    }, 0);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        navigate(initial, false);
+      }, 50);
+    });
   });
 
   // Load UI animations after the page has fully loaded — this ensures animations.js
