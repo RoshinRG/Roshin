@@ -7,10 +7,12 @@
        so users with a saved "light" preference never see the dark-flash CLS hit. -->
   <script>
     (function () {
-      var t = localStorage.getItem('rgr-theme');
-      if (t === 'light' || t === 'dark') {
-        document.documentElement.dataset.theme = t;
-      }
+      try {
+        var t = localStorage.getItem('rgr-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.dataset.theme = t;
+        }
+      } catch (e) { /* localStorage may be unavailable in some contexts */ }
       // After 2 RAFs (≈ first painted frame), add .theme-ready so the CSS
       // body transition is enabled — this ensures zero transition on initial load.
       requestAnimationFrame(function () {
