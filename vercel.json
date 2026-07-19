@@ -4,8 +4,7 @@
     {
       "source": "/dist/:path*.map",
       "headers": [
-        { "key": "Content-Type", "value": "application/json" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        { "key": "Content-Type", "value": "application/json" }
       ]
     }
   ],
