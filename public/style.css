@@ -509,6 +509,10 @@ html {
   scroll-behavior: smooth;
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
+  /* PERF: Force scrollbar visible to prevent CLS from scrollbar appearance on desktop.
+     Without this, content changes (Three.js canvas mount, theme swap) can toggle the
+     scrollbar, shifting the body by ~17px — the root cause of the 0.737 desktop CLS. */
+  overflow-y: scroll;
 }
 
 body {
@@ -912,6 +916,11 @@ code, pre { font-family: var(--font-mono); color: var(--rg-mid); }
   align-items: center;
   padding-top: var(--nav-height);
   min-height: 100vh;
+  /* PERF: Isolate hero from body layout — Three.js canvas mounting (inserting a new
+     canvas + hiding the placeholder) must not propagate layout shifts to <body>.
+     This containment box absorbs any geometry changes within the hero section. */
+  contain: layout size style;
+  overflow: hidden;
 }
 
 .hero__canvas {

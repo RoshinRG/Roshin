@@ -1,4 +1,4 @@
-import{c as i,k as o,x as r,y as a}from"./chunk-36J466AD.js";var l={uniforms:{uTime:{value:0},uColor:{value:new o(12021369)},uCoreColor:{value:new o(16248296)},uIntensity:{value:1}},vertexShader:`
+import{c as i,k as o,x as r,y as a}from"./chunk-VVUT43HO.js";var l={uniforms:{uTime:{value:0},uColor:{value:new o(12021369)},uCoreColor:{value:new o(16248296)},uIntensity:{value:1}},vertexShader:`
     varying vec3 vNormal;
     varying vec3 vPosition;
     varying vec2 vUv;
@@ -105,4 +105,4 @@ import{c as i,k as o,x as r,y as a}from"./chunk-36J466AD.js";var l={uniforms:{uT
       gl_FragColor = vec4(uColor, alpha * 0.85);
     }
   `};function m(e,n={}){return new a({uniforms:r.clone(e.uniforms),vertexShader:e.vertexShader,fragmentShader:e.fragmentShader,transparent:!0,depthWrite:!1,side:i,...n})}export{t as a,s as b,m as c};
-//# sourceMappingURL=chunk-H47JT6MH.js.map
+//# sourceMappingURL=chunk-45X2MTUE.js.map

@@ -60,23 +60,34 @@ async function build() {
       return deps;
     }
 
-    // Gather preloads: main deps + hero scene + animations + renderer
+    // Gather preloads: main.js direct dependencies only (small utility chunks).
+    // PERF: Exclude chunks larger than 10 KB from modulepreload to keep them
+    // off the critical request chain. The Three.js shared chunk (~537 KB) was
+    // previously preloaded here, causing Lighthouse to flag a 313–417 ms
+    // critical path latency and 51–61 KiB of "unused JS" on initial load.
+    // Scene code dynamically import()s Three.js after FCP (via rAF+setTimeout
+    // deferral in main.js), so the browser will fetch it on-demand.
+    const MAX_PRELOAD_BYTES = 10_000; // 10 KB threshold
+
     const preloads = new Set();
     const mainChunk = outputs.find(o => o.endsWith('main.js') && !o.endsWith('.map'));
     if (mainChunk) getDependencies(mainChunk, preloads);
-
-    const heroChunk = outputs.find(o => o.includes('/hero-') && !o.endsWith('.map'));
-    if (heroChunk) { preloads.add(heroChunk); getDependencies(heroChunk, preloads); }
 
     // animations.js is deferred to window.load + requestIdleCallback in main.js.
     // Do NOT preload it — adding it to modulepreload would put it on the critical
     // request chain and delay LCP/FCP (Lighthouse audit confirmed 1,469ms impact).
 
-    const rendererChunk = outputs.find(o => o.includes('/renderer-singleton-') && !o.endsWith('.map'));
-    if (rendererChunk) { preloads.add(rendererChunk); getDependencies(rendererChunk, preloads); }
-
+    // Filter out large chunks (Three.js, etc.) from preloads
     const preloadHtml = Array.from(preloads)
-      .filter(p => p.endsWith('.js'))
+      .filter(p => {
+        if (!p.endsWith('.js')) return false;
+        const info = meta.outputs[p];
+        if (info && info.bytes > MAX_PRELOAD_BYTES) {
+          console.log(`  Skipped modulepreload for ${p} (${(info.bytes / 1024).toFixed(1)} KB > ${MAX_PRELOAD_BYTES / 1000} KB threshold)`);
+          return false;
+        }
+        return true;
+      })
       .map(p => `  <link rel="modulepreload" href="/${p.replace('public/', '')}">`)
       .join('\n');
 

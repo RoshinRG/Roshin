@@ -2,7 +2,7 @@
   "cleanUrls": true,
   "headers": [
     {
-      "source": "/dist/(.*)\\.map",
+      "source": "/dist/:path*.map",
       "headers": [
         { "key": "Content-Type", "value": "application/json" },
         { "key": "Access-Control-Allow-Origin", "value": "*" }
@@ -11,7 +11,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!dist/.*\\.map$).*)",
+      "source": "/((?!dist/|fonts/|sw\\.js|manifest\\.json|robots\\.txt|sitemap\\.xml|og-image\\.png|Roshin_RG_CV\\.pdf|googlef5738759e2f6272f\\.html|style\\.css|_redirects).*)",
       "destination": "/index.html"
     }
   ]
