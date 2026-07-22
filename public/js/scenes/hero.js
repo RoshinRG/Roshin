@@ -95,20 +95,31 @@ export class HeroScene extends BaseScene {
     // Phase 1 runs immediately; Phase 2 geometry is optional until ready
     if (!this._geometryReady || !this.core) return;
 
-    /* ── Y-axis rotation ─────────────────────────────────────────────── */
-    this.core.rotation.y = elapsed * 0.5;
+    const ud = this.core.userData || {};
 
-    if (this.core.userData.outer) {
-      this.core.userData.outer.rotation.x = elapsed * 0.2;
-      this.core.userData.outer.rotation.y = -elapsed * 0.1;
+    // Core motion
+    this.core.rotation.y = elapsed * 0.35;
+    if (ud.torus) {
+      ud.torus.rotation.y = elapsed * 0.75;
+      ud.torus.rotation.z = Math.sin(elapsed * 0.45) * 0.12;
+    }
+    if (ud.orbitGroup) {
+      ud.orbitGroup.rotation.z = elapsed * 0.55;
+    }
+    if (ud.rings && ud.rings.length) {
+      const op = 0.12 + 0.12 * (0.5 + 0.5 * Math.sin(elapsed * 3));
+      ud.rings.forEach(r => {
+        if (r.material) r.material.opacity = op;
+      });
     }
 
-    if (this.core.userData.inner) {
-      this.core.userData.inner.scale.setScalar(1 + 0.05 * Math.sin(elapsed * 4));
-    }
-
-    if (this.core.userData.orbits) {
-      this.core.userData.orbits.rotation.z = elapsed;
+    // Shader core pulse (uTime + uIntensity)
+    if (ud.coreSphere?.material?.uniforms?.uTime) {
+      ud.coreSphere.material.uniforms.uTime.value = elapsed;
+      if (!isMobile() && ud.coreSphere.material.uniforms.uIntensity) {
+        const mouseEnergy = (Math.abs(this._mouse.x) + Math.abs(this._mouse.y)) * 0.5;
+        ud.coreSphere.material.uniforms.uIntensity.value = 0.85 + mouseEnergy * 1.3;
+      }
     }
 
     /* ── Floating Y bobbing ─────────────────────────────────────────── */
@@ -116,10 +127,11 @@ export class HeroScene extends BaseScene {
 
     /* ── Core tilt via cursor (desktop only) ────────────────────────── */
     if (!isMobile()) {
-      const targetRX = -this._mouse.y * 0.5;
-      const targetRY =  this._mouse.x * 0.5;
+      const targetRX = -this._mouse.y * 0.55;
+      const targetRZ = this._mouse.x * 0.35;
+      // Keep Y driven by the animation; cursor only tilts X/Z for stability.
       this.core.rotation.x += (targetRX - this.core.rotation.x) * 0.05;
-      this.core.rotation.z += (targetRY - this.core.rotation.z) * 0.05;
+      this.core.rotation.z += (targetRZ - this.core.rotation.z) * 0.05;
     }
 
     /* ── Core glow pulse ─────────────────────────────────────────────── */

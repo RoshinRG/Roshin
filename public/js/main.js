@@ -63,15 +63,6 @@ async function navigate(route, pushState = true) {
       const instance = new SceneClass();
       instance.init();
       scenes[route] = instance;
-      
-      // Validation logging (only happens once per scene)
-      setTimeout(() => {
-          const renderer = getRenderer();
-          if (renderer && renderer.info) {
-              console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
-              console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
-          }
-      }, 500); // Wait for first render
     }
     if (scenes[route]) scenes[route].resume();
 
@@ -188,6 +179,19 @@ async function registerSW() {
 }
 
 /* ─────────────────────────────────────────────────────────
+   IDLE PRELOAD — warm up other scene chunks after first paint
+───────────────────────────────────────────────────────── */
+function preloadNonCriticalScenes(activeRoute) {
+  const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
+  idle(() => {
+    Object.entries(ROUTES).forEach(([route, config]) => {
+      if (route === activeRoute) return;
+      config.getScene().catch(() => {});
+    });
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
    BOOT
 ───────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
@@ -203,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(() => {
       setTimeout(() => {
         navigate(initial, false);
+        preloadNonCriticalScenes(initial);
       }, 50);
     });
   });
@@ -220,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         module.initScrollReveal();
         module.initContactForm();
         module.initButtonGlow();
+        module.initProjectCardTilt();
         module.initFooterYear();
       });
     });

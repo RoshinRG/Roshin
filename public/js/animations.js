@@ -34,7 +34,11 @@ export function initScrollTracer() {
   const nav    = document.getElementById('mainNav');
   if (!tracer) return;
 
+  let ticking = false;
   const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
     const scrolled = window.scrollY;
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const pct = maxScroll > 0 ? (scrolled / maxScroll) * 100 : 0;
@@ -44,6 +48,8 @@ export function initScrollTracer() {
     if (nav) {
       nav.classList.toggle('nav--scrolled', scrolled > 40);
     }
+      ticking = false;
+    });
   };
 
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -194,14 +200,75 @@ export function initMobileMenu() {
    BUTTON MOUSE-GLOW (cursor radial highlight)
 ───────────────────────────────────────────────────────── */
 export function initButtonGlow() {
-  document.addEventListener('mousemove', (e) => {
-    const btn = e.target.closest('.btn');
-    if (!btn) return;
-    const rect = btn.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1);
-    const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1);
-    btn.style.setProperty('--mx', x + '%');
-    btn.style.setProperty('--my', y + '%');
+  const canHover = window.matchMedia('(hover: hover)').matches && window.matchMedia('(pointer: fine)').matches;
+  if (!canHover || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let queuedEvent = null;
+  let rafId = 0;
+
+  document.addEventListener('pointermove', (e) => {
+    queuedEvent = e;
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      const evt = queuedEvent;
+      queuedEvent = null;
+      rafId = 0;
+      if (!evt) return;
+      const btn = evt.target.closest('.btn');
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const x = ((evt.clientX - rect.left) / rect.width * 100).toFixed(1);
+      const y = ((evt.clientY - rect.top) / rect.height * 100).toFixed(1);
+      btn.style.setProperty('--mx', x + '%');
+      btn.style.setProperty('--my', y + '%');
+    });
+  }, { passive: true });
+}
+
+/* ─────────────────────────────────────────────────────────
+   PROJECT CARD TILT — lightweight 3D hover interaction
+───────────────────────────────────────────────────────── */
+export function initProjectCardTilt() {
+  const canHover = window.matchMedia('(hover: hover)').matches && window.matchMedia('(pointer: fine)').matches;
+  if (!canHover || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const cards = document.querySelectorAll('.project-card');
+  if (!cards.length) return;
+
+  cards.forEach((card) => {
+    let rafId = 0;
+    let pendingEvent = null;
+
+    const update = () => {
+      rafId = 0;
+      if (!pendingEvent) return;
+      const evt = pendingEvent;
+      pendingEvent = null;
+
+      const rect = card.getBoundingClientRect();
+      const x = evt.clientX - rect.left;
+      const y = evt.clientY - rect.top;
+      const px = (x / rect.width - 0.5) * 2;
+      const py = (y / rect.height - 0.5) * 2;
+
+      const tiltX = (-py * 5).toFixed(2);
+      const tiltY = (px * 5).toFixed(2);
+      card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-4px)`;
+    };
+
+    card.addEventListener('pointermove', (e) => {
+      pendingEvent = e;
+      if (!rafId) rafId = requestAnimationFrame(update);
+    }, { passive: true });
+
+    card.addEventListener('pointerleave', () => {
+      pendingEvent = null;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
+      card.style.transform = '';
+    });
   });
 }
 
