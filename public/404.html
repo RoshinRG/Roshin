@@ -72,16 +72,26 @@
       }
     }
   </script>
-
-  <!-- Vercel Web Analytics -->
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
-
-  <!-- Module Preloads -->
-
-
+<script type="importmap">
+{
+  "imports": {
+    "three": "/js/vendor/three.min.js"
+  }
+}
+</script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="modulepreload" href="/dist/chunk-AD5DZV6Z.js">
+<link rel="modulepreload" href="/dist/hero-TYJRXS4P.js">
+<link rel="modulepreload" href="/dist/chunk-VPR25TOL.js">
+<link rel="modulepreload" href="/dist/chunk-TWBA4RQG.js">
+<link rel="modulepreload" href="/dist/renderer-singleton-KKPLY7EA.js">
 </head>
 
 <body class="body">
