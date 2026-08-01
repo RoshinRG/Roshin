@@ -7,6 +7,7 @@
 import { Object3D } from 'three';
 import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight } from '../utils/three-setup.js';
 import { createDataStream } from './constructs.js';
+import { isMobile } from '../utils/device.js';
 
 export class AboutScene extends BaseScene {
   constructor() { super('avatarCanvas'); }
@@ -20,7 +21,8 @@ export class AboutScene extends BaseScene {
     this.fillLight = createFillLight(this.scene);
 
     /* ── Data Stream Matrix Rain ────────────────────────── */
-    this.stream = createDataStream(216); // 6x6x6 cube
+    const plateCount = isMobile() ? 140 : 216;
+    this.stream = createDataStream(plateCount);
     this.scene.add(this.stream);
 
     /* ── Camera & Interactions ──────────────────────────── */
@@ -46,6 +48,9 @@ export class AboutScene extends BaseScene {
       }
     };
     this.canvas.addEventListener('click', this._onClick);
+
+    // Reuse a single Object3D to avoid per-frame allocations.
+    this._dummy = new Object3D();
   }
 
   update(dt, elapsed) {
@@ -58,7 +63,7 @@ export class AboutScene extends BaseScene {
     const progress = Math.min(uData.time / 3.5, 1);
     const ease = 1 - Math.pow(1 - progress, 4); // easeOutQuart
 
-    const dummy = new Object3D();
+    const dummy = this._dummy || (this._dummy = new Object3D());
     for (let i = 0; i < this.stream.count; i++) {
       // Lerp position
       const curr = uData.currents[i];
@@ -78,6 +83,7 @@ export class AboutScene extends BaseScene {
 
       dummy.position.set(px, py, pz);
       dummy.rotation.set(rx, ry, rz);
+      dummy.scale.setScalar(uData.scales?.[i] ?? 1);
       dummy.updateMatrix();
       this.stream.setMatrixAt(i, dummy.matrix);
     }
@@ -85,8 +91,8 @@ export class AboutScene extends BaseScene {
     this.stream.instanceMatrix.needsUpdate = true;
     
     // Slowly rotate the entire constructed matrix cube
-    this.stream.rotation.y = elapsed * 0.2;
-    this.stream.rotation.x = Math.sin(elapsed * 0.5) * 0.1;
+    this.stream.rotation.y = elapsed * 0.22;
+    this.stream.rotation.x = Math.sin(elapsed * 0.55) * 0.14;
   }
 
   dispose() {

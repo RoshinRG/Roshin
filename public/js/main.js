@@ -4,7 +4,8 @@
  * Lazy-initialises Three.js scenes on first section activation.
  */
 
-import { isMobile } from './utils/three-setup.js';
+import { isMobile } from './utils/device.js';
+import { mountRenderer, resizeRenderer, getRenderer } from './utils/renderer-singleton.js';
 /* ─────────────────────────────────────────────────────────
    ROUTE DEFINITIONS
 ───────────────────────────────────────────────────────── */
@@ -62,17 +63,6 @@ async function navigate(route, pushState = true) {
       const instance = new SceneClass();
       instance.init();
       scenes[route] = instance;
-      
-      // Validation logging (only happens once per scene)
-      setTimeout(() => {
-          import('./utils/renderer-singleton.js').then(({ getRenderer }) => {
-            const renderer = getRenderer();
-            if (renderer && renderer.info) {
-                console.log(`[Validation] ${route} Scene draw calls:`, renderer.info.render.calls);
-                console.log(`[Validation] ${route} Scene geometries:`, renderer.info.memory.geometries);
-            }
-          });
-      }, 500); // Wait for first render
     }
     if (scenes[route]) scenes[route].resume();
 
@@ -95,10 +85,8 @@ async function navigate(route, pushState = true) {
       if (isMobile() && route !== 'hero') {
         scenes[route].pause();
       } else {
-        import('./utils/renderer-singleton.js').then(({ mountRenderer, resizeRenderer }) => {
-          mountRenderer(scenes[route].canvas);
-          resizeRenderer(scenes[route].camera);
-        });
+        mountRenderer(scenes[route].canvas);
+        resizeRenderer(scenes[route].camera);
       }
     }
 
@@ -191,35 +179,59 @@ async function registerSW() {
 }
 
 /* ─────────────────────────────────────────────────────────
+   IDLE PRELOAD — warm up other scene chunks after first paint
+───────────────────────────────────────────────────────── */
+function preloadNonCriticalScenes(activeRoute) {
+  const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
+  idle(() => {
+    Object.entries(ROUTES).forEach(([route, config]) => {
+      if (route === activeRoute) return;
+      config.getScene().catch(() => {});
+    });
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
    BOOT
 ───────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
 
-
   // Navigate to initial route (loads + starts first scene)
   const initial = resolveInitialRoute();
   
-  // Yield to the browser to paint FCP/LCP before blocking the main thread with WebGL initialization
+  // Yield to the browser so it can paint the FCP hero text *before* the main
+  // thread is occupied by WebGL context creation + Three.js chunk parsing.
+  // Two rAFs ensure the first frame is committed; the 50ms gap gives slow mobile
+  // CPUs enough runway to finish CSS paint before blocking JS work starts.
   requestAnimationFrame(() => {
-    setTimeout(() => {
-      navigate(initial, false);
-      
-      // Load and initialize UI animations after critical path
-      const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
-      idle(() => {
-        import('./animations.js').then(module => {
-          module.initThemeToggle();
-          module.initMobileMenu();
-          module.initScrollTracer();
-          module.initScrollReveal();
-          module.initContactForm();
-          module.initButtonGlow();
-          module.initFooterYear();
-        });
-      });
-    }, 0);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        navigate(initial, false);
+        preloadNonCriticalScenes(initial);
+      }, 50);
+    });
   });
+
+  // Load UI animations after the page has fully loaded — this ensures animations.js
+  // never competes with LCP painting on mobile. window.load fires after all resources
+  // (images, fonts, scripts) have settled, which is the safest deferral point.
+  window.addEventListener('load', () => {
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+    idle(() => {
+      import('./animations.js').then(module => {
+        module.initThemeToggle();
+        module.initMobileMenu();
+        module.initScrollTracer();
+        module.initScrollReveal();
+        module.initContactForm();
+        module.initButtonGlow();
+        module.initProjectCardTilt();
+        module.initFooterYear();
+      });
+    });
+  }, { once: true });
 
   // Register Service Worker after page is interactive
   registerSW();
 });
+

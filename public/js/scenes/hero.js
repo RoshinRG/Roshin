@@ -1,11 +1,14 @@
 /**
  * hero.js
- * HeroScene — Geodesic core centerpiece, floating animation, core glow,
- * particle trails, cursor look-at interaction.
+ * HeroScene — Two-phase init to eliminate TBT/LCP blocking:
+ *   Phase 1 (init): mount renderer, set up lights + camera — ~1ms, runs immediately
+ *   Phase 2 (_initGeometry): create cube geometry + particles — deferred to
+ *              requestIdleCallback (desktop) or window load event (mobile)
  */
 
 import { FogExp2, PointLight, Vector2 } from 'three';
-import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight, isMobile } from '../utils/three-setup.js';
+import { BaseScene, createNeonKeyLight, createAmbientLight, createFillLight } from '../utils/three-setup.js';
+import { isMobile } from '../utils/device.js';
 import { ParticleSystem } from '../utils/particle-system.js';
 import { createCyberCube } from './constructs.js';
 
@@ -15,42 +18,20 @@ export class HeroScene extends BaseScene {
   init() {
     if (!this.canvas) return;
 
-    /* ── Lights ─────────────────────────────────────────── */
+    /* ── Phase 1: Lights + Camera — synchronous, ~1ms ──────────────────
+       Done immediately so the canvas background shows before geometry loads. */
     createAmbientLight(this.scene);
     this.keyLight  = createNeonKeyLight(this.scene);
     this.fillLight = createFillLight(this.scene);
 
-    /* ── Background gradient fog ────────────────────────── */
-    this.scene.fog = new FogExp2(0x050406, 0.0008); // --bg-void
+    // Background fog
+    this.scene.fog = new FogExp2(0x000000, 0.0008);
 
-    /* ── Cyber Cube ─────────────────────────────────────── */
-    this.core = createCyberCube();
-    this.core.position.set(isMobile() ? 0 : 2.8, 0, 0);
-    this.scene.add(this.core);
-
-    /* ── Core point light ───────────────────────────────── */
-    this.coreLight = new PointLight(0xB76E79, 4, 4); // --rg-core
-    this.coreLight.position.copy(this.core.position);
-    this.scene.add(this.coreLight);
-
-    /* ── Particle nebula system ─────────────────────────── */
-    this.particles = new ParticleSystem(this.scene, {
-      count:   isMobile() ? 60 : 200,
-      spread:  6,
-      size:    0.03,
-      speed:   0.3,
-      // Rose Gold constellation — weighted: 50% dim, 30% core, 15% light, 5% shimmer
-      palette: ['#7A3D45', '#7A3D45', '#7A3D45', '#7A3D45', '#7A3D45',
-                '#B76E79', '#B76E79', '#B76E79',
-                '#DDB8BC', '#DDB8BC',
-                '#EDD5C8'],
-    });
-
-    /* ── Camera position ────────────────────────────────── */
+    // Camera
     this.camera.position.set(0, 0.5, 7);
     this.camera.lookAt(isMobile() ? 0 : 2, 0.2, 0);
 
-    /* ── Cursor tracking ────────────────────────────────── */
+    // Cursor tracking (desktop only — cheap event listener, no geometry)
     this._mouse = new Vector2(0, 0);
     if (!isMobile()) {
       this._onMouseMove = (e) => {
@@ -59,50 +40,109 @@ export class HeroScene extends BaseScene {
       };
       window.addEventListener('mousemove', this._onMouseMove);
     }
+
+    /* ── Phase 2: Geometry + Particles — deferred off main thread ───────
+       On desktop: requestIdleCallback (after LCP is measured and painted).
+       On mobile: window load event (after all resources have settled) to
+       avoid competing with LCP rendering on slower CPUs. */
+    this._geometryReady = false;
+    const initGeometry = () => this._initGeometry();
+
+    if (isMobile()) {
+      if (document.readyState === 'complete') {
+        // Page already loaded — defer by one idle frame
+        const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 100));
+        idle(initGeometry);
+      } else {
+        window.addEventListener('load', initGeometry, { once: true });
+      }
+    } else {
+      // Desktop: use idle callback, fallback to 0ms setTimeout
+      const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 0));
+      idle(initGeometry);
+    }
+  }
+
+  _initGeometry() {
+    if (this._disposed) return; // Scene may have been disposed before idle fires
+
+    /* ── Cyber Cube ────────────────────────────────────────────────────── */
+    this.core = createCyberCube();
+    this.core.position.set(isMobile() ? 0 : 2.8, 0, 0);
+    this.scene.add(this.core);
+
+    /* ── Core point light ──────────────────────────────────────────────── */
+    this.coreLight = new PointLight(0xB76E79, 4, 4);
+    this.coreLight.position.copy(this.core.position);
+    this.scene.add(this.coreLight);
+
+    /* ── Particle nebula ───────────────────────────────────────────────── */
+    this.particles = new ParticleSystem(this.scene, {
+      count:   isMobile() ? 50 : 200,
+      spread:  6,
+      size:    0.03,
+      speed:   0.3,
+      palette: ['#B76E79', '#B76E79', '#B76E79',
+                '#D4AF37', '#D4AF37',
+                '#E8C39E', '#E8C39E',
+                '#C1272D'],
+    });
+
+    this._geometryReady = true;
   }
 
   update(dt, elapsed) {
-    if (!this.core) return;
+    // Phase 1 runs immediately; Phase 2 geometry is optional until ready
+    if (!this._geometryReady || !this.core) return;
 
-    /* ── Y-axis rotation ─────────────────────────────────── */
-    this.core.rotation.y = elapsed * 0.5;
-    
-    if (this.core.userData.outer) {
-      this.core.userData.outer.rotation.x = elapsed * 0.2;
-      this.core.userData.outer.rotation.y = -elapsed * 0.1;
+    const ud = this.core.userData || {};
+
+    // Core motion
+    this.core.rotation.y = elapsed * 0.35;
+    if (ud.torus) {
+      ud.torus.rotation.y = elapsed * 0.75;
+      ud.torus.rotation.z = Math.sin(elapsed * 0.45) * 0.12;
     }
-    
-    if (this.core.userData.inner) {
-      this.core.userData.inner.scale.setScalar(1 + 0.05 * Math.sin(elapsed * 4));
+    if (ud.orbitGroup) {
+      ud.orbitGroup.rotation.z = elapsed * 0.55;
     }
-    
-    if (this.core.userData.orbits) {
-      this.core.userData.orbits.rotation.z = elapsed;
+    if (ud.rings && ud.rings.length) {
+      const op = 0.12 + 0.12 * (0.5 + 0.5 * Math.sin(elapsed * 3));
+      ud.rings.forEach(r => {
+        if (r.material) r.material.opacity = op;
+      });
     }
 
-    /* ── Floating Y bobbing (0–20px range ~4s) ──────────── */
-    const baseY = isMobile() ? 0 : 0;
-    this.core.position.y = baseY + Math.sin(elapsed * 1.5) * 0.18;
+    // Shader core pulse (uTime + uIntensity)
+    if (ud.coreSphere?.material?.uniforms?.uTime) {
+      ud.coreSphere.material.uniforms.uTime.value = elapsed;
+      if (!isMobile() && ud.coreSphere.material.uniforms.uIntensity) {
+        const mouseEnergy = (Math.abs(this._mouse.x) + Math.abs(this._mouse.y)) * 0.5;
+        ud.coreSphere.material.uniforms.uIntensity.value = 0.85 + mouseEnergy * 1.3;
+      }
+    }
 
-    /* ── Core tilt via cursor (desktop only) ────────────── */
+    /* ── Floating Y bobbing ─────────────────────────────────────────── */
+    this.core.position.y = Math.sin(elapsed * 1.5) * 0.18;
+
+    /* ── Core tilt via cursor (desktop only) ────────────────────────── */
     if (!isMobile()) {
-      const targetRX = -this._mouse.y * 0.5;
-      const targetRY = this._mouse.x  * 0.5;
+      const targetRX = -this._mouse.y * 0.55;
+      const targetRZ = this._mouse.x * 0.35;
+      // Keep Y driven by the animation; cursor only tilts X/Z for stability.
       this.core.rotation.x += (targetRX - this.core.rotation.x) * 0.05;
-      // We don't overwrite rotation.y because it's spinning continuously, 
-      // but we can tilt the Z axis instead
-      this.core.rotation.z += (targetRY - this.core.rotation.z) * 0.05;
+      this.core.rotation.z += (targetRZ - this.core.rotation.z) * 0.05;
     }
 
-    /* ── Core glow pulse ────────────────────────────────── */
+    /* ── Core glow pulse ─────────────────────────────────────────────── */
     this.coreLight.intensity = 3 + 1.5 * Math.sin(elapsed * 3);
     this.coreLight.position.copy(this.core.position);
 
-    /* ── Key light subtle orbit ──────────────────────────── */
+    /* ── Key light subtle orbit ─────────────────────────────────────── */
     this.keyLight.position.x = 3 + Math.sin(elapsed * 0.5) * 1;
     this.keyLight.position.z = 3 + Math.cos(elapsed * 0.5) * 1;
 
-    /* ── Particles ───────────────────────────────────────── */
+    /* ── Particles ──────────────────────────────────────────────────── */
     if (this.particles) {
       this.particles.mesh.position.copy(this.core.position);
       this.particles.update(elapsed);
@@ -110,6 +150,7 @@ export class HeroScene extends BaseScene {
   }
 
   dispose() {
+    this._disposed = true;
     if (this._onMouseMove)
       window.removeEventListener('mousemove', this._onMouseMove);
     if (this.particles) this.particles.dispose();

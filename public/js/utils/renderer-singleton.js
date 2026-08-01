@@ -1,5 +1,5 @@
 import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace, WebGLRenderer } from 'three';
-import { isMobile } from './three-setup.js';
+import { isMobile } from './device.js';
 
 let sharedRenderer = null;
 let currentCanvas = null;
@@ -19,7 +19,7 @@ export function getRenderer() {
 
     const dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.5 : 2);
     sharedRenderer.setPixelRatio(dpr);
-    sharedRenderer.setClearColor(0x050406, 1); // --bg-void
+    sharedRenderer.setClearColor(0x000000, 1); // --void-black
     sharedRenderer.outputColorSpace = SRGBColorSpace;
     sharedRenderer.toneMapping = ACESFilmicToneMapping;
     sharedRenderer.toneMappingExposure = 1.2;
@@ -41,21 +41,25 @@ export function mountRenderer(targetCanvas) {
   // If already mounted here, do nothing
   if (currentCanvas === targetCanvas) return;
 
-  // We are going to replace targetCanvas visually.
-  // The simplest way without changing HTML structure is to insert the renderer's canvas
-  // right after the target canvas, and hide the target canvas.
-  
-  // First, if we were mounted somewhere else, we should remove the renderer canvas
-  // (though `insertBefore` automatically moves the element)
-  
   // Hide the original placeholder canvas
   targetCanvas.style.display = 'none';
   
   // Apply classes from target to shared canvas so it styles correctly
   renderer.domElement.className = targetCanvas.className;
   
-  // Clear any inline styles that might interfere with CSS class-based layout
-  renderer.domElement.style.cssText = '';
+  // PERF: Pre-set dimensions on the shared canvas BEFORE inserting it into the DOM.
+  // Without this, the browser computes intrinsic dimensions after insertion, which
+  // triggers a layout shift on <body> (the root cause of desktop CLS 0.737).
+  // We measure the container (parent of the hidden placeholder) and apply matching
+  // dimensions so the canvas occupies exactly the same space from its first frame.
+  const container = targetCanvas.parentElement;
+  if (container) {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    renderer.domElement.style.cssText = `position:absolute;inset:0;width:${w}px;height:${h}px;`;
+  } else {
+    renderer.domElement.style.cssText = 'position:absolute;inset:0;';
+  }
   
   // Insert the shared renderer canvas exactly where the placeholder was
   if (targetCanvas.parentNode) {

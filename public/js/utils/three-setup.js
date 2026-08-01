@@ -6,10 +6,7 @@
 
 import { AmbientLight, Clock, PerspectiveCamera, PointLight, Scene } from 'three';
 import { getRenderer, mountRenderer, resizeRenderer } from './renderer-singleton.js';
-
-export const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
-export const isReducedMotion = () =>
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import { isMobile, isReducedMotion } from './device.js';
 
 export class BaseScene {
   constructor(canvasId, options = {}) {
@@ -32,7 +29,12 @@ export class BaseScene {
     this.renderer = getRenderer();
     this._buildCamera();
     this._onResize = this._onResize.bind(this);
-    window.addEventListener('resize', this._onResize);
+    // Debounce resize to avoid cascading layout reads during drag-resize (fixes forced reflow)
+    this._onResizeDebounced = (() => {
+      let timer;
+      return () => { clearTimeout(timer); timer = setTimeout(() => this._onResize(), 100); };
+    })();
+    window.addEventListener('resize', this._onResizeDebounced);
   }
 
 
@@ -99,7 +101,7 @@ export class BaseScene {
 
   dispose() {
     this.pause();
-    window.removeEventListener('resize', this._onResize);
+    window.removeEventListener('resize', this._onResizeDebounced);
     this.scene.traverse(obj => {
       if (obj.geometry) obj.geometry.dispose();
       if (obj.material) {
@@ -131,23 +133,23 @@ export function createNeonKeyLight(scene) {
 }
 
 export function createAmbientLight(scene) {
-  // Ambient — dark warm shadow fill
-  const ambient = new AmbientLight(0x1A0D10, 0.6);
+  // Ambient — dark charcoal fill
+  const ambient = new AmbientLight(0x121212, 0.6);
   scene.add(ambient);
   return ambient;
 }
 
 export function createFillLight(scene) {
-  // Rim light — cool shimmer from upper right
-  const fill = new PointLight(0xEDD5C8, 1.2, 60);
+  // Rim light — rose-gold light shimmer from upper right
+  const fill = new PointLight(0xE8C39E, 1.2, 60);
   fill.position.set(20, 15, -10);
   scene.add(fill);
   return fill;
 }
 
 export function createDeepAccentLight(scene) {
-  // Deep accent — subtle deep rose from below
-  const accent = new PointLight(0x7A3D45, 0.8, 40);
+  // Deep accent — classic gold from below
+  const accent = new PointLight(0xD4AF37, 0.8, 40);
   accent.position.set(0, -15, 5);
   scene.add(accent);
   return accent;

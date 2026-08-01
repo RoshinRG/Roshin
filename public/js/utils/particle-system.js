@@ -5,7 +5,7 @@
  */
 
 import { Color, DynamicDrawUsage, InstancedBufferAttribute, InstancedMesh, MeshBasicMaterial, Object3D, Scene, SphereGeometry } from 'three';
-import { isMobile } from './three-setup.js';
+import { isMobile } from './device.js';
 
 const _dummy  = new Object3D();
 const _color  = new Color();
@@ -31,7 +31,7 @@ export class ParticleSystem {
       size:       opts.size      || 0.04,
       speed:      opts.speed     || 0.3,
       depthBound: opts.depthBound !== false,
-      palette:    opts.palette   || ['#7A3D45', '#B76E79', '#DDB8BC', '#EDD5C8', '#C9878F'],
+      palette:    opts.palette   || ['#B76E79', '#D4AF37', '#E8C39E', '#C1272D', '#8B0000'],
     };
 
     this._init();
