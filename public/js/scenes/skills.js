@@ -81,7 +81,7 @@ export class SkillsScene extends BaseScene {
     ctx.font         = 'bold 22px "JetBrains Mono", monospace';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle    = '#C9878F'; // --rg-mid
+    ctx.fillStyle    = '#B76E79'; // --rose-gold
     ctx.shadowColor  = 'rgba(183, 110, 121, 0.8)'; // --rg-core glow
     ctx.shadowBlur   = 8;
     ctx.fillText(text, 128, 32);
@@ -111,8 +111,8 @@ export class SkillsScene extends BaseScene {
 
     // Inner glowing sphere — rose gold
     const sphereMat = new MeshStandardMaterial({ 
-      color: 0x1A0A0E, 
-      emissive: new Color(0xB76E79), // --rg-core
+      color: 0x000000, 
+      emissive: new Color(0xB76E79), // --rose-gold
       emissiveIntensity: 0.8,
       roughness: 0.2 
     });

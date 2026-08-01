@@ -22,7 +22,10 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#050406">
+  <meta name="theme-color" content="#000000">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <meta name="description"
     content="Roshin R G — Front-End Developer &amp; SPA Architect. B.Tech AI &amp; Data Science student at Rajalakshmi Engineering College, Chennai. Building high-performance SPAs with vanilla JS, BEM CSS, and Three.js/WebGL.">
   <meta name="keywords"
@@ -75,6 +78,7 @@
   <script defer src="/_vercel/insights/script.js"></script>
 
   <!-- Module Preloads -->
+
 
 </head>
 
@@ -135,6 +139,29 @@
       <canvas class="hero__canvas" id="heroCanvas" aria-label="Cyberpunk grid and data stream 3D animation"
         role="img"></canvas>
 
+      <svg class="hero__hex" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
+        <defs>
+          <radialGradient id="heroHexGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.95"/>
+            <stop offset="55%" stop-color="#B76E79" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <polygon class="hero__hex-glow" points="120,18 198,63 198,153 120,198 42,153 42,63"
+          fill="none" stroke="#B76E79" stroke-width="1.5" opacity="0.85"/>
+        <polygon points="120,42 176,74 176,138 120,170 64,138 64,74"
+          fill="none" stroke="#B76E79" stroke-width="1" opacity="0.55"/>
+        <polygon points="120,62 158,84 158,128 120,150 82,128 82,84"
+          fill="url(#heroHexGlow)" stroke="#D4AF37" stroke-width="1.25" opacity="0.9"/>
+        <circle cx="120" cy="106" r="8" fill="#D4AF37" opacity="0.9"/>
+        <line x1="120" y1="42" x2="120" y2="62" stroke="#E8C39E" stroke-width="1" opacity="0.5"/>
+        <line x1="176" y1="74" x2="158" y2="84" stroke="#E8C39E" stroke-width="1" opacity="0.45"/>
+        <line x1="176" y1="138" x2="158" y2="128" stroke="#E8C39E" stroke-width="1" opacity="0.45"/>
+        <line x1="120" y1="170" x2="120" y2="150" stroke="#E8C39E" stroke-width="1" opacity="0.5"/>
+        <line x1="64" y1="138" x2="82" y2="128" stroke="#E8C39E" stroke-width="1" opacity="0.45"/>
+        <line x1="64" y1="74" x2="82" y2="84" stroke="#E8C39E" stroke-width="1" opacity="0.45"/>
+      </svg>
+
       <div class="hero__content">
         <p class="hero__eyebrow">
           <span class="hero__arc-dot" aria-hidden="true"></span>
@@ -166,8 +193,8 @@
             <span class="btn__glow" aria-hidden="true"></span>
             View Projects
           </a>
-          <a href="/#contact" class="btn btn--outline" data-section="contact">
-            Get In Touch
+          <a href="/#contact" class="hero__link" data-section="contact">
+            Learn More
           </a>
         </div>
 
@@ -552,8 +579,8 @@
             <p>I can help you design and ship a polished SPA with strong animation and performance metrics.</p>
           </div>
           <div class="contact__cta-actions">
-            <a href="mailto:roshin.rg.2024.aids@rajalakshmi.edu.in" class="btn btn--primary">Start a Project</a>
-            <a href="/#projects" class="btn btn--outline" data-section="projects">View Case Studies</a>
+            <a href="mailto:roshin.rg.2024.aids@rajalakshmi.edu.in" class="btn btn--cta">Start a Project</a>
+            <a href="/#projects" class="btn btn--secondary" data-section="projects">View Case Studies</a>
           </div>
         </div>
 

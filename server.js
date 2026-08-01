@@ -124,13 +124,13 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-          <h2 style="color:#d4af37">New Portfolio Message</h2>
+          <h2 style="color:#D4AF37">New Portfolio Message</h2>
           <table style="width:100%;border-collapse:collapse">
-            <tr><td style="padding:8px;color:#888;width:80px">Name</td><td style="padding:8px">${escapeHtml(name)}</td></tr>
-            <tr><td style="padding:8px;color:#888">Email</td><td style="padding:8px"><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
-            ${subject ? `<tr><td style="padding:8px;color:#888">Subject</td><td style="padding:8px">${escapeHtml(subject)}</td></tr>` : ""}
+            <tr><td style="padding:8px;color:#A8A8A8;width:80px">Name</td><td style="padding:8px">${escapeHtml(name)}</td></tr>
+            <tr><td style="padding:8px;color:#A8A8A8">Email</td><td style="padding:8px"><a href="mailto:${escapeHtml(email)}" style="color:#1E3A5F">${escapeHtml(email)}</a></td></tr>
+            ${subject ? `<tr><td style="padding:8px;color:#A8A8A8">Subject</td><td style="padding:8px">${escapeHtml(subject)}</td></tr>` : ""}
           </table>
-          <hr style="border:1px solid #222;margin:16px 0" />
+          <hr style="border:1px solid rgba(212,175,55,0.2);margin:16px 0" />
           <p style="white-space:pre-wrap;line-height:1.6">${escapeHtml(message)}</p>
         </div>
       `,

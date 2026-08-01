@@ -59,8 +59,8 @@ export class ProjectsScene extends BaseScene {
     );
 
     const palette = desktop
-      ? [0xB76E79, 0xC9878F, 0xDDB8BC, 0xEDD5C8]
-      : [0xB76E79, 0xC9878F, 0xEDD5C8];
+      ? [0xB76E79, 0xD4AF37, 0xE8C39E, 0xC1272D]
+      : [0xB76E79, 0xD4AF37, 0xE8C39E];
 
     const spacingX = desktop ? 0.24 : 0.22;
     const spacingY = desktop ? 0.22 : 0.20;

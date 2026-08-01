@@ -133,23 +133,23 @@ export function createNeonKeyLight(scene) {
 }
 
 export function createAmbientLight(scene) {
-  // Ambient — dark warm shadow fill
-  const ambient = new AmbientLight(0x1A0D10, 0.6);
+  // Ambient — dark charcoal fill
+  const ambient = new AmbientLight(0x121212, 0.6);
   scene.add(ambient);
   return ambient;
 }
 
 export function createFillLight(scene) {
-  // Rim light — cool shimmer from upper right
-  const fill = new PointLight(0xEDD5C8, 1.2, 60);
+  // Rim light — rose-gold light shimmer from upper right
+  const fill = new PointLight(0xE8C39E, 1.2, 60);
   fill.position.set(20, 15, -10);
   scene.add(fill);
   return fill;
 }
 
 export function createDeepAccentLight(scene) {
-  // Deep accent — subtle deep rose from below
-  const accent = new PointLight(0x7A3D45, 0.8, 40);
+  // Deep accent — classic gold from below
+  const accent = new PointLight(0xD4AF37, 0.8, 40);
   accent.position.set(0, -15, 5);
   scene.add(accent);
   return accent;

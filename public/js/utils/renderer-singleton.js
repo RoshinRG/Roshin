@@ -19,7 +19,7 @@ export function getRenderer() {
 
     const dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.5 : 2);
     sharedRenderer.setPixelRatio(dpr);
-    sharedRenderer.setClearColor(0x050406, 1); // --bg-void
+    sharedRenderer.setClearColor(0x000000, 1); // --void-black
     sharedRenderer.outputColorSpace = SRGBColorSpace;
     sharedRenderer.toneMapping = ACESFilmicToneMapping;
     sharedRenderer.toneMappingExposure = 1.2;

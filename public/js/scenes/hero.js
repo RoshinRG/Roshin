@@ -25,7 +25,7 @@ export class HeroScene extends BaseScene {
     this.fillLight = createFillLight(this.scene);
 
     // Background fog
-    this.scene.fog = new FogExp2(0x050406, 0.0008);
+    this.scene.fog = new FogExp2(0x000000, 0.0008);
 
     // Camera
     this.camera.position.set(0, 0.5, 7);
@@ -82,10 +82,10 @@ export class HeroScene extends BaseScene {
       spread:  6,
       size:    0.03,
       speed:   0.3,
-      palette: ['#7A3D45', '#7A3D45', '#7A3D45', '#7A3D45', '#7A3D45',
-                '#B76E79', '#B76E79', '#B76E79',
-                '#DDB8BC', '#DDB8BC',
-                '#EDD5C8'],
+      palette: ['#B76E79', '#B76E79', '#B76E79',
+                '#D4AF37', '#D4AF37',
+                '#E8C39E', '#E8C39E',
+                '#C1272D'],
     });
 
     this._geometryReady = true;

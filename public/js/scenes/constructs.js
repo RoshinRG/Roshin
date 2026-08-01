@@ -31,7 +31,7 @@ export function createCyberCube() {
   // Wireframe torus knot shell (new hero look)
   const shellGeo = new TorusKnotGeometry(1.25, 0.42, 160, 28);
   const shellMat = new MeshBasicMaterial({
-    color: 0xEDD5C8,
+    color: 0xE8C39E,
     wireframe: true,
     transparent: true,
     opacity: 0.35,
@@ -67,7 +67,7 @@ export function createCyberCube() {
 
   // Data nodes orbiting along a tilted helix
   const nodeGeo = new BoxGeometry(0.14, 0.14, 0.14);
-  const nodeMat = new MeshBasicMaterial({ color: 0xC9878F });
+  const nodeMat = new MeshBasicMaterial({ color: 0xB76E79 });
   const orbitGroup = new Group();
   const nodeCount = isMobile() ? 7 : 11;
 
@@ -107,7 +107,7 @@ export function createDataStream(count = 200) {
   // Instanced "armor plates" assembling into a helmet-ish structure.
   const geometry = new BoxGeometry(0.46, 0.08, 0.30);
   const material = new MeshBasicMaterial({
-    color: 0x1A0A0E,
+    color: 0x000000,
     transparent: true,
     opacity: 0.95,
   });
