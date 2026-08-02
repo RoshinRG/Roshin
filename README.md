@@ -310,20 +310,6 @@ Drop the folder at [app.netlify.com/drop](https://app.netlify.com/drop) and add 
 /* /index.html 200
 ```
 
-### Vercel
-
-```bash
-npx vercel --prod
-```
-
-Add `vercel.json`:
-
-```json
-{
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-}
-```
-
 ---
 
 ## 🎨 Personalisation Guide
