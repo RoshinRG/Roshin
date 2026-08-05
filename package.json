@@ -1,7 +1,7 @@
 {
   "name": "rgr-portfolio",
   "version": "1.0.0",
-  "description": "Roshin R G — Terminal-themed SPA Portfolio. Vanilla JS, Three.js, BEM CSS, PWA.",
+  "description": "Roshin R G — SPA Portfolio. Vanilla JS, Three.js, BEM CSS, PWA.",
   "author": "Roshin R G <roshin.rg.2024.aids@rajalakshmi.edu.in>",
   "license": "MIT",
   "private": true,

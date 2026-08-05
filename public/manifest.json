@@ -1,7 +1,7 @@
 {
   "name": "Roshin R G — Front-End Architect",
   "short_name": "RGR Nexus",
-  "description": "Terminal-themed SPA Portfolio featuring Vanilla JS, WebGL, and Cyberpunk aesthetics.",
+  "description": "SPA portfolio featuring Vanilla JS, BEM CSS, and dark luxury aesthetics.",
   "start_url": "/?source=pwa",
   "display": "standalone",
   "orientation": "portrait-primary",

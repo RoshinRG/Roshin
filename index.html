@@ -19,7 +19,7 @@
   <meta property="og:url" content="https://roshinrg.github.io">
   <meta property="og:title" content="Roshin R G — Front-End Developer &amp; SPA Architect">
   <meta property="og:description"
-    content="Production-quality SPA portfolio. Vanilla JS, Three.js, BEM CSS, dark luxury design.">
+    content="Production-quality SPA portfolio. Vanilla JS, BEM CSS, dark luxury design.">
   <meta property="og:image" content="https://roshinrg.github.io/og-image.jpg">
 
   <!-- ── Twitter Card ── -->
@@ -1495,11 +1495,7 @@ ul, ol { list-style: none; }
 }
 
   </style>
-
-  <!-- ── Three.js CDN ── -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
-
-  <!-- ── Favicon placeholder ── -->
+<!-- ── Favicon placeholder ── -->
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⬡%3C/text%3E%3C/svg%3E">
 </head>
@@ -1550,7 +1546,6 @@ ul, ol { list-style: none; }
        ══════════════════════════════════════════════════════════════ -->
   <section class="section section--active" id="sectionHero" aria-label="Hero">
     <div class="hero">
-      <canvas class="hero__canvas" id="heroCanvas" aria-hidden="true"></canvas>
       <div class="hero__overlay">
         <p class="hero__label" aria-hidden="true">// Hello —</p>
         <h1 class="hero__heading">
@@ -1589,7 +1584,6 @@ ul, ol { list-style: none; }
         <!-- Left column -->
         <aside class="about__left">
           <div class="about__avatar-wrap reveal">
-            <canvas class="about__avatar-canvas" id="avatarCanvas" width="300" height="300" aria-hidden="true"></canvas>
             <div class="about__badge">Open to opportunities</div>
           </div>
           <div class="about__quick-stats reveal reveal--delay-1">
@@ -1739,12 +1733,11 @@ ul, ol { list-style: none; }
           <div class="project-card__num">// 02</div>
           <h3 class="project-card__title">Portfolio Website</h3>
           <p class="project-card__desc">This very site — a full SPA with a service worker for PWA offline support,
-            dark/light mode, Three.js WebGL scenes, BEM CSS, and zero framework dependencies. Scores 100 on Lighthouse.
+            dark/light mode, BEM CSS, and zero framework dependencies. Scores 100 on Lighthouse.
           </p>
           <div class="project-card__stack">
             <span class="project-card__tech">SPA</span>
             <span class="project-card__tech">PWA</span>
-            <span class="project-card__tech">Three.js</span>
             <span class="project-card__tech">Service Worker</span>
             <span class="project-card__tech">BEM CSS</span>
             <span class="project-card__tech">Vanilla JS</span>
@@ -1863,18 +1856,12 @@ ul, ol { list-style: none; }
         <p class="section-header__subtitle">Tools and technologies I reach for without thinking twice.</p>
       </div>
 
-      <!-- Floating 3D skills canvas -->
-      <div class="skills__canvas-wrap reveal">
-        <canvas class="skills__canvas" id="skillsCanvas" role="img"
-          aria-label="3D floating skill labels"></canvas>
-      </div>
-
       <!-- Skills grid -->
       <div class="skills__grid">
 
         <div class="skills__group reveal">
           <div class="skills__group-name">Core Languages</div>
-          <ul class="skills__items">="Core languages skills">
+          <ul class="skills__items" aria-label="Core languages skills">
             <li class="skills__item">Vanilla JS <span class="skills__item-star">★ expert</span></li>
             <li class="skills__item">jQuery <span class="skills__item-star">★ expert</span></li>
             <li class="skills__item">HTML5 <span class="skills__item-star">★ expert</span></li>
@@ -1884,7 +1871,7 @@ ul, ol { list-style: none; }
 
         <div class="skills__group reveal reveal--delay-1">
           <div class="skills__group-name">DOM &amp; Browser APIs</div>
-          <ul class="skills__items">="DOM and Browser API skills">
+          <ul class="skills__items" aria-label="DOM and Browser API skills">
             <li class="skills__item">DOM Traversal &amp; Manipulation</li>
             <li class="skills__item">MutationObserver</li>
             <li class="skills__item">IntersectionObserver</li>
@@ -1895,7 +1882,7 @@ ul, ol { list-style: none; }
 
         <div class="skills__group reveal reveal--delay-2">
           <div class="skills__group-name">Architecture</div>
-          <ul class="skills__items">="Architecture skills">
+          <ul class="skills__items" aria-label="Architecture skills">
             <li class="skills__item">SPA Patterns <span class="skills__item-star">★ expert</span></li>
             <li class="skills__item">BEM CSS <span class="skills__item-star">★ expert</span></li>
             <li class="skills__item">Conflict-free CSS <span class="skills__item-star">★ expert</span></li>
@@ -1906,7 +1893,7 @@ ul, ol { list-style: none; }
 
         <div class="skills__group reveal reveal--delay-3">
           <div class="skills__group-name">Styling</div>
-          <ul class="skills__items">="Styling skills">
+          <ul class="skills__items" aria-label="Styling skills">
             <li class="skills__item">CSS Grid</li>
             <li class="skills__item">Flexbox</li>
             <li class="skills__item">Responsive Design</li>
@@ -1917,12 +1904,11 @@ ul, ol { list-style: none; }
 
         <div class="skills__group reveal reveal--delay-4">
           <div class="skills__group-name">Other &amp; Tools</div>
-          <ul class="skills__items">="Other skills">
+          <ul class="skills__items" aria-label="Other skills">
             <li class="skills__item">Python</li>
             <li class="skills__item">R</li>
             <li class="skills__item">C</li>
             <li class="skills__item">Git &amp; GitHub</li>
-            <li class="skills__item">Three.js / WebGL</li>
           </ul>
         </div>
 
@@ -2016,7 +2002,6 @@ ul, ol { list-style: none; }
 
         <!-- Right — form -->
         <div class="contact__form-wrap reveal reveal--delay-2">
-          <canvas class="contact__form-canvas" id="contactCanvas" aria-hidden="true"></canvas>
           <form class="contact__form" id="contactForm" method="POST" action="/api/contact" novalidate
             aria-label="Contact form">
             <div class="form__row">

@@ -31,9 +31,9 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap"
     rel="stylesheet">
   <meta name="description"
-    content="Roshin R G — Front-End Developer &amp; SPA Architect. B.Tech AI &amp; Data Science student at Rajalakshmi Engineering College, Chennai. Building high-performance SPAs with vanilla JS, BEM CSS, and Three.js/WebGL.">
+    content="Roshin R G — Front-End Developer &amp; SPA Architect. B.Tech AI &amp; Data Science student at Rajalakshmi Engineering College, Chennai. Building high-performance SPAs with vanilla JS and BEM CSS.">
   <meta name="keywords"
-    content="Roshin RG, front-end developer, SPA architect, Three.js, WebGL, vanilla JavaScript, BEM CSS, PWA, RGR Nexus, Chennai, portfolio">
+    content="Roshin RG, front-end developer, SPA architect, vanilla JavaScript, BEM CSS, PWA, RGR Nexus, Chennai, portfolio">
   <meta name="author" content="Roshin R G">
   <link rel="canonical" href="https://roshinrg.dev/">
 
@@ -42,7 +42,7 @@
   <meta property="og:url" content="https://roshinrg.dev/">
   <meta property="og:title" content="Roshin R G — Front-End Developer &amp; SPA Architect">
   <meta property="og:description"
-    content="Front-end developer specialising in vanilla JS SPA architecture, BEM CSS, and Three.js/WebGL. B.Tech AI &amp; DS student, Chennai.">
+    content="Front-end developer specialising in vanilla JS SPA architecture and BEM CSS. B.Tech AI &amp; DS student, Chennai.">
   <!-- TODO: create og-image.png -->
   <meta property="og:image" content="https://roshinrg.dev/og-image.png">
 
@@ -50,7 +50,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Roshin R G — SPA Architect &amp; Front-End Developer">
   <meta name="twitter:description"
-    content="Vanilla JS, BEM CSS, Three.js — SPA Expert | CSS Enthusiast | Code Craftsman. Based in Chennai, India.">
+    content="Vanilla JS & BEM CSS — SPA Expert | CSS Enthusiast | Code Craftsman. Based in Chennai, India.">
 
   <title>Roshin R G — Front-End Developer &amp; SPA Architect</title>
 
@@ -62,18 +62,30 @@
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
   <!-- Fonts: Hosted locally in style.css via @font-face -->
-  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-9.woff2" crossorigin fetchpriority="high">
-  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-39.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-15.woff2" crossorigin fetchpriority="high">
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/font-25.woff2" crossorigin>
   <!-- Styles -->
   <link rel="stylesheet" href="style.css">
-  <!-- Three.js Import Map -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "/js/vendor/three.min.js"
-      }
-    }
-  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </head>
 
@@ -85,23 +97,26 @@
   <!-- Fade Transition Overlay -->
   <div class="page-transition" id="pageTransition" aria-hidden="true"></div>
 
+  <!-- Shared Three.js background (all routes) -->
+  <canvas class="bg-canvas" id="bgCanvas" aria-hidden="true"></canvas>
+
   <!-- Scroll Progress Tracer -->
   <div class="scroll-tracer" id="scrollTracer" aria-hidden="true"></div>
 
   <!-- Navigation -->
   <header class="nav" id="mainNav">
     <div class="nav__container">
-      <a href="/#hero" class="nav__logo" data-section="hero" aria-label="Roshin RG — Home">
+      <a href="/" class="nav__logo" data-section="hero" aria-label="Roshin RG — Home">
         <span class="nav__logo-arc" aria-hidden="true">⬡</span>
         <span class="nav__logo-text">RGR</span>
       </a>
 
       <nav class="nav__links" aria-label="Main navigation">
-        <a href="/#hero" class="nav__link nav__link--active" data-section="hero" aria-current="page">Home</a>
-        <a href="/#about" class="nav__link" data-section="about">About</a>
-        <a href="/#projects" class="nav__link" data-section="projects">Projects</a>
-        <a href="/#skills" class="nav__link" data-section="skills">Skills</a>
-        <a href="/#contact" class="nav__link" data-section="contact">Contact</a>
+        <a href="/" class="nav__link nav__link--active" data-section="hero" aria-current="page">Home</a>
+        <a href="/about" class="nav__link" data-section="about">About</a>
+        <a href="/projects" class="nav__link" data-section="projects">Projects</a>
+        <a href="/skills" class="nav__link" data-section="skills">Skills</a>
+        <a href="/contact" class="nav__link" data-section="contact">Contact</a>
       </nav>
 
       <div class="nav__controls">
@@ -116,11 +131,11 @@
 
     <!-- Mobile Menu -->
     <div class="nav__mobile-menu" id="mobileMenu" role="dialog" aria-label="Mobile navigation" inert>
-      <a href="/#hero" class="nav__mobile-link" data-section="hero">Home</a>
-      <a href="/#about" class="nav__mobile-link" data-section="about">About</a>
-      <a href="/#projects" class="nav__mobile-link" data-section="projects">Projects</a>
-      <a href="/#skills" class="nav__mobile-link" data-section="skills">Skills</a>
-      <a href="/#contact" class="nav__mobile-link" data-section="contact">Contact</a>
+      <a href="/" class="nav__mobile-link" data-section="hero">Home</a>
+      <a href="/about" class="nav__mobile-link" data-section="about">About</a>
+      <a href="/projects" class="nav__mobile-link" data-section="projects">Projects</a>
+      <a href="/skills" class="nav__mobile-link" data-section="skills">Skills</a>
+      <a href="/contact" class="nav__mobile-link" data-section="contact">Contact</a>
     </div>
   </header>
 
@@ -131,25 +146,6 @@
          SECTION 1 — HERO
     ════════════════════════════════════════════ -->
     <section class="section hero" id="sectionHero" data-route="hero" aria-label="Hero — Introduction">
-      <canvas class="hero__canvas" id="heroCanvas" aria-label="Cyberpunk grid and data stream 3D animation"
-        role="img"></canvas>
-
-      <svg class="hero__hex" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
-        <defs>
-          <radialGradient id="heroHexGlow404" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.95" />
-            <stop offset="55%" stop-color="#B76E79" stop-opacity="0.35" />
-            <stop offset="100%" stop-color="#000000" stop-opacity="0" />
-          </radialGradient>
-        </defs>
-        <polygon class="hero__hex-glow" points="120,18 198,63 198,153 120,198 42,153 42,63" fill="none" stroke="#B76E79"
-          stroke-width="1.5" opacity="0.85" />
-        <polygon points="120,42 176,74 176,138 120,170 64,138 64,74" fill="none" stroke="#B76E79" stroke-width="1"
-          opacity="0.55" />
-        <polygon points="120,62 158,84 158,128 120,150 82,128 82,84" fill="url(#heroHexGlow404)" stroke="#D4AF37"
-          stroke-width="1.25" opacity="0.9" />
-        <circle cx="120" cy="106" r="8" fill="#D4AF37" opacity="0.9" />
-      </svg>
 
       <div class="hero__content">
         <p class="hero__eyebrow">
@@ -163,15 +159,19 @@
         <p class="hero__role">Front&#8209;End Developer &amp; SPA Architect</p>
         <p class="hero__tagline">
           I build high-performance single-page applications with<br>
-          <em>vanilla JS, BEM CSS, and 3D web experiences.</em>
+          <em>vanilla JS, BEM CSS, and high-performance SPA design.</em>
         </p>
 
         <div class="hero__ctas">
-          <a href="/#projects" class="btn btn--primary" data-section="projects">
+          <a href="/projects" class="btn btn--primary" data-section="projects">
             <span class="btn__glow" aria-hidden="true"></span>
             View Projects
           </a>
-          <a href="/#contact" class="hero__link" data-section="contact">
+          <a href="/Roshin_RG_CV.pdf" class="btn btn--secondary" download="Roshin_RG_CV.pdf"
+            aria-label="Download Resume PDF">
+            Download Resume
+          </a>
+          <a href="/contact" class="hero__link" data-section="contact">
             Learn More
           </a>
         </div>
@@ -201,11 +201,6 @@
       <div class="section__arc-bg" aria-hidden="true"></div>
 
       <div class="about__container">
-        <div class="about__avatar-col">
-          <canvas class="about__avatar-canvas" id="avatarCanvas" aria-label="Holographic cyber globe assembly animation"
-            role="img" tabindex="0"></canvas>
-          <p class="about__canvas-hint" aria-hidden="true">Hover to pause · Click to reset</p>
-        </div>
 
         <div class="about__content">
           <h2 class="section__heading reveal-item">
@@ -217,7 +212,7 @@
             I'm <strong>Roshin R G</strong>, a front-end developer and AI &amp; Data Science student
             at <strong>Rajalakshmi Engineering College, Chennai</strong>. I specialise in building
             single-page applications with <strong>vanilla JavaScript</strong>, strict
-            <strong>BEM CSS</strong>, and integrated WebGL experiences.
+            <strong>BEM CSS</strong>, and polished interaction design.
           </p>
           <p class="about__bio reveal-item">
             My philosophy is simple: <em>the best abstraction is the one you understand
@@ -267,7 +262,7 @@
           </div>
 
           <div class="about__links reveal-item">
-            <a href="Roshin_RG_CV.pdf" download class="about__link" aria-label="Download Resume">
+            <a href="/Roshin_RG_CV.pdf" download="Roshin_RG_CV.pdf" class="about__link" aria-label="Download Resume">
               ↓ Resume
             </a>
             <a href="https://github.com/roshinrg" class="about__link" target="_blank" rel="noopener"
@@ -287,8 +282,6 @@
     ════════════════════════════════════════════ -->
     <section class="section projects" id="sectionProjects" data-route="projects" aria-label="Projects" hidden>
       <div class="section__arc-bg" aria-hidden="true"></div>
-      <canvas class="projects__bg-canvas" id="projectsCanvas" aria-label="Ambient particle field" role="presentation"
-        aria-hidden="true"></canvas>
 
       <div class="projects__container">
         <h2 class="section__heading reveal-item">
@@ -304,14 +297,13 @@
             <div class="project-card__inner">
               <div class="project-card__header">
                 <span class="project-card__tag">Vanilla JS</span>
-                <span class="project-card__tag">Three.js</span>
                 <span class="project-card__tag">PWA</span>
                 <span class="project-card__tag">BEM CSS</span>
               </div>
               <h3 class="project-card__title">Portfolio Website</h3>
               <p class="project-card__desc">
                 This very site — a zero-framework SPA with a custom history API router,
-                Cyberpunk Three.js/WebGL animations across all 5 sections, Service Worker
+                Custom history API routing across all 5 sections, Service Worker
                 offline support, and a perfect 100 Lighthouse score.
               </p>
               <div class="project-card__footer">
@@ -458,7 +450,7 @@
               <h3 class="skills__cat-title">Proficient ★★★★</h3>
               <ul class="skills__tags">
                 <li class="skill-tag">SPA Architecture</li>
-                <li class="skill-tag">Three.js &amp; WebGL</li>
+                <li class="skill-tag">Responsive Design</li>
                 <li class="skill-tag">Service Workers</li>
                 <li class="skill-tag">PWA Development</li>
                 <li class="skill-tag">CSS Grid &amp; Flexbox</li>
@@ -483,20 +475,14 @@
             <div class="skills__category">
               <h3 class="skills__cat-title">Currently Exploring</h3>
               <ul class="skills__tags">
-                <li class="skill-tag">GLSL Shaders</li>
-                <li class="skill-tag">WebXR / Spatial Computing</li>
-                <li class="skill-tag">Advanced 3D Graphics</li>
+                <li class="skill-tag">Design Systems</li>
+                <li class="skill-tag">Accessibility</li>
+                <li class="skill-tag">Animation Patterns</li>
                 <li class="skill-tag">Music Technology</li>
               </ul>
             </div>
 
           </div>
-        </div>
-
-        <div class="skills__canvas-col">
-          <canvas class="skills__canvas" id="skillsCanvas" aria-label="3D floating skill labels interactive canvas"
-            role="img" tabindex="0"></canvas>
-          <p class="skills__canvas-hint" aria-hidden="true">Move cursor to interact</p>
         </div>
       </div>
     </section>
@@ -505,8 +491,6 @@
          SECTION 5 — CONTACT
     ════════════════════════════════════════════ -->
     <section class="section contact" id="sectionContact" data-route="contact" aria-label="Contact" hidden>
-      <canvas class="contact__canvas" id="contactCanvas" aria-label="Abstract geometric hologram background"
-        role="presentation" tabindex="-1"></canvas>
 
       <div class="contact__container">
         <div class="contact__header reveal-item">
@@ -646,7 +630,7 @@
   <footer class="footer">
     <div class="footer__container">
       <p class="footer__text">
-        Crafted with ⚡ by <strong>Roshin R G</strong> · RGR Nexus · Three.js + Vanilla JS
+        Crafted with ⚡ by <strong>Roshin R G</strong> · RGR Nexus · Vanilla JS + BEM CSS
       </p>
       <p class="footer__copy">
         © <span id="footerYear"></span> Roshin R G. All rights reserved.
@@ -665,7 +649,7 @@
     "email": "roshin.rg.2024.aids@rajalakshmi.edu.in",
     "telephone": "+916369460964",
     "jobTitle": "Front-End Developer & SPA Architect",
-    "description": "B.Tech AI & Data Science student at Rajalakshmi Engineering College, Chennai. Specialises in vanilla JavaScript SPA architecture, BEM CSS, and Three.js/WebGL experiences.",
+    "description": "B.Tech AI & Data Science student at Rajalakshmi Engineering College, Chennai. Specialises in vanilla JavaScript SPA architecture and BEM CSS.",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Chennai",
@@ -678,7 +662,7 @@
       "address": "Chennai, Tamil Nadu, India"
     },
     "knowsAbout": [
-      "Vanilla JavaScript", "SPA Architecture", "BEM CSS", "Three.js", "WebGL",
+      "Vanilla JavaScript", "SPA Architecture", "BEM CSS",
       "HTML5", "jQuery", "Service Workers", "PWA", "Node.js", "Python"
     ],
     "brand": {

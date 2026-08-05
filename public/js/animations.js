@@ -76,6 +76,7 @@ export function initContactForm() {
   const messageError = document.getElementById('messageError');
 
   function validateField(input, errorEl, validator) {
+    if (!input || !errorEl) return false;
     const ok = validator(input.value.trim());
     errorEl.textContent = ok ? '' : errorEl.dataset.msg || 'Required';
     return ok;
@@ -88,15 +89,15 @@ export function initContactForm() {
     message: v => v.length >= 10,
   };
 
-  nameError.dataset.msg    = 'Please enter your name (2+ characters)';
-  emailError.dataset.msg   = 'Please enter a valid email address';
-  phoneError.dataset.msg   = 'Please enter a valid phone number';
-  messageError.dataset.msg = 'Message must be at least 10 characters';
+  if (nameError) nameError.dataset.msg = 'Please enter your name (2+ characters)';
+  if (emailError) emailError.dataset.msg = 'Please enter a valid email address';
+  if (phoneError) phoneError.dataset.msg = 'Please enter a valid phone number';
+  if (messageError) messageError.dataset.msg = 'Message must be at least 10 characters';
 
-  nameInput.addEventListener('blur',    () => validateField(nameInput,    nameError,    validators.name));
-  emailInput.addEventListener('blur',   () => validateField(emailInput,   emailError,   validators.email));
-  phoneInput.addEventListener('blur',   () => validateField(phoneInput,   phoneError,   validators.phone));
-  messageInput.addEventListener('blur', () => validateField(messageInput, messageError, validators.message));
+  nameInput?.addEventListener('blur',    () => validateField(nameInput,    nameError,    validators.name));
+  emailInput?.addEventListener('blur',   () => validateField(emailInput,   emailError,   validators.email));
+  phoneInput?.addEventListener('blur',   () => validateField(phoneInput,   phoneError,   validators.phone));
+  messageInput?.addEventListener('blur', () => validateField(messageInput, messageError, validators.message));
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
