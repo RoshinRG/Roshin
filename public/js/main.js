@@ -1,131 +1,87 @@
 /**
  * main.js
- * SPA Router — history API + IntersectionObserver scene management.
- * Lazy-initialises Three.js scenes on first section activation.
+ * SPA Router — history API section switching + shared Three.js background.
  */
 
-import { isMobile } from './utils/device.js';
-import { mountRenderer, resizeRenderer, getRenderer } from './utils/renderer-singleton.js';
-/* ─────────────────────────────────────────────────────────
-   ROUTE DEFINITIONS
-───────────────────────────────────────────────────────── */
 const ROUTES = {
-  hero:     { sectionId: 'sectionHero',     getScene: () => import('./scenes/hero.js').then(m => m.HeroScene) },
-  about:    { sectionId: 'sectionAbout',    getScene: () => import('./scenes/about.js').then(m => m.AboutScene) },
-  projects: { sectionId: 'sectionProjects', getScene: () => import('./scenes/projects.js').then(m => m.ProjectsScene) },
-  skills:   { sectionId: 'sectionSkills',   getScene: () => import('./scenes/skills.js').then(m => m.SkillsScene) },
-  contact:  { sectionId: 'sectionContact',  getScene: () => import('./scenes/contact.js').then(m => m.ContactScene) },
+  hero:     { sectionId: 'sectionHero' },
+  about:    { sectionId: 'sectionAbout' },
+  projects: { sectionId: 'sectionProjects' },
+  skills:   { sectionId: 'sectionSkills' },
+  contact:  { sectionId: 'sectionContact' },
 };
 
-/* Scene instances — lazy-created on first activation */
-const scenes = {};
-
-/* ─────────────────────────────────────────────────────────
-   ROUTER
-───────────────────────────────────────────────────────── */
 let currentRoute = null;
-let navigationCount = 0;
 let isNavigating = false;
+let nexusScene = null;
 const transition = document.getElementById('pageTransition');
+
+function routeUrl(route) {
+  return route === 'hero' ? '/' : `/${route}`;
+}
+
+function showRouteSection(route) {
+  Object.entries(ROUTES).forEach(([key, { sectionId }]) => {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    section.hidden = key !== route;
+  });
+
+  document.querySelectorAll('[data-section]').forEach((el) => {
+    const active = el.dataset.section === route;
+    el.classList.toggle('nav__link--active', active);
+    if (active) el.setAttribute('aria-current', 'page');
+    else el.removeAttribute('aria-current');
+  });
+}
+
+function revealRoute(route) {
+  const sectionId = ROUTES[route]?.sectionId;
+  if (!sectionId) return;
+  document.querySelectorAll(`#${sectionId} .reveal-item`).forEach((el) => {
+    el.classList.add('reveal-item--visible');
+  });
+}
 
 async function navigate(route, pushState = true) {
   if (isNavigating || !ROUTES[route] || route === currentRoute) return;
   isNavigating = true;
 
-  // ── Fade out ────────────────────────────────────────────
   transition?.classList.add('page-transition--active');
 
-  // Pre-fetch the scene class while fading out
-  const next = ROUTES[route];
-  let SceneClass;
-  try {
-    SceneClass = await next.getScene();
-  } catch (e) {
-    console.error('Failed to load scene', e);
-  }
-
-  setTimeout(() => {
-    // ── Deactivate current ─────────────────────────────────
-    let prevRoute = currentRoute;
-    if (currentRoute) {
-      const prev = ROUTES[currentRoute];
-      const prevSection = document.getElementById(prev.sectionId);
-      if (prevSection) prevSection.hidden = true;
-      if (scenes[currentRoute]) scenes[currentRoute].pause();
-    }
-
-    // ── Activate new ───────────────────────────────────────
-    const nextSection = document.getElementById(next.sectionId);
-    if (nextSection) nextSection.hidden = false;
-
-    // Lazy-init scene
-    if (!scenes[route] && SceneClass) {
-      const instance = new SceneClass();
-      instance.init();
-      scenes[route] = instance;
-    }
-    if (scenes[route]) scenes[route].resume();
-
-    // Update nav active state
-    document.querySelectorAll('[data-section]').forEach(el => {
-      el.classList.toggle('nav__link--active', el.dataset.section === route);
-    });
-
-    // Push to browser history
-    if (pushState) {
-      const url = route === 'hero' ? '/' : `/${route}`;
-      history.pushState({ route }, '', url);
-    }
-
-    currentRoute = route;
-    navigationCount++;
-
-    // Mount shared renderer to the new scene's canvas slot (skip secondary on mobile)
-    if (scenes[route].canvas) {
-      if (isMobile() && route !== 'hero') {
-        scenes[route].pause();
-      } else {
-        mountRenderer(scenes[route].canvas);
-        resizeRenderer(scenes[route].camera);
-      }
-    }
-
-    // Dispose old scenes that haven't been active recently
-    Object.keys(scenes).forEach(sceneRoute => {
-      if (sceneRoute === currentRoute) return;
-      if (sceneRoute === prevRoute) return;
-
-      const scene = scenes[sceneRoute];
-      if (!scene._lastNavCount) scene._lastNavCount = navigationCount;
-      
-      if (navigationCount - scene._lastNavCount > 2) {
-        scene.dispose();
-        delete scenes[sceneRoute];
-      }
-    });
-    
-    // Update active scene's nav count
-    if (scenes[route]) {
-      scenes[route]._lastNavCount = navigationCount;
-    }
-
-    // Trigger scroll reveal for visible items
+  await new Promise((resolve) => {
     setTimeout(() => {
-      document.querySelectorAll(`#${next.sectionId} .reveal-item`).forEach(el => {
-        el.classList.add('reveal-item--visible');
-      });
-    }, 50);
+      showRouteSection(route);
 
-    // ── Fade in ─────────────────────────────────────────────
-    transition?.classList.remove('page-transition--active');
-    
-    setTimeout(() => { isNavigating = false; }, 50);
-  }, 280);
+      const url = routeUrl(route);
+      if (pushState) {
+        history.pushState({ route }, '', url);
+      } else {
+        history.replaceState({ route }, '', url);
+      }
+
+      currentRoute = route;
+      revealRoute(route);
+
+      transition?.classList.remove('page-transition--active');
+      setTimeout(() => { isNavigating = false; }, 50);
+      resolve();
+    }, 220);
+  });
 }
 
-/* ─────────────────────────────────────────────────────────
-   EVENT DELEGATION — nav clicks
-───────────────────────────────────────────────────────── */
+async function initNexusBackground() {
+  const canvas = document.getElementById('bgCanvas');
+  if (!canvas || nexusScene) return;
+  try {
+    const { createNexusSphere } = await import('./scenes/nexus-sphere.js');
+    nexusScene = createNexusSphere(canvas);
+  } catch (err) {
+    console.warn('[Nexus] WebGL unavailable:', err);
+    canvas.hidden = true;
+  }
+}
+
 document.addEventListener('click', (e) => {
   const link = e.target.closest('[data-section]');
   if (!link) return;
@@ -133,21 +89,16 @@ document.addEventListener('click', (e) => {
   navigate(link.dataset.section);
 });
 
-/* ─────────────────────────────────────────────────────────
-   POPSTATE — browser back/forward
-───────────────────────────────────────────────────────── */
 window.addEventListener('popstate', (e) => {
-  const route = e.state?.route || 'hero';
+  const route = e.state?.route || resolveInitialRoute();
+  if (route === currentRoute) return;
   navigate(route, false);
 });
 
-/* ─────────────────────────────────────────────────────────
-   KEYBOARD NAVIGATION — arrow keys on nav links
-───────────────────────────────────────────────────────── */
 document.addEventListener('keydown', (e) => {
   if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
   const routes = Object.keys(ROUTES);
-  const idx    = routes.indexOf(currentRoute);
+  const idx = routes.indexOf(currentRoute);
   if (idx === -1) return;
   const next = e.key === 'ArrowRight'
     ? routes[Math.min(idx + 1, routes.length - 1)]
@@ -155,70 +106,56 @@ document.addEventListener('keydown', (e) => {
   navigate(next);
 });
 
-/* ─────────────────────────────────────────────────────────
-   INITIAL ROUTE — resolve from URL path
-───────────────────────────────────────────────────────── */
 function resolveInitialRoute() {
-  const path    = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-  const matched = Object.keys(ROUTES).find(r => r === path);
-  return matched || 'hero';
+  const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+  if (path === '' || path === 'index.html') return 'hero';
+  if (ROUTES[path]) return path;
+  const hash = window.location.hash.replace(/^#\/?/, '');
+  if (ROUTES[hash]) return hash;
+  return 'hero';
 }
 
-/* ─────────────────────────────────────────────────────────
-   SERVICE WORKER REGISTRATION
-───────────────────────────────────────────────────────── */
+function signalAppReady() {
+  window.__RGR_READY__ = true;
+  window.dispatchEvent(new CustomEvent('rgr:ready'));
+}
+
 async function registerSW() {
-  if ('serviceWorker' in navigator) {
-    try {
-      const reg = await navigator.serviceWorker.register('/sw.js');
-      console.log('[SW] Registered:', reg.scope);
-    } catch (err) {
-      console.warn('[SW] Registration failed:', err);
-    }
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    console.log('[SW] Registered:', reg.scope);
+  } catch (err) {
+    console.warn('[SW] Registration failed:', err);
   }
 }
 
-/* ─────────────────────────────────────────────────────────
-   IDLE PRELOAD — warm up other scene chunks after first paint
-───────────────────────────────────────────────────────── */
-function preloadNonCriticalScenes(activeRoute) {
-  const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
-  idle(() => {
-    Object.entries(ROUTES).forEach(([route, config]) => {
-      if (route === activeRoute) return;
-      config.getScene().catch(() => {});
-    });
-  });
-}
-
-/* ─────────────────────────────────────────────────────────
-   BOOT
-───────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-
-  // Navigate to initial route (loads + starts first scene)
   const initial = resolveInitialRoute();
-  
-  // Yield to the browser so it can paint the FCP hero text *before* the main
-  // thread is occupied by WebGL context creation + Three.js chunk parsing.
-  // Two rAFs ensure the first frame is committed; the 50ms gap gives slow mobile
-  // CPUs enough runway to finish CSS paint before blocking JS work starts.
+
+  history.replaceState({ route: initial }, '', routeUrl(initial));
+  showRouteSection(initial);
+  currentRoute = null;
+
+  const nexusReady = initNexusBackground();
+
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      setTimeout(() => {
-        navigate(initial, false);
-        preloadNonCriticalScenes(initial);
-      }, 50);
+      setTimeout(async () => {
+        try {
+          await navigate(initial, false);
+          await nexusReady;
+        } finally {
+          signalAppReady();
+        }
+      }, 40);
     });
   });
 
-  // Load UI animations after the page has fully loaded — this ensures animations.js
-  // never competes with LCP painting on mobile. window.load fires after all resources
-  // (images, fonts, scripts) have settled, which is the safest deferral point.
   window.addEventListener('load', () => {
     const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
     idle(() => {
-      import('./animations.js').then(module => {
+      import('./animations.js').then((module) => {
         module.initThemeToggle();
         module.initMobileMenu();
         module.initScrollTracer();
@@ -231,7 +168,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, { once: true });
 
-  // Register Service Worker after page is interactive
   registerSW();
 });
-

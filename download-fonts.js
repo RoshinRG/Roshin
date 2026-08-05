@@ -12,32 +12,45 @@ https.get(GOOGLE_FONTS_URL, { headers: { 'User-Agent': USER_AGENT } }, (res) => 
   let css = '';
   res.on('data', d => css += d);
   res.on('end', async () => {
+    css = css.replace(/font-display:\s*swap/g, 'font-display: optional');
     const urlRegex = /url\((https:\/\/[^)]+)\)/g;
     let match;
     let newCss = css;
     let i = 0;
     const downloads = [];
-    
+    const urls = [];
+
     while ((match = urlRegex.exec(css)) !== null) {
-      const url = match[1];
+      urls.push(match[1]);
+    }
+
+    for (const url of urls) {
       const filename = `font-${i++}.woff2`;
       const localPath = `/fonts/${filename}`;
-      newCss = newCss.replace(url, localPath);
-      
+      newCss = newCss.split(url).join(localPath);
+
       downloads.push(new Promise((resolve, reject) => {
-        https.get(url, (res) => {
+        https.get(url, (r) => {
           const fileStream = fs.createWriteStream(path.join(fontsDir, filename));
-          res.pipe(fileStream);
+          r.pipe(fileStream);
           fileStream.on('finish', () => { fileStream.close(); resolve(); });
         }).on('error', reject);
       }));
     }
-    
+
     await Promise.all(downloads);
-    
+
     const stylePath = path.join(__dirname, 'public', 'style.css');
     const existingStyle = fs.readFileSync(stylePath, 'utf8');
-    fs.writeFileSync(stylePath, newCss + '\n\n' + existingStyle);
-    console.log('Fonts downloaded and style.css updated.');
+    const marker = '/* ─── 1. DESIGN TOKENS';
+    const idx = existingStyle.indexOf(marker);
+    if (idx === -1) {
+      console.error('DESIGN TOKENS marker not found in style.css');
+      process.exit(1);
+    }
+    const bannerStart = existingStyle.lastIndexOf('/* ═', idx);
+    const cutAt = bannerStart !== -1 ? bannerStart : idx;
+    fs.writeFileSync(stylePath, newCss.trim() + '\n\n' + existingStyle.slice(cutAt));
+    console.log(`Fonts downloaded (${i} files: Playfair Display, Poppins, JetBrains Mono) and style.css updated.`);
   });
 });

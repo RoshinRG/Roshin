@@ -61,12 +61,7 @@ async function build() {
     }
 
     // Gather preloads: main.js direct dependencies only (small utility chunks).
-    // PERF: Exclude chunks larger than 10 KB from modulepreload to keep them
-    // off the critical request chain. The Three.js shared chunk (~537 KB) was
-    // previously preloaded here, causing Lighthouse to flag a 313–417 ms
-    // critical path latency and 51–61 KiB of "unused JS" on initial load.
-    // Scene code dynamically import()s Three.js after FCP (via rAF+setTimeout
-    // deferral in main.js), so the browser will fetch it on-demand.
+    // Filter out large chunks from modulepreload to keep them off the critical path.
     const MAX_PRELOAD_BYTES = 10_000; // 10 KB threshold
 
     const preloads = new Set();
@@ -75,9 +70,8 @@ async function build() {
 
     // animations.js is deferred to window.load + requestIdleCallback in main.js.
     // Do NOT preload it — adding it to modulepreload would put it on the critical
-    // request chain and delay LCP/FCP (Lighthouse audit confirmed 1,469ms impact).
+    // request chain and delay LCP/FCP.
 
-    // Filter out large chunks (Three.js, etc.) from preloads
     const preloadHtml = Array.from(preloads)
       .filter(p => {
         if (!p.endsWith('.js')) return false;
@@ -118,10 +112,19 @@ async function build() {
       // Remove the noscript fallback (no longer needed with sync load)
       html = html.replace(/<noscript><link rel="stylesheet" href="style\.css"><\/noscript>\s*/g, '');
 
-      // 5. Ensure font-9.woff2 (Cormorant Garamond latin, the LCP font) has fetchpriority=high
+      // 5. Ensure Playfair Display latin (LCP heading font) has fetchpriority=high
       html = html.replace(
-        /<link rel="preload" as="font" type="font\/woff2" href="\/fonts\/font-9\.woff2" crossorigin>/,
-        '<link rel="preload" as="font" type="font/woff2" href="/fonts/font-9.woff2" crossorigin fetchpriority="high">'
+        /<link rel="preload" as="font" type="font\/woff2" href="\/fonts\/font-15\.woff2" crossorigin>/,
+        '<link rel="preload" as="font" type="font/woff2" href="/fonts/font-15.woff2" crossorigin fetchpriority="high">'
+      );
+      // Migrate any leftover Cormorant-era preload paths
+      html = html.replace(
+        /href="\/fonts\/font-9\.woff2"/g,
+        'href="/fonts/font-15.woff2"'
+      );
+      html = html.replace(
+        /href="\/fonts\/font-39\.woff2"/g,
+        'href="/fonts/font-25.woff2"'
       );
 
       // 6. Replace modulepreloads (remove old, inject fresh hashed filenames)
