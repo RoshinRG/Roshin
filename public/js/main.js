@@ -3,6 +3,8 @@
  * SPA Router — history API section switching + shared Three.js background.
  */
 
+const BASE_PATH = typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
+
 const ROUTES = {
   hero:     { sectionId: 'sectionHero' },
   about:    { sectionId: 'sectionAbout' },
@@ -17,7 +19,8 @@ let nexusScene = null;
 const transition = document.getElementById('pageTransition');
 
 function routeUrl(route) {
-  return route === 'hero' ? '/' : `/${route}`;
+  if (route === 'hero') return BASE_PATH ? BASE_PATH + '/' : '/';
+  return BASE_PATH + '/' + route;
 }
 
 function showRouteSection(route) {
@@ -36,9 +39,9 @@ function showRouteSection(route) {
 }
 
 function revealRoute(route) {
-  const sectionId = ROUTES[route]?.sectionId;
+  const sectionId = ROUTES[route] && ROUTES[route].sectionId;
   if (!sectionId) return;
-  document.querySelectorAll(`#${sectionId} .reveal-item`).forEach((el) => {
+  document.querySelectorAll('#' + sectionId + ' .reveal-item').forEach((el) => {
     el.classList.add('reveal-item--visible');
   });
 }
@@ -47,7 +50,7 @@ async function navigate(route, pushState = true) {
   if (isNavigating || !ROUTES[route] || route === currentRoute) return;
   isNavigating = true;
 
-  transition?.classList.add('page-transition--active');
+  if (transition) transition.classList.add('page-transition--active');
 
   await new Promise((resolve) => {
     setTimeout(() => {
@@ -63,7 +66,7 @@ async function navigate(route, pushState = true) {
       currentRoute = route;
       revealRoute(route);
 
-      transition?.classList.remove('page-transition--active');
+      if (transition) transition.classList.remove('page-transition--active');
       setTimeout(() => { isNavigating = false; }, 50);
       resolve();
     }, 220);
@@ -90,7 +93,7 @@ document.addEventListener('click', (e) => {
 });
 
 window.addEventListener('popstate', (e) => {
-  const route = e.state?.route || resolveInitialRoute();
+  const route = (e.state && e.state.route) || resolveInitialRoute();
   if (route === currentRoute) return;
   navigate(route, false);
 });
@@ -107,7 +110,11 @@ document.addEventListener('keydown', (e) => {
 });
 
 function resolveInitialRoute() {
-  const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+  let path = window.location.pathname;
+  if (BASE_PATH && path.startsWith(BASE_PATH)) {
+    path = path.slice(BASE_PATH.length) || '/';
+  }
+  path = path.replace(/^\//, '').replace(/\/$/, '');
   if (path === '' || path === 'index.html') return 'hero';
   if (ROUTES[path]) return path;
   const hash = window.location.hash.replace(/^#\/?/, '');
@@ -122,6 +129,7 @@ function signalAppReady() {
 
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
+  if (BASE_PATH) return;
   try {
     const reg = await navigator.serviceWorker.register('/sw.js');
     console.log('[SW] Registered:', reg.scope);

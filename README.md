@@ -2,7 +2,7 @@
 
 Vanilla JS SPA portfolio with a shared Three.js nexus-sphere background, BEM CSS, and PWA support.
 
-**Live:** [roshinrg.dev](https://roshinrg.dev) · **Repo:** [RoshinRG/Roshin](https://github.com/RoshinRG/Roshin)
+**Live:** [roshinrg.github.io/Roshin](https://roshinrg.github.io/Roshin/) · **Repo:** [RoshinRG/Roshin](https://github.com/RoshinRG/Roshin)
 
 ---
 
@@ -110,7 +110,11 @@ ALLOWED_ORIGIN=https://roshinrg.dev
 
 ### GitHub Pages (this repo)
 
-Push to `main`. The workflow runs `npm ci && npm run build` and publishes **`public/`**.
+Push to main. Workflow runs BASE_PATH=/Roshin npm run build and publishes public/.
+
+**https://roshinrg.github.io/Roshin/**
+
+Enable once: Settings → Pages → Source: **GitHub Actions**.
 
 ### Express / Render / VPS
 
