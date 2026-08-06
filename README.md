@@ -63,7 +63,6 @@ Open [http://localhost:3000](http://localhost:3000).
 │   ├── style.css
 │   ├── sw.js                 # Service worker
 │   ├── manifest.json
-│   ├── CNAME                 # Custom domain
 │   ├── Roshin_RG_CV.pdf
 │   ├── fonts/                # Self-hosted Playfair / Poppins / JetBrains Mono
 │   ├── dist/                 # Built JS (generated)
