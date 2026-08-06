@@ -2,7 +2,7 @@
 
 Vanilla JS SPA portfolio with a shared Three.js nexus-sphere background, BEM CSS, and PWA support.
 
-**Live:** [roshinrg.github.io/Roshin](https://roshinrg.github.io/Roshin/) · **Repo:** [RoshinRG/Roshin](https://github.com/RoshinRG/Roshin)
+**Live:** [roshinrg.dev](https://roshinrg.dev/) · **Repo:** [RoshinRG/Roshin](https://github.com/RoshinRG/Roshin)
 
 ---
 

@@ -68,9 +68,6 @@ async function build() {
       outdir: 'public/dist',
       target: ['es2020'],
       metafile: true,
-      define: {
-        __BASE_PATH__: JSON.stringify(BASE_PATH),
-      },
     });
 
     const meta = result.metafile;

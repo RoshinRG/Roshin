@@ -72,12 +72,23 @@ export function createNexusSphere(canvas) {
     antialias: !mobile,
     alpha: false,
     powerPreference: 'high-performance',
+    failIfMajorPerformanceCaveat: false,
   });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2));
   renderer.setClearColor(0x000000, 1);
 
+  // Ensure the drawing buffer matches CSS box (avoids 0×0 / stale sizes)
+  const syncSize = () => {
+    const w = Math.max(1, canvas.clientWidth || window.innerWidth);
+    const h = Math.max(1, canvas.clientHeight || window.innerHeight);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  };
+
   const root = new Group();
-  root.position.set(0, 0, 0);
+  // Sit in the right half so the hero card on the left doesn't cover it
+  root.position.set(mobile ? 0.15 : 1.55, 0.05, 0);
   scene.add(root);
 
   const detail = mobile ? 2 : 3;
@@ -161,14 +172,10 @@ export function createNexusSphere(canvas) {
   const clockStart = performance.now();
 
   function resize() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    camera.aspect = w / Math.max(h, 1);
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h, false);
+    syncSize();
   }
 
-  resize();
+  syncSize();
   window.addEventListener('resize', resize, { passive: true });
 
   function tick() {

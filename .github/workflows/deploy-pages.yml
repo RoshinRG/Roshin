@@ -32,8 +32,6 @@ jobs:
           cache: npm
 
       - name: Install & build
-        env:
-          BASE_PATH: /Roshin
         run: |
           npm ci
           npm run build

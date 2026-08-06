@@ -3,7 +3,20 @@
  * SPA Router — history API section switching + shared Three.js background.
  */
 
-const BASE_PATH = typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
+/** Resolve deploy base from this module URL (/dist/main.js or /Roshin/dist/main.js). */
+function detectBasePath() {
+  try {
+    const path = new URL(import.meta.url).pathname;
+    const idx = path.lastIndexOf('/dist/');
+    if (idx > 0) return path.slice(0, idx);
+    if (idx === 0) return '';
+  } catch (_) { /* ignore */ }
+  return typeof window !== 'undefined' && window.__RGR_BASE__
+    ? String(window.__RGR_BASE__)
+    : '';
+}
+
+const BASE_PATH = detectBasePath();
 
 const ROUTES = {
   hero:     { sectionId: 'sectionHero' },
@@ -19,8 +32,8 @@ let nexusScene = null;
 const transition = document.getElementById('pageTransition');
 
 function routeUrl(route) {
-  if (route === 'hero') return BASE_PATH ? BASE_PATH + '/' : '/';
-  return BASE_PATH + '/' + route;
+  if (route === 'hero') return BASE_PATH ? `${BASE_PATH}/` : '/';
+  return `${BASE_PATH}/${route}`;
 }
 
 function showRouteSection(route) {
@@ -39,9 +52,9 @@ function showRouteSection(route) {
 }
 
 function revealRoute(route) {
-  const sectionId = ROUTES[route] && ROUTES[route].sectionId;
+  const sectionId = ROUTES[route]?.sectionId;
   if (!sectionId) return;
-  document.querySelectorAll('#' + sectionId + ' .reveal-item').forEach((el) => {
+  document.querySelectorAll(`#${sectionId} .reveal-item`).forEach((el) => {
     el.classList.add('reveal-item--visible');
   });
 }
@@ -50,7 +63,7 @@ async function navigate(route, pushState = true) {
   if (isNavigating || !ROUTES[route] || route === currentRoute) return;
   isNavigating = true;
 
-  if (transition) transition.classList.add('page-transition--active');
+  transition?.classList.add('page-transition--active');
 
   await new Promise((resolve) => {
     setTimeout(() => {
@@ -66,11 +79,18 @@ async function navigate(route, pushState = true) {
       currentRoute = route;
       revealRoute(route);
 
-      if (transition) transition.classList.remove('page-transition--active');
+      transition?.classList.remove('page-transition--active');
       setTimeout(() => { isNavigating = false; }, 50);
       resolve();
     }, 220);
   });
+}
+
+function markCanvasFailed(canvas, reason) {
+  console.warn('[Nexus]', reason);
+  if (!canvas) return;
+  canvas.classList.add('bg-canvas--fallback');
+  canvas.dataset.nexusError = String(reason?.message || reason || 'failed');
 }
 
 async function initNexusBackground() {
@@ -79,9 +99,10 @@ async function initNexusBackground() {
   try {
     const { createNexusSphere } = await import('./scenes/nexus-sphere.js');
     nexusScene = createNexusSphere(canvas);
+    canvas.classList.add('bg-canvas--ready');
+    canvas.classList.remove('bg-canvas--fallback');
   } catch (err) {
-    console.warn('[Nexus] WebGL unavailable:', err);
-    canvas.hidden = true;
+    markCanvasFailed(canvas, err);
   }
 }
 
@@ -93,7 +114,7 @@ document.addEventListener('click', (e) => {
 });
 
 window.addEventListener('popstate', (e) => {
-  const route = (e.state && e.state.route) || resolveInitialRoute();
+  const route = e.state?.route || resolveInitialRoute();
   if (route === currentRoute) return;
   navigate(route, false);
 });
@@ -129,6 +150,7 @@ function signalAppReady() {
 
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
+  // Only register at site root scopes (custom domain / user pages)
   if (BASE_PATH) return;
   try {
     const reg = await navigator.serviceWorker.register('/sw.js');
@@ -145,14 +167,14 @@ document.addEventListener('DOMContentLoaded', () => {
   showRouteSection(initial);
   currentRoute = null;
 
-  const nexusReady = initNexusBackground();
+  // Start Three.js in parallel — never block the loader on WebGL
+  initNexusBackground();
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       setTimeout(async () => {
         try {
           await navigate(initial, false);
-          await nexusReady;
         } finally {
           signalAppReady();
         }

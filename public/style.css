@@ -965,6 +965,20 @@ code, pre { font-family: var(--font-mono); color: var(--rose-gold); }
   z-index: var(--z-canvas);
   pointer-events: none;
   display: block;
+  /* Visible fallback if WebGL never starts */
+  background:
+    radial-gradient(ellipse 55% 50% at 72% 48%, rgba(79, 210, 255, 0.22) 0%, transparent 58%),
+    radial-gradient(ellipse 40% 35% at 68% 52%, rgba(26, 111, 154, 0.18) 0%, transparent 70%),
+    #000;
+}
+.bg-canvas--ready {
+  background: #000;
+}
+.bg-canvas--fallback {
+  background:
+    radial-gradient(ellipse 60% 55% at 70% 45%, rgba(79, 210, 255, 0.28) 0%, transparent 55%),
+    radial-gradient(circle at 75% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
+    #000;
 }
 
 /* ─── 9. SECTION BASE ──────────────────────────────────── */
