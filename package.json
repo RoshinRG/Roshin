@@ -5,10 +5,10 @@
   "author": "Roshin R G <roshin.rg.2024.aids@rajalakshmi.edu.in>",
   "license": "MIT",
   "private": true,
-  "homepage": "https://roshinrg.dev",
+  "homepage": "https://github.com/RoshinRG/Roshin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/roshinrg/roshinrg.dev"
+    "url": "https://github.com/RoshinRG/Roshin.git"
   },
   "keywords": [
     "portfolio",
@@ -22,6 +22,7 @@
   "scripts": {
     "start": "node server.js",
     "build": "node build.js",
+    "fonts": "node download-fonts.js",
     "dev": "nodemon server.js",
     "serve": "npx serve public --listen 3000 --single",
     "preview": "npx serve public --listen 3131 --single"
